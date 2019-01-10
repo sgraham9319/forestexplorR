@@ -8,6 +8,7 @@
 
 # Load required packages
 library(dplyr)
+library(ggplot2)
 
 #==========================
 # Loading and checking data
@@ -97,3 +98,27 @@ data <- TSHE[TSHE$standid == "PP17",]
 plot(data$annGrowth ~ data$abh, ylim = c(0, 100), ylab = "Annual Growth (cm2)",
      xlab = "Cross-sectional area at breast height (cm2)", 
      main = "Western hemlock in PP17")
+
+############################################################
+# Exploring changes in growth rate with size for individuals
+############################################################
+
+# Create subset of one species in one stand
+TA01TSHE <- droplevels(TSHE[TSHE$standid == "TA01",])
+
+# Remove rows with NA for annual growth
+TA01TSHE <- TA01TSHE[!is.na(TA01TSHE$annGrowth), ]
+
+# Identify unique tree IDs
+uniqueIDs <- unique(TA01TSHE$treeid)
+
+# Randomly sample 10 tree IDs
+randIDs <- sample(uniqueIDs, size = 10)
+
+# Subset to these 10 tree IDs
+tenTrees <- TA01TSHE[TA01TSHE$treeid %in% randIDs,]
+
+# Plot abh vs. annual growth
+ggplot(data=tenTrees, aes(x=abh, y=annGrowth, group=treeid)) +
+  geom_line() +
+  geom_point()

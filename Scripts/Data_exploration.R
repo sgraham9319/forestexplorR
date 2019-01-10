@@ -14,7 +14,7 @@ library(dplyr)
 #==========================
 
 # Load cleaned 2013 data
-cleanData <- read.csv("2013_cleaned.csv")
+cleanData <- read.csv("../Data/2013_cleaned.csv")
 
 # Remove columns not required for exploratory analysis to keep things tidy
 unneededCols <- which(names(cleanData) %in% c("Canopy_class", "Tree_vigor", 

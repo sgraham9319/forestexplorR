@@ -8,13 +8,16 @@
 
 # Load required packages
 library(dplyr)
-
+library(tibble)
+library(ggplot2)
 #==========================
 # Loading and checking data
 #==========================
 
 # Load cleaned 2013 data
 cleanData <- read.csv("../Data/2013_cleaned.csv")
+
+tib_data = as_tibble(cleanData)
 
 # Remove columns not required for exploratory analysis to keep things tidy
 unneededCols <- which(names(cleanData) %in% c("Canopy_class", "Tree_vigor", 
@@ -97,3 +100,10 @@ data <- TSHE[TSHE$StandID == "PP17",]
 plot(data$annGrowth ~ data$ABH_cm, ylim = c(0, 100), ylab = "Annual Growth (cm2)",
      xlab = "Cross-sectional area at breast height (cm2)", 
      main = "Western hemlock in PP17")
+
+m <- ggplot(cleanData, aes(x = ABH_cm, y = annGrowth)) +
+  geom_point() +
+  xlim(0.5, 6) +
+  ylim(40, 110)
+
+m + geom_density_2d()

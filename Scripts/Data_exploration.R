@@ -75,6 +75,10 @@ period <- diff(cleanData$year)
 annGrowth <- growth/period
 cleanData$annGrowth <- c(annGrowth, NA)
 
+growthD <- diff(cleanData$dbh)
+annGrowthD <- growthD/period
+cleanData$annGrowthD <- c(annGrowthD, NA)
+
 # Remove growth estimates that are comparing different trees
 meaninglessGrowth <- cumsum(as.vector(table(cleanData$treeid)))
 cleanData$annGrowth[meaninglessGrowth] <- NA
@@ -122,3 +126,17 @@ tenTrees <- TA01TSHE[TA01TSHE$treeid %in% randIDs,]
 ggplot(data=tenTrees, aes(x=abh, y=annGrowth, group=treeid)) +
   geom_line() +
   geom_point()
+
+# Extract y-intercept and slope for linear model of annual growth ~ size for each
+# tree as well as average size of the tree during the course of monitoring
+y <- TA01TSHE %>% group_by(treeid) %>% summarize(y_intercept = unname(lm(annGrowth ~ abh)["coefficients"][[1]][1]),
+                                                 slope = unname(lm(annGrowth ~ abh)["coefficients"][[1]][2]),
+                                                 av_abh = mean(abh))
+
+# Plot slope of model vs average size (expect large positive slope at small size 
+# but small positive to zero slope at large size)
+plot(y$slope ~ y$av_abh, ylim = c(0, max(y$slope, na.rm = T)))
+
+# Should we be looking at dbh instead of abh?
+plot(annGrowth ~ abh, data = TA01TSHE)
+plot(annGrowthD ~ dbh, data = TA01TSHE)

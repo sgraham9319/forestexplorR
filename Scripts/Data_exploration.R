@@ -8,12 +8,13 @@
 
 # Load required packages
 library(dplyr)
+library(moments)
 
 #==========================
 # Loading and checking data
 #==========================
 
-# Load cleaned 2013 data
+# Load cleaned 2017 data
 cleanData <- read.csv("../Data/Tree_growth_2017.csv")
 
 # Remove columns not required for exploratory analysis to keep things tidy
@@ -68,15 +69,23 @@ cleanData <- cleanData[order(cleanData$treeid, cleanData$year),]
 # Convert DBH to area at breast height (ABH) to get more meaningful growth
 cleanData$abh <- pi*((cleanData$dbh / 2) ^ 2)
 
-# Calculate ABH difference between each row and the row below and add as new column
-growth <- diff(cleanData$abh)
-period <- diff(cleanData$year)
-annGrowth <- growth/period
-cleanData$annGrowth <- c(annGrowth, NA)
+growth = cleanData %>% 
+  group_by(treeid) %>% 
+  arrange(year) %>%
+  filter(
+    year==max(year) | 
+      year==min(year)
+  ) %>%
+  summarize(
+    annual_growth=(dbh[2] - dbh[1]) / (year[2] - year[1])
+  ) %>% 
+  mutate(sqrt_annual_growth=sqrt(annual_growth))
 
-# Remove growth estimates that are comparing different trees
-meaninglessGrowth <- cumsum(as.vector(table(cleanData$treeid)))
-cleanData$annGrowth[meaninglessGrowth] <- NA
+hist(growth$annual_growth)
+kurtosis(growth$sqrt_annual_growth[!is.na(growth$sqrt_annual_growth)])
+hist(growth$sqrt_annual_growth) 
+
+cleanData = left_join(cleanData, growth, by="treeid")
 
 # Check for relationship when all species combined
 plot(cleanData$annGrowth ~ cleanData$abh, ylim = c(0, 300))

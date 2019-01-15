@@ -39,25 +39,28 @@ sum(is.na(cleanData$species))
 sum(is.na(cleanData$year))
 sum(is.na(cleanData$dbh))
 
-##################################################
-# Exploring source of negative growth measurements
-##################################################
-
-#=========================================
+##########################################
 # Investigate rows with no dbh measurement
-#=========================================
+##########################################
 
-# Extract trees with dbh code for "missing"
+# How many rows have NA for dbh measurement?
+sum(is.na(cleanData$dbh)) # 1930
+
+# Do all these rows have the dbh code for "missing"
+any(cleanData$dbh_code[which(is.na(cleanData$dbh))] != "M") # Yes
+
+# Do any rows have the dbh code for missing but have a dbh measurement?
+sum(is.na(cleanData$dbh)) == sum(cleanData$dbh_code == "M") # No
+
+# All of the trees without dbh measurements are said to be missing, but does this
+# mean they were not found or that they were dead?
 nodbh <- cleanData[cleanData$dbh_code == "M",]
-sum(is.na(cleanData$dbh)) == nrow(nodbh) # all NAs for dbh have the missing dbh code
+table(nodbh$tree_status)  # Of 1930 trees, 1911 were dead (tree status = 6), and
+                          # 19 were not found (tree status = 9)
 
-# Why are these measurements missing?
-table(nodbh$tree_status) # Some dead (tree status = 6), some not found (tree status = 9)
-
-# Isolate dead trees
+# Check that dead trees were not recorded twice or ever came back to life
 deadTrees <- cleanData[cleanData$tree_status == 6, "treeid"]
 deadTreeDat <- cleanData[cleanData$treeid %in% deadTrees,]
-# Are any trees recorded dead twice and do trees ever come back to life
 deadTreeSumm <- deadTreeDat %>% group_by(treeid) %>% 
   summarize(numDead = sum(tree_status == 6),
             yearDead = year[which(tree_status == 6)],
@@ -65,13 +68,14 @@ deadTreeSumm <- deadTreeDat %>% group_by(treeid) %>%
 table(deadTreeSumm$numDead) # No trees recorded dead twice
 any(deadTreeSumm$yearDead != deadTreeSumm$lastYearRecorded) # no dead trees come back to life
 
-# Isolate missing trees
-View(nodbh[nodbh$tree_status == 9, ])
-table(cleanData$tree_status)
-View(cleanData[cleanData$tree_status == 9, ])
-
-# Remove 1930 lines with NA for DBH
+# All rows with no dbh measurement can be excluded from the analysis
 cleanData <- cleanData[!is.na(cleanData$dbh), ]
+
+##################################################
+# Exploring source of negative growth measurements
+##################################################
+table(cleanData$dbh_code)
+
 
 #=============================
 # Summarizing quantity of data

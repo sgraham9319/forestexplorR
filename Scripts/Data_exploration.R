@@ -39,6 +39,37 @@ sum(is.na(cleanData$species))
 sum(is.na(cleanData$year))
 sum(is.na(cleanData$dbh))
 
+##################################################
+# Exploring source of negative growth measurements
+##################################################
+
+#=========================================
+# Investigate rows with no dbh measurement
+#=========================================
+
+# Extract trees with dbh code for "missing"
+nodbh <- cleanData[cleanData$dbh_code == "M",]
+sum(is.na(cleanData$dbh)) == nrow(nodbh) # all NAs for dbh have the missing dbh code
+
+# Why are these measurements missing?
+table(nodbh$tree_status) # Some dead (tree status = 6), some not found (tree status = 9)
+
+# Isolate dead trees
+deadTrees <- cleanData[cleanData$tree_status == 6, "treeid"]
+deadTreeDat <- cleanData[cleanData$treeid %in% deadTrees,]
+# Are any trees recorded dead twice and do trees ever come back to life
+deadTreeSumm <- deadTreeDat %>% group_by(treeid) %>% 
+  summarize(numDead = sum(tree_status == 6),
+            yearDead = year[which(tree_status == 6)],
+            lastYearRecorded = max(year))
+table(deadTreeSumm$numDead) # No trees recorded dead twice
+any(deadTreeSumm$yearDead != deadTreeSumm$lastYearRecorded) # no dead trees come back to life
+
+# Isolate missing trees
+View(nodbh[nodbh$tree_status == 9, ])
+table(cleanData$tree_status)
+View(cleanData[cleanData$tree_status == 9, ])
+
 # Remove 1930 lines with NA for DBH
 cleanData <- cleanData[!is.na(cleanData$dbh), ]
 
@@ -82,6 +113,7 @@ cleanData$annGrowthD <- c(annGrowthD, NA)
 # Remove growth estimates that are comparing different trees
 meaninglessGrowth <- cumsum(as.vector(table(cleanData$treeid)))
 cleanData$annGrowth[meaninglessGrowth] <- NA
+cleanData$annGrowthD[meaninglessGrowth] <- NA
 
 # Check for relationship when all species combined
 plot(cleanData$annGrowth ~ cleanData$abh, ylim = c(0, 300))
@@ -113,6 +145,14 @@ TA01TSHE <- droplevels(TSHE[TSHE$standid == "TA01",])
 # Remove rows with NA for annual growth
 TA01TSHE <- TA01TSHE[!is.na(TA01TSHE$annGrowth), ]
 
+# Create overall plot
+plot(TA01TSHE$annGrowth ~ TA01TSHE$abh, ylim = c(0, 100), ylab = "Annual Growth (cm2)",
+     xlab = "Cross-sectional area at breast height (cm2)", 
+     main = "Western hemlock in TA01")
+plot(TA01TSHE$annGrowthD ~ TA01TSHE$dbh, ylab = "Annual Growth (cm)",
+     xlab = "Cross-sectional area at breast height (cm)", 
+     main = "Western hemlock in TA01")
+
 # Identify unique tree IDs
 uniqueIDs <- unique(TA01TSHE$treeid)
 
@@ -124,6 +164,9 @@ tenTrees <- TA01TSHE[TA01TSHE$treeid %in% randIDs,]
 
 # Plot abh vs. annual growth
 ggplot(data=tenTrees, aes(x=abh, y=annGrowth, group=treeid)) +
+  geom_line() +
+  geom_point()
+ggplot(data=tenTrees, aes(x=dbh, y=annGrowthD, group=treeid)) +
   geom_line() +
   geom_point()
 

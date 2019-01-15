@@ -71,11 +71,98 @@ any(deadTreeSumm$yearDead != deadTreeSumm$lastYearRecorded) # no dead trees come
 # All rows with no dbh measurement can be excluded from the analysis
 cleanData <- cleanData[!is.na(cleanData$dbh), ]
 
-##################################################
-# Exploring source of negative growth measurements
-##################################################
-table(cleanData$dbh_code)
+#==========================
+# Calculating annual growth
+#==========================
 
+# Ensure data set is sorted by tree id and year of measurement
+cleanData <- cleanData[order(cleanData$treeid, cleanData$year),]
+
+# Calculate annual growth between each pair of consecutive rows
+cleanData$rawGrowth <- c(diff(cleanData$dbh), NA)
+cleanData$interval <- c(diff(cleanData$year), NA)
+cleanData$annGrowth <- cleanData$rawGrowth/cleanData$interval
+
+# Remove growth estimates that are comparing different trees
+meaninglessGrowth <- cumsum(as.vector(table(cleanData$treeid)))
+cleanData$rawGrowth[meaninglessGrowth] <- NA
+cleanData$interval[meaninglessGrowth] <- NA
+cleanData$annGrowth[meaninglessGrowth] <- NA
+
+# Are there any NAs in annual growth that are unexpected?
+sum(is.na(cleanData$annGrowth)) - length(meaninglessGrowth) # No
+
+#===================================
+# Exploring cases of negative growth
+#===================================
+
+# How many cases of negative growth are there?
+sum(cleanData$annGrowth < 0, na.rm = T) # 2858
+sum(cleanData$annGrowth < 0, na.rm = T) / sum(!is.na(cleanData$annGrowth)) # ~ 6%
+
+# How many of the negative growth measurements can be attributed to suspicious
+# dbh codes (in either the first or second dbh measurement)?
+negRows <- which(cleanData$annGrowth < 0)
+suspCodes <- c("2", "3", "8", "9", "A")
+containsIssue <- rep(NA, times = length (negRows))
+negRowSumm <- data.frame(negRows, containsIssue)
+
+for(i in 1:length(negRows)){
+  if(cleanData$dbh_code[negRows[i]] %in% suspCodes |
+      cleanData$dbh_code[negRows[i] + 1] %in% suspCodes){
+    negRowSumm$containsIssue[i] <- "TRUE"
+  }else{
+    negRowSumm$containsIssue[i] <- "FALSE"
+  }
+}
+sum(negRowSumm$containsIssue == "TRUE") # Only 21 of these negative measurements
+                                        # contain suspicious measurements
+
+# How large are the negative growth measurements?
+hist(cleanData$annGrowth[negRows])
+min(cleanData$annGrowth, na.rm = T)
+
+plot(annGrowth ~ dbh, data = cleanData)
+
+# How many cases of negative growth are there if we calculate growth rate from 
+# first measurement to last measurement?
+y <- cleanData %>%
+  group_by(treeid) %>%
+  summarize(stand = standid[1],
+            initSize = dbh[1], finalSize = dbh[n()],
+            firstYear = year[1], lastYear = year[n()]) %>%
+  mutate(totalGrowth = (finalSize - initSize) / (lastYear - firstYear))
+
+# Create function to extract trees for which annual growth for a specified year
+# can be estimated - requires dataset with one row per tree and columns for first
+# year and last year recorded as input
+yearSpecific <- function(data, focalYear){
+  startBefore <- which(data[, "firstYear"] <= focalYear)
+  endAfter <- which(data[, "lastYear"] >= focalYear)
+  relevantRows <- startBefore[startBefore %in% endAfter]
+  data[relevantRows, ]
+}
+
+
+hist(y$totalGrowth)
+negatives <- y[y$totalGrowth < 0,]
+negatives <- negatives[!is.na(negatives$totalGrowth),]
+table(negatives$stand)
+hist(negatives$totalGrowth)
+largeNegatives <- negatives$treeid[negatives$totalGrowth < 0.1]
+View(cleanData[cleanData$treeid %in% largeNegatives,])                                                                                                 
+hist(sqrt(y$totalGrowth))
+
+plot(totalGrowth ~ initSize, data = y)
+#===============
+# Creating function to extract growth data
+#=========================================
+
+table(cleanData$standid, cleanData$year)
+
+
+
+cleanData %>% 
 
 #=============================
 # Summarizing quantity of data

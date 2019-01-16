@@ -153,17 +153,6 @@ largeNegatives <- negatives$treeid[negatives$totalGrowth < 0.1]
 View(cleanData[cleanData$treeid %in% largeNegatives,])                                                                                                 
 hist(sqrt(y$totalGrowth))
 
-plot(totalGrowth ~ initSize, data = y)
-#===============
-# Creating function to extract growth data
-#=========================================
-
-table(cleanData$standid, cleanData$year)
-
-
-
-cleanData %>% 
-
 #=============================
 # Summarizing quantity of data
 #=============================

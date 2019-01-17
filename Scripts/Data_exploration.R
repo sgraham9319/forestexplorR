@@ -39,6 +39,40 @@ sum(is.na(cleanData$species))
 sum(is.na(cleanData$year))
 sum(is.na(cleanData$dbh))
 
+#====================
+# Attach mapping data
+#====================
+
+# Load 2013 mapping data
+mapping <- read.csv("../Data/Mapping_2017.csv")
+
+# Determine how many remappings there are
+table(cleanData$tree_status, cleanData$new_mapping) # 230 ingrowth and 166 old of
+                                                    # a total of 7198 measured trees
+table(cleanData$year)
+ingrowth2017 <- cleanData[cleanData$tree_status == 2 & cleanData$new_mapping == "Y", "treeid"]
+oldgrowth2017 <- cleanData[cleanData$tree_status == 1 & cleanData$new_mapping == "Y", "treeid"]
+sum(ingrowth2017 %in% mapping$TreeID)
+sum(oldgrowth2017 %in% mapping$TreeID)
+table(mapping$Year)
+
+# Obtaining lat/longs for stand locations
+stand <- read.csv("../Data/Stand_locations.csv")
+stand$northing <- as.character(stand$northing)
+stand$westing <- as.character(stand$westing)
+
+# Convert degree/minutes/seconds to decimal degrees
+library(measurements)
+stand$lat <- as.numeric(conv_unit(stand$northing, "deg_min_sec", "dec_deg"))
+stand$lon <- as.numeric(conv_unit(stand$westing, "deg_min_sec", "dec_deg"))
+stand$lon <- -stand$lon
+
+# Convert lat/longs to spatial objects
+library(sp)
+coordinates(stand) <- ~ lon + lat
+plot(stand)
+
+
 ##########################################
 # Investigate rows with no dbh measurement
 ##########################################

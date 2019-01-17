@@ -37,3 +37,6 @@ rsconnect/
 
 # csv files
 Data/*.csv
+
+# Annoying
+.DS_Store

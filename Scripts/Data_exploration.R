@@ -39,16 +39,35 @@ sum(is.na(cleanData$species))
 sum(is.na(cleanData$year))
 sum(is.na(cleanData$dbh))
 
-#====================
-# Attach mapping data
-#====================
+#=======================
+# Attaching mapping data
+#=======================
 
 # Load 2013 mapping data
-mapping <- read.csv("../Data/Mapping_2017.csv")
+mapping <- read.csv("../Data/Mapping_2013.csv")
+
+# Extract unique tree IDs from growth data
+treeIDs <- unique(cleanData$treeid) # 8803 tree IDs
+
+# How many of these trees do we have mapping data for?
+sum(treeIDs %in% mapping$TreeID) # 8416
+
+# Add mapping data to growth data
+cleanData$x_coord <- mapping[match(cleanData$treeid, mapping$TreeID), "Xcoord"]
+cleanData$y_coord <- mapping[match(cleanData$treeid, mapping$TreeID), "Ycoord"]
+
+#===========================================
+# Explore new mapping data collected in 2017
+#===========================================
 
 # Determine how many remappings there are
 table(cleanData$tree_status, cleanData$new_mapping) # 230 ingrowth and 166 old of
                                                     # a total of 7198 measured trees
+
+# Isolate new mapping data
+newMap <- cleanData[cleanData$new_mapping == "Y",]
+update <- newMap[!is.na(newMap$x_coord), ]
+
 table(cleanData$year)
 ingrowth2017 <- cleanData[cleanData$tree_status == 2 & cleanData$new_mapping == "Y", "treeid"]
 oldgrowth2017 <- cleanData[cleanData$tree_status == 1 & cleanData$new_mapping == "Y", "treeid"]

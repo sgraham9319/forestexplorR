@@ -1,48 +1,79 @@
-
 # Load required packages
 library(measurements)
-library(sp)
 library(sf)
 library(mapview)
-library(rgdal)
+library(tidyverse)
 
 # Load stand location data
-stand <- read.csv("../Data/Stand_locations.csv")
+stand_locs_raw <- read.csv("../Data/all_stand_location_data.csv", stringsAsFactors = F)
 
-# Change degrees/minutes/seconds to decimal degrees
-stand$northing <- as.character(stand$northing)
-stand$westing <- as.character(stand$westing)
-stand$lat <- as.numeric(conv_unit(stand$northing, "deg_min_sec", "dec_deg"))
-stand$lon <- as.numeric(conv_unit(stand$westing, "deg_min_sec", "dec_deg"))
-stand$lon <- -stand$lon # longitudes should be negative
+# Calculate decimal degrees and format for analysis
+stand_locs <- stand_locs_raw %>%
+  
+  # Convert to long format
+  gather("location_id", "deg_min_sec", 3:10) %>%
+  
+  # Remove cardinal directions from location IDs
+  mutate(corner_id = str_sub(location_id, end = -3),
+         
+         # Add column for lat or long
+         coord = ifelse(
+           stringr::str_detect(deg_min_sec, "W") == TRUE,
+           "lon",
+           "lat"),
+         
+         # Make deg_min_sec values negative for westings
+         deg_min_sec = ifelse(
+           str_detect(deg_min_sec, "W") == TRUE,
+           paste("-", deg_min_sec, sep = ""),
+           deg_min_sec),
+         
+         # Remove unwanted symbols from deg_min_sec
+         deg_min_sec = str_replace(deg_min_sec, '\"', ""),
+         deg_min_sec = str_replace(deg_min_sec, "\'", " "),
+         deg_min_sec = str_replace(deg_min_sec, "\\.", " "),
+         deg_min_sec = str_sub(deg_min_sec, end = -2),
+         
+         # Calculate decimal degrees
+         dec_deg = as.numeric(conv_unit(deg_min_sec, "deg_min_sec", "dec_deg"))
+  ) %>%
+  
+  # Select required columns
+  select(stand, y_azim, corner_id, coord, dec_deg) %>%
+  
+  # Separate lats and longs
+  spread(coord, dec_deg)
 
-# Transform to spatial object
-coordinates(stand) <- ~ lon + lat
+# Create spatial object
+stand_locs_sf <- st_as_sf(stand_locs, coords = c("lon", "lat"), crs = 4326)
 
-# Plot points
-plot(stand)
+# Check points appear in expected places
+mapview(stand_locs_sf, zcol="stand")
 
-# Check coordinate reference system (CRS)
-proj4string(stand) # right now is NA, need to set
+# Create polygons for each stand using convex hull method
+stand_polygons <- stand_locs_sf %>%
+  
+  # Group by stand to create multipoint objects
+  group_by(stand) %>%
+  
+  # Need to include summarize for group_by to take effect
+  summarise(y_azim = y_azim[1]) %>%
+  
+  # Use convex hull method to form polygon around each set of four points
+  st_convex_hull() %>%
+  
+  # Return only stand IDs and geometry
+  select(stand) #get only stand + geometry
 
-# Assign WGS84 EPSG code to data
-proj4string(stand) <- CRS("+init=epsg:4326")
+# Plot polygons
+mapview(stand_polygons, zcol="stand")
 
-# Transform to UTM Zone 10
-stand_UTM <- spTransform(stand, CRS("+init=epsg:32610"))
+# Transform coordinate reference system to UTM
+stand_utm <- st_transform(stand_locs_sf, crs = 32610)
 
-# Double check in mapview that coordinates are correct
-mapview(stand_UTM)
-
-# Now convert to sf object (easier to work with, issues before with starting as sf which I didn't have time to trouble shoot so kept as sp)
-new_stand_UTM <- st_as_sf(stand_UTM)
-
-# Get x and y columns for each point, so you can add meters 
-new_stand_UTM$x <- as.vector(st_coordinates(new_stand_UTM)[,1])
-new_stand_UTM$y <- as.vector(st_coordinates(new_stand_UTM)[,2])
-
-# Plot stands
-mapview(new_stand_UTM)
+# Split UTM coordinates into x and y columns 
+stand_utm$x <- as.vector(st_coordinates(stand_utm)[,1])
+stand_utm$y <- as.vector(st_coordinates(stand_utm)[,2])
 
 #===============================================
 # Obtaining UTM coordinates for individual trees
@@ -75,25 +106,24 @@ sub_90 <- ag05[(ag05$rel_az / cf) <= 90, ]
 super_90 <- ag05[(ag05$rel_az / cf) > 90, ]
 
 # Extract X and Y UTM coordinates of stand origin
-origin_x <- new_stand_UTM[new_stand_UTM$standid == "AG05", "x"][[1]]
-origin_y <- new_stand_UTM[new_stand_UTM$standid == "AG05", "y"][[1]]
+origin_x <- stand_utm[stand_utm$stand == "AG05" & 
+                        stand_utm$corner_id == "origin", "x"][[1]]
+origin_y <- stand_utm[stand_utm$stand == "AG05" & 
+                        stand_utm$corner_id == "origin", "y"][[1]]
 
 # Calculate UTM X and Y for sub 90 group
 sub_90$x_UTM <- origin_x + (sin(sub_90$rel_az) * sub_90$dists)
 sub_90$y_UTM <- origin_y + (cos(sub_90$rel_az) * sub_90$dists)
 
-# Calculate UTM X and Y for sub 90 group
+# Calculate UTM X and Y for super 90 group
 super_90$x_UTM <- origin_x + (sin(super_90$rel_az) * super_90$dists)
-super_90$y_UTM <- origin_y - (cos(super_90$rel_az) * super_90$dists)
+super_90$y_UTM <- origin_y + (cos(super_90$rel_az) * super_90$dists)
 
 # Recombine two groups
-ag05_UTM <- rbind(sub_90, super_90)
+ag05_utm <- rbind(sub_90, super_90)
 
 # Transform to spatial object
-coordinates(ag05_UTM) <- ~ x_UTM + y_UTM
-
-# Assign UTM Zone 10 to data
-proj4string(ag05_UTM) <- CRS("+init=epsg:32610")
+ag05_utm <- st_as_sf(ag05_utm, coords = c("x_UTM", "y_UTM"), crs = 32610)
 
 # Plot trees
-mapview(ag05_UTM)
+mapview(ag05_utm, zcol = "Species") + mapview(stand_polygons)

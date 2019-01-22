@@ -10,6 +10,9 @@
 library(dplyr)
 library(ggplot2)
 
+# Load functions
+devtools::load_all()
+
 #==========================
 # Loading and checking data
 #==========================

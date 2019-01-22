@@ -1,0 +1,13 @@
+Package: TreeNeighborhood
+Type: Package
+Title: Tree growth as a function of its neighbors
+Version: 0.1.0
+Author: Stuart Graham
+Maintainer: Stuart Graham <sgraham3@uw.edu>
+Description: This package analyzes tree growth measurements, and their dependence
+    on the tree neighborhood: what other trees are growing nearby.
+Imports:
+    tidyverse
+License: MIT
+Encoding: UTF-8
+LazyData: true

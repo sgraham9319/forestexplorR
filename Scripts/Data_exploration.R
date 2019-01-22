@@ -75,26 +75,9 @@ sum(ingrowth2017 %in% mapping$TreeID)
 sum(oldgrowth2017 %in% mapping$TreeID)
 table(mapping$Year)
 
-# Obtaining lat/longs for stand locations
-stand <- read.csv("../Data/Stand_locations.csv")
-stand$northing <- as.character(stand$northing)
-stand$westing <- as.character(stand$westing)
-
-# Convert degree/minutes/seconds to decimal degrees
-library(measurements)
-stand$lat <- as.numeric(conv_unit(stand$northing, "deg_min_sec", "dec_deg"))
-stand$lon <- as.numeric(conv_unit(stand$westing, "deg_min_sec", "dec_deg"))
-stand$lon <- -stand$lon
-
-# Convert lat/longs to spatial objects
-library(sp)
-coordinates(stand) <- ~ lon + lat
-plot(stand)
-
-
-##########################################
+#=========================================
 # Investigate rows with no dbh measurement
-##########################################
+#=========================================
 
 # How many rows have NA for dbh measurement?
 sum(is.na(cleanData$dbh)) # 1930
@@ -124,100 +107,72 @@ any(deadTreeSumm$yearDead != deadTreeSumm$lastYearRecorded) # no dead trees come
 # All rows with no dbh measurement can be excluded from the analysis
 cleanData <- cleanData[!is.na(cleanData$dbh), ]
 
-#==========================
-# Calculating annual growth
-#==========================
+#=============================================
+# Calculating annual growth over entire period
+#=============================================
 
-# Ensure data set is sorted by tree id and year of measurement
-cleanData <- cleanData[order(cleanData$treeid, cleanData$year),]
-
-# Calculate annual growth between each pair of consecutive rows
-cleanData$rawGrowth <- c(diff(cleanData$dbh), NA)
-cleanData$interval <- c(diff(cleanData$year), NA)
-cleanData$annGrowth <- cleanData$rawGrowth/cleanData$interval
-
-# Remove growth estimates that are comparing different trees
-meaninglessGrowth <- cumsum(as.vector(table(cleanData$treeid)))
-cleanData$rawGrowth[meaninglessGrowth] <- NA
-cleanData$interval[meaninglessGrowth] <- NA
-cleanData$annGrowth[meaninglessGrowth] <- NA
-
-# Are there any NAs in annual growth that are unexpected?
-sum(is.na(cleanData$annGrowth)) - length(meaninglessGrowth) # No
-
-#===================================
-# Exploring cases of negative growth
-#===================================
+growth = cleanData %>% 
+  group_by(treeid) %>% 
+  arrange(year) %>%
+  filter(
+    year == max(year) | 
+      year == min(year)
+  ) %>%
+  summarize(
+    annual_growth = (dbh[2] - dbh[1]) / (year[2] - year[1])
+  ) %>% 
+  mutate(sqrt_annual_growth = sqrt(annual_growth))
 
 # How many cases of negative growth are there?
-sum(cleanData$annGrowth < 0, na.rm = T) # 2858
-sum(cleanData$annGrowth < 0, na.rm = T) / sum(!is.na(cleanData$annGrowth)) # ~ 6%
+sum(growth$annual_growth < 0, na.rm = T) # 134
+sum(is.na(growth$annual_growth))
 
-# How many of the negative growth measurements can be attributed to suspicious
-# dbh codes (in either the first or second dbh measurement)?
-negRows <- which(cleanData$annGrowth < 0)
-suspCodes <- c("2", "3", "8", "9", "A")
-containsIssue <- rep(NA, times = length (negRows))
-negRowSumm <- data.frame(negRows, containsIssue)
+#======================================================
+# Calculating annual growth rate during specifc periods
+#======================================================
 
-for(i in 1:length(negRows)){
-  if(cleanData$dbh_code[negRows[i]] %in% suspCodes |
-      cleanData$dbh_code[negRows[i] + 1] %in% suspCodes){
-    negRowSumm$containsIssue[i] <- "TRUE"
-  }else{
-    negRowSumm$containsIssue[i] <- "FALSE"
-  }
+# Create function to calculate annual growth for all trees during a user-defined
+# period (defined by begin and end years)
+defined_period_annual_growth <- function(data, begin, end){
+  
+  # Calculate differences between each measurement and begin and end
+  data <- data %>%
+    mutate(
+      begin_dif = abs(begin - year),
+      end_dif = abs(end - year))
+  
+  # Subset measurements earlier than begin
+  before <- data %>%
+    filter(year <= begin) %>%
+    group_by(treeid) %>%
+    filter(begin_dif == min(begin_dif))
+  
+  # Subset measurements later than end
+  after <- data %>%
+    filter(year >= end) %>%
+    group_by(treeid) %>%
+    filter(end_dif == min(end_dif))
+  
+  # Combine subsets
+  before_after <- rbind(before, after)
+  
+  # Calculate annual growth
+  period_growth = before_after %>% 
+    group_by(treeid) %>% 
+    arrange(year) %>%
+    summarize(
+      annual_growth = (dbh[2] - dbh[1]) / (year[2] - year[1])
+    ) %>% 
+    filter(!is.na(annual_growth)) %>%
+    mutate(sqrt_annual_growth = sqrt(annual_growth))
+  
+  # Return new data frame
+  period_growth
 }
-sum(negRowSumm$containsIssue == "TRUE") # Only 21 of these negative measurements
-                                        # contain suspicious measurements
 
-# How large are the negative growth measurements?
-hist(cleanData$annGrowth[negRows])
-min(cleanData$annGrowth, na.rm = T)
+# Example of use
+y <- defined_period_annual_growth(data = cleanData, begin = 1977, end = 1980)
 
-plot(annGrowth ~ dbh, data = cleanData)
-
-# How many cases of negative growth are there if we calculate growth rate from 
-# first measurement to last measurement?
-y <- cleanData %>%
-  group_by(treeid) %>%
-  summarize(stand = standid[1],
-            initSize = dbh[1], finalSize = dbh[n()],
-            firstYear = year[1], lastYear = year[n()]) %>%
-  mutate(totalGrowth = (finalSize - initSize) / (lastYear - firstYear))
-
-# Create function to extract trees for which annual growth for a specified year
-# can be estimated - requires dataset with one row per tree and columns for first
-# year and last year recorded as input
-yearSpecific <- function(data, focalYear){
-  startBefore <- which(data[, "firstYear"] <= focalYear)
-  endAfter <- which(data[, "lastYear"] >= focalYear)
-  relevantRows <- startBefore[startBefore %in% endAfter]
-  data[relevantRows, ]
-}
-
-
-hist(y$totalGrowth)
-negatives <- y[y$totalGrowth < 0,]
-negatives <- negatives[!is.na(negatives$totalGrowth),]
-table(negatives$stand)
-hist(negatives$totalGrowth)
-largeNegatives <- negatives$treeid[negatives$totalGrowth < 0.1]
-View(cleanData[cleanData$treeid %in% largeNegatives,])                                                                                                 
-hist(sqrt(y$totalGrowth))
-
-#=============================
-# Summarizing quantity of data
-#=============================
-
-# Determine how many trees were measured at least twice (allows growth 
-# estimation) and how these are distributed among species
-indsPerSpecies <- cleanData %>% group_by(species) %>% 
-  summarize(numTrees = sum(table(treeid) >= 2))
-sum(indsPerSpecies$numTrees) # 8376 trees
-
-# Determine how many times trees have been measured
-hist(table(cleanData$treeid)) # most have been measured at least 7 times
 
 #==========================================
 # Exploring how growth rate relates to size

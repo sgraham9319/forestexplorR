@@ -107,72 +107,20 @@ any(deadTreeSumm$yearDead != deadTreeSumm$lastYearRecorded) # no dead trees come
 # All rows with no dbh measurement can be excluded from the analysis
 cleanData <- cleanData[!is.na(cleanData$dbh), ]
 
-#=============================================
-# Calculating annual growth over entire period
-#=============================================
+#================================
+# Calculating annual growth rates
+#================================
 
-growth = cleanData %>% 
-  group_by(treeid) %>% 
-  arrange(year) %>%
-  filter(
-    year == max(year) | 
-      year == min(year)
-  ) %>%
-  summarize(
-    annual_growth = (dbh[2] - dbh[1]) / (year[2] - year[1])
-  ) %>% 
-  mutate(sqrt_annual_growth = sqrt(annual_growth))
+# Calculate annual growth over entire measurement period for each tree
+annual_growth <- overall_annual_growth(cleanData)
 
 # How many cases of negative growth are there?
 sum(growth$annual_growth < 0, na.rm = T) # 134
 sum(is.na(growth$annual_growth))
 
-#======================================================
-# Calculating annual growth rate during specifc periods
-#======================================================
-
-# Create function to calculate annual growth for all trees during a user-defined
-# period (defined by begin and end years)
-defined_period_annual_growth <- function(data, begin, end){
-  
-  # Calculate differences between each measurement and begin and end
-  data <- data %>%
-    mutate(
-      begin_dif = abs(begin - year),
-      end_dif = abs(end - year))
-  
-  # Subset measurements earlier than begin
-  before <- data %>%
-    filter(year <= begin) %>%
-    group_by(treeid) %>%
-    filter(begin_dif == min(begin_dif))
-  
-  # Subset measurements later than end
-  after <- data %>%
-    filter(year >= end) %>%
-    group_by(treeid) %>%
-    filter(end_dif == min(end_dif))
-  
-  # Combine subsets
-  before_after <- rbind(before, after)
-  
-  # Calculate annual growth
-  period_growth = before_after %>% 
-    group_by(treeid) %>% 
-    arrange(year) %>%
-    summarize(
-      annual_growth = (dbh[2] - dbh[1]) / (year[2] - year[1])
-    ) %>% 
-    filter(!is.na(annual_growth)) %>%
-    mutate(sqrt_annual_growth = sqrt(annual_growth))
-  
-  # Return new data frame
-  period_growth
-}
-
-# Example of use
-y <- defined_period_annual_growth(data = cleanData, begin = 1977, end = 1980)
-
+# Calculate annual growth between 1977 and 1980
+specific_annual_growth <- defined_period_annual_growth(data = cleanData,
+                                                       begin = 1977, end = 1980)
 
 #==========================================
 # Exploring how growth rate relates to size

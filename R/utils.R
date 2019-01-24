@@ -17,9 +17,11 @@ overall_annual_growth <- function(data){
         year == min(year)
     ) %>%
     summarize(
-      annual_growth = (dbh[2] - dbh[1]) / (year[2] - year[1])
+      annual_growth = (dbh[2] - dbh[1]) / (year[2] - year[1]),
+      begin_size = dbh[1]
     ) %>% 
-    mutate(sqrt_annual_growth = sqrt(annual_growth))
+    mutate(sqrt_annual_growth = sqrt(annual_growth),
+           size_adj_sqrt_growth = sqrt(annual_growth / begin_size))
 }
 
 

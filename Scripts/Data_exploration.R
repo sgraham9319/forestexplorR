@@ -6,11 +6,7 @@
 # information), checks and excludes missing data, explores the quantity of data,
 #......
 
-# Load required packages
-library(dplyr)
-library(ggplot2)
-
-# Load functions
+# Load package
 devtools::load_all()
 
 #==========================

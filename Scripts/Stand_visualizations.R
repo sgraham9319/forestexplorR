@@ -47,21 +47,22 @@ stand_utm$y <- as.vector(st_coordinates(stand_utm)[,2])
 #===============================================
 
 # Load growth data
-growth_data <- read.csv("../Data/Tree_growth_2017.csv")
+growth_data <- read.csv("../Data/Tree_growth_2017.csv", stringsAsFactors = F)
 
 # Remove rows without dbh measurement
 growth_data <- growth_data[!is.na(growth_data$dbh), ]
 
 # Find trees that were never measured as 15 cm dbh or larger
-small_trees <- growth_data %>% group_by(treeid) %>% 
+small_trees_data <- growth_data %>% group_by(treeid) %>% 
   summarize(max_size = max(dbh)) %>%
   filter(max_size < 15)
 
-length(unique(growth_data$treeid))
+# Exclude these trees
+small_trees <- unique(small_trees_data$treeid)
+growth_data <- growth_data[-which(growth_data$treeid %in% small_trees), ]
 
-
-# Exclude rows with trees measured at < 15 cm dbh
-growth_data <- growth_data[growth_data$dbh >= 15, ]
+# Exclude small trees from mapping data
+mapping <- mapping[-which(mapping$TreeID %in% small_trees), ]
 
 # Calculate annual growth over entire measurement period
 overall_growth <- overall_annual_growth(growth_data)
@@ -71,22 +72,10 @@ mapping$ann_growth <- overall_growth$annual_growth[match(mapping$TreeID, overall
 mapping$sqrt_ann_growth <- overall_growth$sqrt_annual_growth[match(mapping$TreeID, overall_growth$treeid)]
 mapping$size_corr_growth <- overall_growth$size_adj_sqrt_growth[match(mapping$TreeID, overall_growth$treeid)]
 
+# Check distributions of growth data
 hist(mapping$ann_growth)
 hist(mapping$sqrt_ann_growth)
 hist(mapping$size_corr_growth)
 
-# Plot stand with color representing size corrected growth 
+# Plot a stand with color representing sqrt(annual growth / initial size)
 utm_mapping(tree_x_y = mapping, stand = "AV06", color_var = "size_corr_growth")
-
-
-# Calculate annual growth over a specific time period
-
-# Calculate annual growth between 2005 and 2015
-specific_annual_growth <- defined_period_annual_growth(data = growth_data,
-                                                       begin = 2005, end = 2015)
-
-# Add growth data to mapping
-mapping$sqrt_ann_growth <- specific_annual_growth$sqrt_annual_growth[match(mapping$TreeID, specific_annual_growth$treeid)]
-
-# Plot one stand
-utm_mapping(tree_x_y = mapping, stand = "AX15", color_var = "sqrt_ann_growth")

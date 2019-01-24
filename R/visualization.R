@@ -16,7 +16,7 @@ reorient <- function(tree_x_y, stand_azims){
     mutate(X_new = NA, Y_new = NA, y_azim = NA)
   
   # Create vector of the stands
-  stand_ids <- unique(mapping$StandID)
+  stand_ids <- unique(tree_x_y$StandID)
   
   # Open loop for stands
   for(stand in 1:length(stand_ids)){

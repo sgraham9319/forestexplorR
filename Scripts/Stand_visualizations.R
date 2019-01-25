@@ -79,3 +79,5 @@ hist(mapping$size_corr_growth)
 
 # Plot a stand with color representing sqrt(annual growth / initial size)
 utm_mapping(tree_x_y = mapping, stand = "AM16", color_var = "size_corr_growth")
+
+utm_mapping1(tree_x_y = mapping, stand = "AM16", color_var = "size_corr_growth")

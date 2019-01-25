@@ -156,7 +156,7 @@ polygons <- function(data){
 utm_mapping <- function(tree_x_y, stand, color_var){
   
   # Isolate focal stand
-  focal_stand <- mapping[mapping$StandID == stand, ]
+  focal_stand <- tree_x_y[tree_x_y$StandID == stand, ]
   
   # Calculate degrees to radians conversion factor
   cf <- pi / 180
@@ -171,29 +171,18 @@ utm_mapping <- function(tree_x_y, stand, color_var){
   # Calculate distances from origin to each tree
   focal_stand$dists <- sqrt((focal_stand$Xcoord ^ 2) + (focal_stand$Ycoord ^ 2))
   
-  # Extract rows with relative azimuths <= 90 degrees
-  sub_90 <- focal_stand[(focal_stand$rel_az / cf) <= 90, ]
-  super_90 <- focal_stand[(focal_stand$rel_az / cf) > 90, ]
-  
   # Extract X and Y UTM coordinates of stand origin
   origin_x <- stand_utm[stand_utm$stand == stand & 
                           stand_utm$corner_id == "origin", "x"][[1]]
   origin_y <- stand_utm[stand_utm$stand == stand & 
                           stand_utm$corner_id == "origin", "y"][[1]]
   
-  # Calculate UTM X and Y for sub 90 group
-  sub_90$x_UTM <- origin_x + (sin(sub_90$rel_az) * sub_90$dists)
-  sub_90$y_UTM <- origin_y + (cos(sub_90$rel_az) * sub_90$dists)
-  
-  # Calculate UTM X and Y for super 90 group
-  super_90$x_UTM <- origin_x + (sin(super_90$rel_az) * super_90$dists)
-  super_90$y_UTM <- origin_y + (cos(super_90$rel_az) * super_90$dists)
-  
-  # Recombine two groups
-  focal_stand_utm <- rbind(sub_90, super_90)
+  # Calculate UTM X and Y
+  focal_stand$x_UTM <- origin_x + (sin(focal_stand$rel_az) * focal_stand$dists)
+  focal_stand$y_UTM <- origin_y + (cos(focal_stand$rel_az) * focal_stand$dists)
   
   # Transform output to spatial object
-  focal_stand_utm <- st_as_sf(focal_stand_utm, coords = c("x_UTM", "y_UTM"), crs = 32610)
+  focal_stand_utm <- st_as_sf(focal_stand, coords = c("x_UTM", "y_UTM"), crs = 32610)
   
   # Plot result
   mapview(focal_stand_utm, zcol = color_var) + 

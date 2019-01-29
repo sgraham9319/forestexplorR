@@ -72,3 +72,53 @@ defined_period_annual_growth <- function(data, begin, end){
   # Return new data frame
   period_growth
 }
+
+#=======================
+# Calculate tree density
+#=======================
+
+# This function calculates tree density as both the number of trees and the
+# summed area at breast height of trees within a user-defined distance of a
+# provided set of coordinates.
+
+nbhd_density <- function(mapping_data, stand, x, y, nbhd_radius){
+  
+  # Subset to stand of interest
+  focal_stand <- mapping_data %>%
+    filter(StandID == stand)
+  
+  # Create output table
+  x_coord <- NA
+  y_coord <- NA
+  num_trees <- NA
+  total_abh <- NA
+  output <- data.frame(x_coord, y_coord, num_trees, total_abh)
+  
+  # Begin looping through input coordinates
+  for(coord_num in 1:length(x)){
+    
+    focal_stand_summary <- focal_stand %>%
+      
+      # Calculate distance of each tree from input coordinates
+      mutate(dist = sqrt((abs(Xcoord - x[coord_num]) ^ 2) +
+                           (abs(Ycoord - y[coord_num]) ^ 2))) %>%
+      
+      # Subset to trees within input radius of input coordinates
+      filter(dist <= nbhd_radius) %>%
+      
+      # Calculate cross-sectional area at breast height (abh) for each tree
+      mutate(abh = pi * ((Dbh_cm / 2) ^ 2)) %>%
+      
+      # Extract number of trees and total abh within neighborhood
+      summarize(x_coord = x[coord_num],
+                y_coord = y[coord_num],
+                num_trees = n(),
+                total_abh = sum(abh))
+    
+    # Append to output table
+    output <- rbind(output, focal_stand_summary)
+  }
+  
+  # Return output with first row (NAs) removed
+  output[-1, ]
+}

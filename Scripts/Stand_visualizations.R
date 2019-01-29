@@ -2,6 +2,7 @@
 library(measurements)
 library(sf)
 library(mapview)
+library(plotly)
 
 # Load package
 devtools::load_all()
@@ -78,6 +79,36 @@ hist(mapping$sqrt_ann_growth)
 hist(mapping$size_corr_growth)
 
 # Plot a stand with color representing sqrt(annual growth / initial size)
-utm_mapping(tree_x_y = mapping, stand = "AM16", color_var = "size_corr_growth")
+utm_mapping(tree_x_y = mapping, stand = "AB08", color_var = "size_corr_growth")
 
-utm_mapping1(tree_x_y = mapping, stand = "AM16", color_var = "size_corr_growth")
+utm_mapping1(tree_x_y = mapping, stand = "AB08", color_var = "size_corr_growth")
+
+
+#=====================================
+# Calculating density around each tree
+#=====================================
+
+# Calculate density at local coordinates 50, 50 in stand AB08 given
+# neighborhood radius of 10 m
+nbhd_density(mapping_data = mapping_raw, stand = "AB08", x = 50, y = 50, 
+             nbhd_radius = 10)
+
+# Calculate density at every intersection of a 5 x 5 grid across AB08 given
+# neighborhood radius of 10 m
+des_x <- rep(seq(0, 100, 5), each = 21)
+des_y <- rep(seq(0, 100, 5), times = 21)
+result <- nbhd_density(mapping_data = mapping_raw, stand = "AB08", x = des_x, 
+                       y = des_y, nbhd_radius = 10)
+
+# Create a contour plot of density for AB08
+plot_ly(
+  x = result$x_coord, 
+  y = result$y_coord, 
+  z = result$total_abh, 
+  type = "contour" 
+)
+
+
+
+
+

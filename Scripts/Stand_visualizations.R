@@ -19,7 +19,7 @@ stand_locs_raw <- read.csv("../Data/Stand_locations.csv", stringsAsFactors = F)
 
 # Remap individual trees with the western-most corner of each stand as
 # the origin
-mapping <- reorient(tree_x_y = mapping_raw, stand_azims = stand_locs_raw)
+mapping <- mapping_raw
 
 # Convert stand corner locations to decimal degrees
 stand_locs <- stand_dms_to_dd(stand_locs_raw)
@@ -79,10 +79,7 @@ hist(mapping$sqrt_ann_growth)
 hist(mapping$size_corr_growth)
 
 # Plot a stand with color representing sqrt(annual growth / initial size)
-utm_mapping(tree_x_y = mapping, stand = "AB08", color_var = "size_corr_growth")
-
-utm_mapping1(tree_x_y = mapping, stand = "AB08", color_var = "size_corr_growth")
-
+utm_mapping(tree_x_y = mapping, stand = "AG05", color_var = "size_corr_growth")
 
 #=====================================
 # Calculating density around each tree
@@ -107,8 +104,3 @@ plot_ly(
   z = result$total_abh, 
   type = "contour" 
 )
-
-
-
-
-

@@ -101,6 +101,6 @@ result <- nbhd_density(mapping_data = mapping_raw, stand = "AB08", x = des_x,
 plot_ly(
   x = result$x_coord, 
   y = result$y_coord, 
-  z = result$total_abh, 
+  z = result$abh_density, 
   type = "contour" 
 )

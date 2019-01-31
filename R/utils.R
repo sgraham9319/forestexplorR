@@ -91,8 +91,11 @@ nbhd_density <- function(mapping_data, stand, x, y, nbhd_radius){
   x_coord <- NA
   y_coord <- NA
   num_trees <- NA
+  tree_density <- NA
   total_abh <- NA
-  output <- data.frame(x_coord, y_coord, num_trees, total_abh)
+  abh_density <- NA
+  output <- data.frame(x_coord, y_coord, num_trees, tree_density, total_abh,
+                       abh_density)
   
   # Begin looping through input coordinates
   for(coord_num in 1:length(x)){
@@ -113,7 +116,9 @@ nbhd_density <- function(mapping_data, stand, x, y, nbhd_radius){
       summarize(x_coord = x[coord_num],
                 y_coord = y[coord_num],
                 num_trees = n(),
-                total_abh = sum(abh))
+                tree_density = n() / (pi * (nbhd_radius ^ 2)),
+                total_abh = sum(abh),
+                abh_density = sum(abh) / (pi * (nbhd_radius ^ 2)))
     
     # Append to output table
     output <- rbind(output, focal_stand_summary)

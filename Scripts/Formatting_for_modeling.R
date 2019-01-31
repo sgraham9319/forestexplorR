@@ -1,6 +1,10 @@
 # Load package
 devtools::load_all()
 
+#==============
+# Cleaning data
+#==============
+
 # Load growth data
 growth_data <- read.csv("../Data/Tree_growth_2017.csv", stringsAsFactors = F)
 
@@ -22,10 +26,12 @@ mapping <- read.csv("../Data/Mapping_2013.csv", stringsAsFactors = F)
 # Exclude small trees from mapping data
 mapping <- mapping[-which(mapping$TreeID %in% small_trees), ]
 
-ab08 <- mapping[mapping$StandID == "AB08", ]
-ab08_density <- nbhd_density(mapping_data = ab08, stand = "AB08", x = ab08$Xcoord, 
-                             y = ab08$Ycoord, nbhd_radius = 10)
+#=================
+# Summarizing data 
+#=================
 
-# Calculating density data
-result <- nbhd_density(mapping_data = ab08mapping, stand = "AB08", x = mapping$Xcoord, 
-                       y = Ycoord, nbhd_radius = 10)
+# Calculate neighborhood density for all trees
+densities <- nbhd_density_all(mapping)
+
+# Summarize growth for all trees
+growth <- growth_summary(growth_data)

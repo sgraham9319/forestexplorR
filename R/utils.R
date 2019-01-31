@@ -8,6 +8,24 @@
 # that contains unique tree ID values, a column named "year" containing the year
 # of the measurement, and a column named "dbh" containing the dbh measurements.
 
+growth_summary <- function(data){
+  data %>% 
+    group_by(treeid) %>% 
+    arrange(year) %>%
+    summarize(
+      stand_id = standid[1],
+      species = species[1],
+      first_record = year[1],
+      last_record = year[n()],
+      begin_size = dbh[1],
+      mean_size = mean(dbh),
+      midpoint_size = (min(dbh) + max(dbh)) / 2, 
+      ann_dbh_growth = (dbh[n()] - dbh[1]) / (year[n()] - year[1])
+    ) %>% 
+    mutate(size_adj_ann_growth = sqrt(ann_dbh_growth / begin_size))
+}
+
+# The function below is old and probably not needed anymore
 overall_annual_growth <- function(data){
   data %>% 
     group_by(treeid) %>% 
@@ -23,6 +41,7 @@ overall_annual_growth <- function(data){
     mutate(sqrt_annual_growth = sqrt(annual_growth),
            size_adj_sqrt_growth = sqrt(annual_growth / begin_size))
 }
+
 
 
 #==============================================
@@ -96,12 +115,12 @@ nbhd_density <- function(mapping_data, stand, x, y, nbhd_radius){
   abam_density <- NA
   thpl_density <- NA
   tsme_density <- NA
-  chno_density <- NA
+  cano_density <- NA
   pico_density <- NA
   psme_density <- NA
-  output <- data.frame(x_coord, y_coord, num_trees, all_density, tshe_density,
-                       abam_density, thpl_density, tsme_density, chno_density,
-                       pico_density, psme_density)
+  output <- data.frame(x_coord, y_coord, num_trees, all_density,
+                       tshe_density, abam_density, thpl_density, tsme_density,
+                       cano_density, pico_density, psme_density)
   
   # Begin looping through input coordinates
   for(coord_num in 1:length(x)){
@@ -127,14 +146,60 @@ nbhd_density <- function(mapping_data, stand, x, y, nbhd_radius){
                 abam_density = sum(abh[which(Species == "ABAM")]) / (pi * (nbhd_radius ^ 2)),
                 thpl_density = sum(abh[which(Species == "THPL")]) / (pi * (nbhd_radius ^ 2)),
                 tsme_density = sum(abh[which(Species == "TSME")]) / (pi * (nbhd_radius ^ 2)),
-                chno_density = sum(abh[which(Species == "CHNO")]) / (pi * (nbhd_radius ^ 2)),
+                cano_density = sum(abh[which(Species == "CANO9")]) / (pi * (nbhd_radius ^ 2)),
                 pico_density = sum(abh[which(Species == "PICO")]) / (pi * (nbhd_radius ^ 2)),
                 psme_density = sum(abh[which(Species == "PSME")]) / (pi * (nbhd_radius ^ 2)))
                 
     # Append to output table
     output <- rbind(output, focal_stand_summary)
+    
   }
+  
+  # Add tree id as first column in dataset
+  output$tree_id <- c(NA, focal_stand$TreeID)
+  output <- output[,c(ncol(output), 1:(ncol(output) - 1))]
   
   # Return output with first row (NAs) removed
   output[-1, ]
+}
+
+#======================================================================
+# Calculate neighborhood density for all trees in a multi-stand dataset
+#======================================================================
+
+nbhd_density_all <- function(all_stands){
+  
+  # Identify unique stands in dataset
+  stand_ids <- unique(all_stands$StandID)
+  
+  # Loop through stands
+  for(stand in 1:length(stand_ids)){
+    
+    # Isolate focal stand
+    single_stand <- all_stands[all_stands$StandID == stand_ids[stand], ]
+    
+    # If first stand, make the output table
+    if(stand == 1){
+      
+      output <- nbhd_density(mapping_data = single_stand,
+                             stand = stand_ids[stand],
+                             x = single_stand[, "Xcoord"], 
+                             y = single_stand[, "Ycoord"],
+                             nbhd_radius = 10)
+    } else { 
+      
+      # If not first stand, append results to those from earlier stands
+      new_stand <- nbhd_density(mapping_data = single_stand,
+                                stand = stand_ids[stand],
+                                x = single_stand[, "Xcoord"], 
+                                y = single_stand[, "Ycoord"],
+                                nbhd_radius = 10)
+      
+      output <- rbind(output, new_stand)
+    }
+  }
+  
+  # Return output
+  output
+  
 }

@@ -91,11 +91,17 @@ nbhd_density <- function(mapping_data, stand, x, y, nbhd_radius){
   x_coord <- NA
   y_coord <- NA
   num_trees <- NA
-  tree_density <- NA
-  total_abh <- NA
-  abh_density <- NA
-  output <- data.frame(x_coord, y_coord, num_trees, tree_density, total_abh,
-                       abh_density)
+  all_density <- NA
+  tshe_density <- NA
+  abam_density <- NA
+  thpl_density <- NA
+  tsme_density <- NA
+  chno_density <- NA
+  pico_density <- NA
+  psme_density <- NA
+  output <- data.frame(x_coord, y_coord, num_trees, all_density, tshe_density,
+                       abam_density, thpl_density, tsme_density, chno_density,
+                       pico_density, psme_density)
   
   # Begin looping through input coordinates
   for(coord_num in 1:length(x)){
@@ -116,10 +122,15 @@ nbhd_density <- function(mapping_data, stand, x, y, nbhd_radius){
       summarize(x_coord = x[coord_num],
                 y_coord = y[coord_num],
                 num_trees = n(),
-                tree_density = n() / (pi * (nbhd_radius ^ 2)),
-                total_abh = sum(abh),
-                abh_density = sum(abh) / (pi * (nbhd_radius ^ 2)))
-    
+                all_density = sum(abh) / (pi * (nbhd_radius ^ 2)),
+                tshe_density = sum(abh[which(Species == "TSHE")]) / (pi * (nbhd_radius ^ 2)),
+                abam_density = sum(abh[which(Species == "ABAM")]) / (pi * (nbhd_radius ^ 2)),
+                thpl_density = sum(abh[which(Species == "THPL")]) / (pi * (nbhd_radius ^ 2)),
+                tsme_density = sum(abh[which(Species == "TSME")]) / (pi * (nbhd_radius ^ 2)),
+                chno_density = sum(abh[which(Species == "CHNO")]) / (pi * (nbhd_radius ^ 2)),
+                pico_density = sum(abh[which(Species == "PICO")]) / (pi * (nbhd_radius ^ 2)),
+                psme_density = sum(abh[which(Species == "PSME")]) / (pi * (nbhd_radius ^ 2)))
+                
     # Append to output table
     output <- rbind(output, focal_stand_summary)
   }

@@ -30,8 +30,17 @@ mapping <- mapping[-which(mapping$TreeID %in% small_trees), ]
 # Summarizing data 
 #=================
 
+# Summarize growth for all trees
+growth <- growth_summary(growth_data)
+
 # Calculate neighborhood density for all trees
 densities <- nbhd_density_all(mapping)
 
-# Summarize growth for all trees
-growth <- growth_summary(growth_data)
+# Attach neighborhood information to growth
+colnames(growth)[1] <- "tree_id"
+growth <- inner_join(growth, densities)
+
+# Note - tree id AG05001500036 appears twice with same information apart from 
+# mapping (presumably new mapping was added without removing old mapping). Need
+# to deal with this in the data cleaning phase
+View(growth[growth$tree_id == "AG05001500036", ])

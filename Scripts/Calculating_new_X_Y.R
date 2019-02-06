@@ -18,13 +18,14 @@ combined_map <- new_map %>%
   left_join(old_map, by = c("stand_id", "ref_tree" = "tag")) %>%
   
   # Reduce dataset to desired columns
-  select(tree_id.x, stand_id, plot.x, tag, year.x, tree_status.x, 
+  select(tree_id.x, stand_id, plot.x, species.x, tag, year.x, tree_status.x, 
          dbh.x, ref_tree, azim, dist,
          tree_id.y, dbh.y, x_coord, y_coord) %>%
 
   # Rename columns
   rename(tree_id = tree_id.x,
          plot = plot.x,
+         species = species.x,
          year = year.x,
          tree_status = tree_status.x,
          dbh = dbh.x,

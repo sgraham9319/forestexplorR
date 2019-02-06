@@ -12,7 +12,7 @@ devtools::load_all()
 #=====================================
 
 # Load 2013 within-stand location data for individual trees
-mapping_raw <- read.csv("../Data/Mapping_2013.csv", stringsAsFactors = F)
+mapping_raw <- read.csv("../Data/Mapping_2017.csv", stringsAsFactors = F)
 
 # Load location data for stands
 stand_locs_raw <- read.csv("../Data/Stand_locations.csv", stringsAsFactors = F)

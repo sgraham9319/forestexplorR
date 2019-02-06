@@ -43,17 +43,17 @@ sum(is.na(cleanData$dbh))
 #=======================
 
 # Load 2013 mapping data
-mapping <- read.csv("../Data/Mapping_2013.csv", stringsAsFactors = F)
+mapping <- read.csv("../Data/Mapping_2017.csv", stringsAsFactors = F)
 
 # Extract unique tree IDs from growth data
-treeIDs <- unique(cleanData$treeid) # 8803 tree IDs
+treeIDs <- unique(cleanData$treeid)
 
 # How many of these trees do we have mapping data for?
-sum(treeIDs %in% mapping$TreeID) # 8416
+sum(treeIDs %in% mapping$tree_id)
 
 # Add mapping data to growth data
-cleanData$x_coord <- mapping[match(cleanData$treeid, mapping$TreeID), "Xcoord"]
-cleanData$y_coord <- mapping[match(cleanData$treeid, mapping$TreeID), "Ycoord"]
+cleanData$x_coord <- mapping[match(cleanData$treeid, mapping$tree_id), "x_coord"]
+cleanData$y_coord <- mapping[match(cleanData$treeid, mapping$tree_id), "y_coord"]
 
 #===========================================
 # Explore new mapping data collected in 2017
@@ -70,9 +70,9 @@ update <- newMap[!is.na(newMap$x_coord), ]
 table(cleanData$year)
 ingrowth2017 <- cleanData[cleanData$tree_status == 2 & cleanData$new_mapping == "Y", "treeid"]
 oldgrowth2017 <- cleanData[cleanData$tree_status == 1 & cleanData$new_mapping == "Y", "treeid"]
-sum(ingrowth2017 %in% mapping$TreeID)
-sum(oldgrowth2017 %in% mapping$TreeID)
-table(mapping$Year)
+sum(ingrowth2017 %in% mapping$tree_id)
+sum(oldgrowth2017 %in% mapping$tree_id)
+table(mapping$year)
 
 #=========================================
 # Investigate rows with no dbh measurement

@@ -21,7 +21,8 @@ small_trees <- unique(small_trees_data$treeid)
 growth_data <- growth_data[-which(growth_data$treeid %in% small_trees), ]
 
 # Load mapping data for individual trees
-mapping <- read.csv("../Data/Mapping_2013.csv", stringsAsFactors = F)
+#mapping <- read.csv("../Data/Mapping_2013.csv", stringsAsFactors = F)
+mapping <- read.csv("../Data/Mapping_2017.csv", stringsAsFactors = F)
 
 # Exclude small trees from mapping data
 mapping <- mapping[-which(mapping$tree_id %in% small_trees), ]
@@ -36,9 +37,12 @@ growth <- growth_summary(growth_data)
 # Calculate neighborhood density for all trees
 densities <- nbhd_density_all(mapping)
 
+# Add tree ids to densities
+densities$tree_id <- mapping$tree_id
+
 # Attach neighborhood information to growth
 colnames(growth)[1] <- "tree_id"
-growth <- inner_join(growth, densities)
+growth <- left_join(growth, densities)
 
 # Note - tree id AG05001500036 appears twice with same information apart from 
 # mapping (presumably new mapping was added without removing old mapping). Need

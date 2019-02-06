@@ -24,7 +24,7 @@ growth_data <- growth_data[-which(growth_data$treeid %in% small_trees), ]
 mapping <- read.csv("../Data/Mapping_2013.csv", stringsAsFactors = F)
 
 # Exclude small trees from mapping data
-mapping <- mapping[-which(mapping$TreeID %in% small_trees), ]
+mapping <- mapping[-which(mapping$tree_id %in% small_trees), ]
 
 #=================
 # Summarizing data 

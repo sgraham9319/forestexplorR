@@ -43,7 +43,7 @@ sum(is.na(cleanData$dbh))
 #=======================
 
 # Load 2013 mapping data
-mapping <- read.csv("../Data/Mapping_2013.csv")
+mapping <- read.csv("../Data/Mapping_2013.csv", stringsAsFactors = F)
 
 # Extract unique tree IDs from growth data
 treeIDs <- unique(cleanData$treeid) # 8803 tree IDs

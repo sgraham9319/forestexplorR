@@ -63,15 +63,15 @@ small_trees <- unique(small_trees_data$treeid)
 growth_data <- growth_data[-which(growth_data$treeid %in% small_trees), ]
 
 # Exclude small trees from mapping data
-mapping <- mapping[-which(mapping$TreeID %in% small_trees), ]
+mapping <- mapping[-which(mapping$tree_id %in% small_trees), ]
 
 # Calculate annual growth over entire measurement period
 overall_growth <- overall_annual_growth(growth_data)
 
 # Add growth data to mapping
-mapping$ann_growth <- overall_growth$annual_growth[match(mapping$TreeID, overall_growth$treeid)]
-mapping$sqrt_ann_growth <- overall_growth$sqrt_annual_growth[match(mapping$TreeID, overall_growth$treeid)]
-mapping$size_corr_growth <- overall_growth$size_adj_sqrt_growth[match(mapping$TreeID, overall_growth$treeid)]
+mapping$ann_growth <- overall_growth$annual_growth[match(mapping$tree_id, overall_growth$treeid)]
+mapping$sqrt_ann_growth <- overall_growth$sqrt_annual_growth[match(mapping$tree_id, overall_growth$treeid)]
+mapping$size_corr_growth <- overall_growth$size_adj_sqrt_growth[match(mapping$tree_id, overall_growth$treeid)]
 
 # Check distributions of growth data
 hist(mapping$ann_growth)
@@ -101,45 +101,45 @@ result <- nbhd_density(mapping_data = mapping_raw, stand = "AB08", x = des_x,
 plot_ly(
   x = result$x_coord, 
   y = result$y_coord, 
-  z = result$abh_density, 
+  z = result$all_density, 
   type = "contour" 
 )
 
 # Calculate neighborhood density for each tree in stand AB08
-ab08 <- mapping[mapping$StandID == "AB08", ]
+ab08 <- mapping[mapping$stand_id == "AB08", ]
 
-ab08_density <- nbhd_density(mapping_data = ab08, stand = "AB08", x = ab08$Xcoord, 
-                       y = ab08$Ycoord, nbhd_radius = 10)
-ab08_density <- cbind(ab08$TreeID, ab08_density)
-colnames(ab08_density)[1] <- "TreeID"
+ab08_density <- nbhd_density(mapping_data = ab08, stand = "AB08", x = ab08$x_coord, 
+                       y = ab08$y_coord, nbhd_radius = 10)
+ab08_density <- cbind(ab08$tree_id, ab08_density)
+colnames(ab08_density)[1] <- "tree_id"
 
 # Combine density with annual growth
 ab08_density$ann_growth <- 
-  overall_growth$size_adj_sqrt_growth[match(ab08_density$TreeID,
+  overall_growth$size_adj_sqrt_growth[match(ab08_density$tree_id,
                                             overall_growth$treeid)]
 
 # Plot annual growth against density
-plot(ab08_density$ann_growth ~ ab08_density$abh_density)
-tshe_ids <- mapping[mapping$StandID == "AB08" & mapping$Species == "TSHE",
-        "TreeID"]
+plot(ab08_density$ann_growth ~ ab08_density$all_density)
+tshe_ids <- mapping[mapping$stand_id == "AB08" & mapping$species == "TSHE",
+        "tree_id"]
 length(tshe_ids)
-ab08_tshe_density <- ab08_density[ab08_density$TreeID %in% tshe_ids, ]
-plot(ab08_tshe_density$ann_growth ~ ab08_tshe_density$abh_density)
-summary(lm(ann_growth ~ abh_density, data = ab08_tshe_density))
+ab08_tshe_density <- ab08_density[ab08_density$tree_id %in% tshe_ids, ]
+plot(ab08_tshe_density$ann_growth ~ ab08_tshe_density$all_density)
+summary(lm(ann_growth ~ all_density, data = ab08_tshe_density))
 
 # Repeat for AV06
-av06 <- mapping[mapping$StandID == "AV06", ]
-av06_density <- nbhd_density(mapping_data = av06, stand = "AV06", x = av06$Xcoord, 
-                             y = av06$Ycoord, nbhd_radius = 10)
-av06_density <- cbind(av06$TreeID, av06_density)
-colnames(av06_density)[1] <- "TreeID"
+av06 <- mapping[mapping$stand_id == "AV06", ]
+av06_density <- nbhd_density(mapping_data = av06, stand = "AV06", x = av06$x_coord, 
+                             y = av06$y_coord, nbhd_radius = 10)
+av06_density <- cbind(av06$tree_id, av06_density)
+colnames(av06_density)[1] <- "tree_id"
 av06_density$ann_growth <- 
-  overall_growth$size_adj_sqrt_growth[match(av06_density$TreeID,
+  overall_growth$size_adj_sqrt_growth[match(av06_density$tree_id,
                                             overall_growth$treeid)]
-plot(av06_density$ann_growth ~ av06_density$abh_density)
-tshe_ids <- mapping[mapping$StandID == "AV06" & mapping$Species == "TSHE",
-                    "TreeID"]
+plot(av06_density$ann_growth ~ av06_density$all_density)
+tshe_ids <- mapping[mapping$stand_id == "AV06" & mapping$species == "TSHE",
+                    "tree_id"]
 length(tshe_ids)
-av06_tshe_density <- av06_density[av06_density$TreeID %in% tshe_ids, ]
-plot(av06_tshe_density$ann_growth ~ av06_tshe_density$abh_density)
-summary(lm(ann_growth ~ abh_density, data = av06_tshe_density))
+av06_tshe_density <- av06_density[av06_density$tree_id %in% tshe_ids, ]
+plot(av06_tshe_density$ann_growth ~ av06_tshe_density$all_density)
+summary(lm(ann_growth ~ all_density, data = av06_tshe_density))

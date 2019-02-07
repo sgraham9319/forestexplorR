@@ -10,10 +10,10 @@
 
 growth_summary <- function(data){
   data %>% 
-    group_by(treeid) %>% 
+    group_by(tree_id) %>% 
     arrange(year) %>%
     summarize(
-      stand_id = standid[1],
+      stand_id = stand_id[1],
       species = species[1],
       first_record = year[1],
       last_record = year[n()],
@@ -28,7 +28,7 @@ growth_summary <- function(data){
 # The function below is old and probably not needed anymore
 overall_annual_growth <- function(data){
   data %>% 
-    group_by(treeid) %>% 
+    group_by(tree_id) %>% 
     arrange(year) %>%
     filter(
       year == max(year) | 
@@ -66,13 +66,13 @@ defined_period_annual_growth <- function(data, begin, end){
   # Subset measurements earlier than begin
   before <- data %>%
     filter(year <= begin) %>%
-    group_by(treeid) %>%
+    group_by(tree_id) %>%
     filter(begin_dif == min(begin_dif))
   
   # Subset measurements later than end
   after <- data %>%
     filter(year >= end) %>%
-    group_by(treeid) %>%
+    group_by(tree_id) %>%
     filter(end_dif == min(end_dif))
   
   # Combine subsets
@@ -80,7 +80,7 @@ defined_period_annual_growth <- function(data, begin, end){
   
   # Calculate annual growth
   period_growth = before_after %>% 
-    group_by(treeid) %>% 
+    group_by(tree_id) %>% 
     arrange(year) %>%
     summarize(
       annual_growth = (dbh[2] - dbh[1]) / (year[2] - year[1])

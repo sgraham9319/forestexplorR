@@ -8,20 +8,26 @@ devtools::load_all()
 # Load growth data
 growth_data <- read.csv("../Data/Tree_growth_2017.csv", stringsAsFactors = F)
 
+# Remove test data (2017 measurements and stands TO04, AE10, and AV02)
+growth_data <- growth_data %>%
+  filter(year != 2017,
+         stand_id != "TO04",
+         stand_id != "AE10",
+         stand_id != "AV02")
+
 # Remove rows without dbh measurement
 growth_data <- growth_data[!is.na(growth_data$dbh), ]
 
 # Identify trees that were never measured as 15 cm dbh or larger
-small_trees_data <- growth_data %>% group_by(treeid) %>% 
+small_trees_data <- growth_data %>% group_by(tree_id) %>% 
   summarize(max_size = max(dbh)) %>%
   filter(max_size < 15)
-small_trees <- unique(small_trees_data$treeid)
+small_trees <- unique(small_trees_data$tree_id)
 
 # Exclude small trees
-growth_data <- growth_data[-which(growth_data$treeid %in% small_trees), ]
+growth_data <- growth_data[-which(growth_data$tree_id %in% small_trees), ]
 
 # Load mapping data for individual trees
-#mapping <- read.csv("../Data/Mapping_2013.csv", stringsAsFactors = F)
 mapping <- read.csv("../Data/Mapping_2017.csv", stringsAsFactors = F)
 
 # Exclude small trees from mapping data
@@ -41,10 +47,8 @@ densities <- nbhd_density_all(mapping)
 densities$tree_id <- mapping$tree_id
 
 # Attach neighborhood information to growth
-colnames(growth)[1] <- "tree_id"
 growth <- left_join(growth, densities)
 
-# Note - tree id AG05001500036 appears twice with same information apart from 
-# mapping (presumably new mapping was added without removing old mapping). Need
-# to deal with this in the data cleaning phase
-View(growth[growth$tree_id == "AG05001500036", ])
+
+# SHOULD WE EXCLUDE UNCOMMON TREE SPECIES?
+

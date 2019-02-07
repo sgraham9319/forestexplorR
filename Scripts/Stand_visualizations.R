@@ -28,13 +28,13 @@ stand_locs <- stand_dms_to_dd(stand_locs_raw)
 stand_locs_sf <- st_as_sf(stand_locs, coords = c("lon_dd", "lat_dd"), crs = 4326)
 
 # Check points appear in expected places
-mapview(stand_locs_sf, zcol = "standid")
+mapview(stand_locs_sf, zcol = "stand_id")
 
 # Create polygons for each stand using convex hull method
 stand_polygons <- polygons(stand_locs_sf)
   
 # Plot polygons
-mapview(stand_polygons, zcol = "standid")
+mapview(stand_polygons, zcol = "stand_id")
 
 # Transform coordinate reference system to UTM
 stand_utm <- st_transform(stand_locs_sf, crs = 32610)
@@ -54,13 +54,13 @@ growth_data <- read.csv("../Data/Tree_growth_2017.csv", stringsAsFactors = F)
 growth_data <- growth_data[!is.na(growth_data$dbh), ]
 
 # Find trees that were never measured as 15 cm dbh or larger
-small_trees_data <- growth_data %>% group_by(treeid) %>% 
+small_trees_data <- growth_data %>% group_by(tree_id) %>% 
   summarize(max_size = max(dbh)) %>%
   filter(max_size < 15)
 
 # Exclude these trees
-small_trees <- unique(small_trees_data$treeid)
-growth_data <- growth_data[-which(growth_data$treeid %in% small_trees), ]
+small_trees <- unique(small_trees_data$tree_id)
+growth_data <- growth_data[-which(growth_data$tree_id %in% small_trees), ]
 
 # Exclude small trees from mapping data
 mapping <- mapping[-which(mapping$tree_id %in% small_trees), ]
@@ -69,9 +69,9 @@ mapping <- mapping[-which(mapping$tree_id %in% small_trees), ]
 overall_growth <- overall_annual_growth(growth_data)
 
 # Add growth data to mapping
-mapping$ann_growth <- overall_growth$annual_growth[match(mapping$tree_id, overall_growth$treeid)]
-mapping$sqrt_ann_growth <- overall_growth$sqrt_annual_growth[match(mapping$tree_id, overall_growth$treeid)]
-mapping$size_corr_growth <- overall_growth$size_adj_sqrt_growth[match(mapping$tree_id, overall_growth$treeid)]
+mapping$ann_growth <- overall_growth$annual_growth[match(mapping$tree_id, overall_growth$tree_id)]
+mapping$sqrt_ann_growth <- overall_growth$sqrt_annual_growth[match(mapping$tree_id, overall_growth$tree_id)]
+mapping$size_corr_growth <- overall_growth$size_adj_sqrt_growth[match(mapping$tree_id, overall_growth$tree_id)]
 
 # Check distributions of growth data
 hist(mapping$ann_growth)
@@ -116,7 +116,7 @@ colnames(ab08_density)[1] <- "tree_id"
 # Combine density with annual growth
 ab08_density$ann_growth <- 
   overall_growth$size_adj_sqrt_growth[match(ab08_density$tree_id,
-                                            overall_growth$treeid)]
+                                            overall_growth$tree_id)]
 
 # Plot annual growth against density
 plot(ab08_density$ann_growth ~ ab08_density$all_density)
@@ -135,7 +135,7 @@ av06_density <- cbind(av06$tree_id, av06_density)
 colnames(av06_density)[1] <- "tree_id"
 av06_density$ann_growth <- 
   overall_growth$size_adj_sqrt_growth[match(av06_density$tree_id,
-                                            overall_growth$treeid)]
+                                            overall_growth$tree_id)]
 plot(av06_density$ann_growth ~ av06_density$all_density)
 tshe_ids <- mapping[mapping$stand_id == "AV06" & mapping$species == "TSHE",
                     "tree_id"]

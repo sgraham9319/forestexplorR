@@ -43,7 +43,7 @@ stand_dms_to_dd <- function(data){
     ) %>%
     
     # Select required columns
-    select(standid, y_azim, corner_id, coord, dec_deg) %>%
+    select(stand_id, y_azim, corner_id, coord, dec_deg) %>%
     
     # Separate lats and longs
     spread(coord, dec_deg)
@@ -58,7 +58,7 @@ polygons <- function(data){
   data %>%
     
     # Group by stand to create multipoint objects
-    group_by(standid) %>%
+    group_by(stand_id) %>%
     
     # Need to include summarize for group_by to take effect
     summarise(y_azim = y_azim[1]) %>%
@@ -67,7 +67,7 @@ polygons <- function(data){
     st_convex_hull() %>%
     
     # Return only stand IDs and geometry
-    select(standid)
+    select(stand_id)
 }
 
 #==========================================================
@@ -83,7 +83,7 @@ utm_mapping <- function(tree_x_y, stand, color_var){
   cf <- pi / 180
   
   # Extract y azimuth for focal stand and convert to radians
-  y_azim <- stand_locs_raw[stand_locs_raw$standid == stand, "y_azim"]
+  y_azim <- stand_locs_raw[stand_locs_raw$stand_id == stand, "y_azim"]
   y_azim <- y_azim * cf
   
   # Calculate relative azimuths (in radians) from stand origin to each tree
@@ -107,6 +107,6 @@ utm_mapping <- function(tree_x_y, stand, color_var){
   
   # Plot result
   mapview(focal_stand_utm, zcol = color_var) + 
-    mapview(stand_polygons[["geometry"]][which(stand_polygons[["standid"]] == stand)])
+    mapview(stand_polygons[["geometry"]][which(stand_polygons[["stand_id"]] == stand)])
   
 }

@@ -35,8 +35,8 @@ combined_map <- new_map %>%
          ref_y = y_coord) %>%
   
   # Add stand location data
-  left_join(stand_locs[, c("standid", "y_azim")],
-            by = c("stand_id" = "standid")) %>%
+  left_join(stand_locs[, c("stand_id", "y_azim")],
+            by = "stand_id") %>%
   
   # Calculate relative azimuths
   mutate(rel_azim = azim - y_azim,
@@ -86,6 +86,19 @@ updated_map <- rbind(old_map, combined_map)
 
 # Remove failed update data from the updated mapping data frame
 updated_map <- updated_map[-which(updated_map$tree_id %in% failed_update_ids), ]
+
+# Check for any tree IDs that appear in dataset multiple times
+length(unique(updated_map$tree_id))
+
+# Identify these tree IDs and look at their data
+repeated_ids <- names(which(table(updated_map$tree_id) > 1))
+View(updated_map[updated_map$tree_id %in% repeated_ids, ])
+
+# As the repeats have very similar X, Y coordinates, remove the second occurence
+# of each from the dataset
+rows_to_remove <- c(which(updated_map$tree_id == repeated_ids[1])[2],
+                    which(updated_map$tree_id == repeated_ids[2])[2])
+updated_map <- updated_map[-rows_to_remove, ]
 
 # Write updated mapping to file
 write.csv(updated_map, "../Data/Mapping_2017.csv", row.names = F)

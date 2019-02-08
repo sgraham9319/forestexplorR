@@ -106,21 +106,18 @@ nbhd_density <- function(mapping_data, stand, x, y, nbhd_radius){
   focal_stand <- mapping_data %>%
     filter(stand_id == stand)
   
-  # Create output table
-  x_coord <- NA
-  y_coord <- NA
-  num_trees <- NA
-  all_density <- NA
-  tshe_density <- NA
-  abam_density <- NA
-  thpl_density <- NA
-  tsme_density <- NA
-  cano_density <- NA
-  pico_density <- NA
-  psme_density <- NA
-  output <- data.frame(x_coord, y_coord, num_trees, all_density,
-                       tshe_density, abam_density, thpl_density, tsme_density,
-                       cano_density, pico_density, psme_density)
+  # Create output vectors
+  x_coord <- c()
+  y_coord <- c()
+  num_trees <- c()
+  all_density <- c()
+  tshe_density <- c()
+  abam_density <- c()
+  thpl_density <- c()
+  tsme_density <- c()
+  cano_density <- c()
+  pico_density <- c()
+  psme_density <- c()
   
   # Begin looping through input coordinates
   for(coord_num in 1:length(x)){
@@ -150,17 +147,28 @@ nbhd_density <- function(mapping_data, stand, x, y, nbhd_radius){
                 pico_density = sum(abh[which(species == "PICO")]) / (pi * (nbhd_radius ^ 2)),
                 psme_density = sum(abh[which(species == "PSME")]) / (pi * (nbhd_radius ^ 2)))
                 
-    # Append to output table
-    output <- rbind(output, focal_stand_summary)
+    # Append output data to vectors
+    x_coord <- c(x_coord, focal_stand_summary$x_coord)
+    y_coord <- c(y_coord, focal_stand_summary$y_coord)
+    num_trees <- c(num_trees, focal_stand_summary$num_trees)
+    all_density <- c(all_density, focal_stand_summary$all_density)
+    tshe_density <- c(tshe_density, focal_stand_summary$tshe_density)
+    abam_density <- c(abam_density, focal_stand_summary$abam_density)
+    thpl_density <- c(thpl_density, focal_stand_summary$thpl_density)
+    tsme_density <- c(tsme_density, focal_stand_summary$tsme_density)
+    cano_density <- c(cano_density, focal_stand_summary$cano_density)
+    pico_density <- c(pico_density, focal_stand_summary$pico_density)
+    psme_density <- c(psme_density, focal_stand_summary$psme_density)
     
   }
   
-  # Add tree id as first column in dataset
-  #output$tree_id <- c(NA, focal_stand$tree_id)
-  output <- output[,c(ncol(output), 1:(ncol(output) - 1))]
+  # Combine vectors into output table
+  output <- data.frame(x_coord, y_coord, num_trees, all_density,
+                tshe_density, abam_density, thpl_density, tsme_density,
+                cano_density, pico_density, psme_density)
   
-  # Return output with first row (NAs) removed
-  output[-1, ]
+  # Return output
+  output
 }
 
 #======================================================================

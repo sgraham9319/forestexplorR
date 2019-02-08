@@ -2,6 +2,7 @@
 library(measurements)
 library(sf)
 library(mapview)
+library(plotly)
 
 # Load package
 devtools::load_all()
@@ -11,14 +12,14 @@ devtools::load_all()
 #=====================================
 
 # Load 2013 within-stand location data for individual trees
-mapping_raw <- read.csv("../Data/Mapping_2013.csv", stringsAsFactors = F)
+mapping_raw <- read.csv("../Data/Mapping_2017.csv", stringsAsFactors = F)
 
 # Load location data for stands
 stand_locs_raw <- read.csv("../Data/Stand_locations.csv", stringsAsFactors = F)
 
 # Remap individual trees with the western-most corner of each stand as
 # the origin
-mapping <- reorient(tree_x_y = mapping_raw, stand_azims = stand_locs_raw)
+mapping <- mapping_raw
 
 # Convert stand corner locations to decimal degrees
 stand_locs <- stand_dms_to_dd(stand_locs_raw)
@@ -27,13 +28,13 @@ stand_locs <- stand_dms_to_dd(stand_locs_raw)
 stand_locs_sf <- st_as_sf(stand_locs, coords = c("lon_dd", "lat_dd"), crs = 4326)
 
 # Check points appear in expected places
-mapview(stand_locs_sf, zcol = "standid")
+mapview(stand_locs_sf, zcol = "stand_id")
 
 # Create polygons for each stand using convex hull method
 stand_polygons <- polygons(stand_locs_sf)
   
 # Plot polygons
-mapview(stand_polygons, zcol = "standid")
+mapview(stand_polygons, zcol = "stand_id")
 
 # Transform coordinate reference system to UTM
 stand_utm <- st_transform(stand_locs_sf, crs = 32610)
@@ -53,24 +54,24 @@ growth_data <- read.csv("../Data/Tree_growth_2017.csv", stringsAsFactors = F)
 growth_data <- growth_data[!is.na(growth_data$dbh), ]
 
 # Find trees that were never measured as 15 cm dbh or larger
-small_trees_data <- growth_data %>% group_by(treeid) %>% 
+small_trees_data <- growth_data %>% group_by(tree_id) %>% 
   summarize(max_size = max(dbh)) %>%
   filter(max_size < 15)
 
 # Exclude these trees
-small_trees <- unique(small_trees_data$treeid)
-growth_data <- growth_data[-which(growth_data$treeid %in% small_trees), ]
+small_trees <- unique(small_trees_data$tree_id)
+growth_data <- growth_data[-which(growth_data$tree_id %in% small_trees), ]
 
 # Exclude small trees from mapping data
-mapping <- mapping[-which(mapping$TreeID %in% small_trees), ]
+mapping <- mapping[-which(mapping$tree_id %in% small_trees), ]
 
 # Calculate annual growth over entire measurement period
 overall_growth <- overall_annual_growth(growth_data)
 
 # Add growth data to mapping
-mapping$ann_growth <- overall_growth$annual_growth[match(mapping$TreeID, overall_growth$treeid)]
-mapping$sqrt_ann_growth <- overall_growth$sqrt_annual_growth[match(mapping$TreeID, overall_growth$treeid)]
-mapping$size_corr_growth <- overall_growth$size_adj_sqrt_growth[match(mapping$TreeID, overall_growth$treeid)]
+mapping$ann_growth <- overall_growth$annual_growth[match(mapping$tree_id, overall_growth$tree_id)]
+mapping$sqrt_ann_growth <- overall_growth$sqrt_annual_growth[match(mapping$tree_id, overall_growth$tree_id)]
+mapping$size_corr_growth <- overall_growth$size_adj_sqrt_growth[match(mapping$tree_id, overall_growth$tree_id)]
 
 # Check distributions of growth data
 hist(mapping$ann_growth)
@@ -78,4 +79,67 @@ hist(mapping$sqrt_ann_growth)
 hist(mapping$size_corr_growth)
 
 # Plot a stand with color representing sqrt(annual growth / initial size)
-utm_mapping(tree_x_y = mapping, stand = "AV06", color_var = "size_corr_growth")
+utm_mapping(tree_x_y = mapping, stand = "AG05", color_var = "size_corr_growth")
+
+#=====================================
+# Calculating density around each tree
+#=====================================
+
+# Calculate density at local coordinates 50, 50 in stand AB08 given
+# neighborhood radius of 10 m
+nbhd_density(mapping_data = mapping_raw, stand = "AB08", x = 50, y = 50, 
+             nbhd_radius = 10)
+
+# Calculate density at every intersection of a 5 x 5 grid across AB08 given
+# neighborhood radius of 10 m
+des_x <- rep(seq(0, 100, 5), each = 21)
+des_y <- rep(seq(0, 100, 5), times = 21)
+result <- nbhd_density(mapping_data = mapping_raw, stand = "AB08", x = des_x, 
+                       y = des_y, nbhd_radius = 10)
+
+# Create a contour plot of density for AB08
+plot_ly(
+  x = result$x_coord, 
+  y = result$y_coord, 
+  z = result$all_density, 
+  type = "contour" 
+)
+
+# Calculate neighborhood density for each tree in stand AB08
+ab08 <- mapping[mapping$stand_id == "AB08", ]
+
+ab08_density <- nbhd_density(mapping_data = ab08, stand = "AB08", x = ab08$x_coord, 
+                       y = ab08$y_coord, nbhd_radius = 10)
+ab08_density <- cbind(ab08$tree_id, ab08_density)
+colnames(ab08_density)[1] <- "tree_id"
+
+# Combine density with annual growth
+ab08_density$ann_growth <- 
+  overall_growth$size_adj_sqrt_growth[match(ab08_density$tree_id,
+                                            overall_growth$tree_id)]
+
+# Plot annual growth against density
+plot(ab08_density$ann_growth ~ ab08_density$all_density)
+tshe_ids <- mapping[mapping$stand_id == "AB08" & mapping$species == "TSHE",
+        "tree_id"]
+length(tshe_ids)
+ab08_tshe_density <- ab08_density[ab08_density$tree_id %in% tshe_ids, ]
+plot(ab08_tshe_density$ann_growth ~ ab08_tshe_density$all_density)
+summary(lm(ann_growth ~ all_density, data = ab08_tshe_density))
+
+# Repeat for AV06
+av06 <- mapping[mapping$stand_id == "AV06", ]
+av06_density <- nbhd_density(mapping_data = av06, stand = "AV06", x = av06$x_coord, 
+                             y = av06$y_coord, nbhd_radius = 10)
+av06_density <- cbind(av06$tree_id, av06_density)
+colnames(av06_density)[1] <- "tree_id"
+av06_density$ann_growth <- 
+  overall_growth$size_adj_sqrt_growth[match(av06_density$tree_id,
+                                            overall_growth$tree_id)]
+plot(av06_density$ann_growth ~ av06_density$all_density)
+tshe_ids <- mapping[mapping$stand_id == "AV06" & mapping$species == "TSHE",
+                    "tree_id"]
+length(tshe_ids)
+av06_tshe_density <- av06_density[av06_density$tree_id %in% tshe_ids, ]
+plot(av06_tshe_density$ann_growth ~ av06_tshe_density$all_density)
+summary(lm(ann_growth ~ all_density, data = av06_tshe_density))

@@ -32,8 +32,8 @@ cleanData <- cleanData[,-unneededCols]
 #                                    !is.na(cleanData$Ycoord), ])
 
 # Final check for gaps in required data
-sum(is.na(cleanData$treeid))
-sum(is.na(cleanData$standid))
+sum(is.na(cleanData$tree_id))
+sum(is.na(cleanData$stand_id))
 sum(is.na(cleanData$species))
 sum(is.na(cleanData$year))
 sum(is.na(cleanData$dbh))
@@ -43,17 +43,17 @@ sum(is.na(cleanData$dbh))
 #=======================
 
 # Load 2013 mapping data
-mapping <- read.csv("../Data/Mapping_2013.csv")
+mapping <- read.csv("../Data/Mapping_2017.csv", stringsAsFactors = F)
 
 # Extract unique tree IDs from growth data
-treeIDs <- unique(cleanData$treeid) # 8803 tree IDs
+treeIDs <- unique(cleanData$tree_id)
 
 # How many of these trees do we have mapping data for?
-sum(treeIDs %in% mapping$TreeID) # 8416
+sum(treeIDs %in% mapping$tree_id)
 
 # Add mapping data to growth data
-cleanData$x_coord <- mapping[match(cleanData$treeid, mapping$TreeID), "Xcoord"]
-cleanData$y_coord <- mapping[match(cleanData$treeid, mapping$TreeID), "Ycoord"]
+cleanData$x_coord <- mapping[match(cleanData$tree_id, mapping$tree_id), "x_coord"]
+cleanData$y_coord <- mapping[match(cleanData$tree_id, mapping$tree_id), "y_coord"]
 
 #===========================================
 # Explore new mapping data collected in 2017
@@ -68,11 +68,11 @@ newMap <- cleanData[cleanData$new_mapping == "Y",]
 update <- newMap[!is.na(newMap$x_coord), ]
 
 table(cleanData$year)
-ingrowth2017 <- cleanData[cleanData$tree_status == 2 & cleanData$new_mapping == "Y", "treeid"]
-oldgrowth2017 <- cleanData[cleanData$tree_status == 1 & cleanData$new_mapping == "Y", "treeid"]
-sum(ingrowth2017 %in% mapping$TreeID)
-sum(oldgrowth2017 %in% mapping$TreeID)
-table(mapping$Year)
+ingrowth2017 <- cleanData[cleanData$tree_status == 2 & cleanData$new_mapping == "Y", "tree_id"]
+oldgrowth2017 <- cleanData[cleanData$tree_status == 1 & cleanData$new_mapping == "Y", "tree_id"]
+sum(ingrowth2017 %in% mapping$tree_id)
+sum(oldgrowth2017 %in% mapping$tree_id)
+table(mapping$year)
 
 #=========================================
 # Investigate rows with no dbh measurement
@@ -94,9 +94,9 @@ table(nodbh$tree_status)  # Of 1930 trees, 1911 were dead (tree status = 6), and
                           # 19 were not found (tree status = 9)
 
 # Check that dead trees were not recorded twice or ever came back to life
-deadTrees <- cleanData[cleanData$tree_status == 6, "treeid"]
-deadTreeDat <- cleanData[cleanData$treeid %in% deadTrees,]
-deadTreeSumm <- deadTreeDat %>% group_by(treeid) %>% 
+deadTrees <- cleanData[cleanData$tree_status == 6, "tree_id"]
+deadTreeDat <- cleanData[cleanData$tree_id %in% deadTrees,]
+deadTreeSumm <- deadTreeDat %>% group_by(tree_id) %>% 
   summarize(numDead = sum(tree_status == 6),
             yearDead = year[which(tree_status == 6)],
             lastYearRecorded = max(year))
@@ -126,11 +126,11 @@ specific_annual_growth <- defined_period_annual_growth(data = cleanData,
 #==========================================
 
 # Remove trees that were only measured once
-onceMeasured <- names(which(table(cleanData$treeid) < 2))
-cleanData <- cleanData[-which(cleanData$treeid %in% onceMeasured),]
+onceMeasured <- names(which(table(cleanData$tree_id) < 2))
+cleanData <- cleanData[-which(cleanData$tree_id %in% onceMeasured),]
 
 # Sort by year
-cleanData <- cleanData[order(cleanData$treeid, cleanData$year),]
+cleanData <- cleanData[order(cleanData$tree_id, cleanData$year),]
 
 # Convert DBH to area at breast height (ABH) to get more meaningful growth
 cleanData$abh <- pi*((cleanData$dbh / 2) ^ 2)
@@ -146,7 +146,7 @@ annGrowthD <- growthD/period
 cleanData$annGrowthD <- c(annGrowthD, NA)
 
 # Remove growth estimates that are comparing different trees
-meaninglessGrowth <- cumsum(as.vector(table(cleanData$treeid)))
+meaninglessGrowth <- cumsum(as.vector(table(cleanData$tree_id)))
 cleanData$annGrowth[meaninglessGrowth] <- NA
 cleanData$annGrowthD[meaninglessGrowth] <- NA
 
@@ -160,12 +160,12 @@ plot(TSHE$annGrowth ~ TSHE$abh, ylim = c(0, 300), ylab = "Annual Growth (cm2)",
      main = "Western hemlock")
 
 # Check for relationship among western hemlock growing in the same stand
-data <- TSHE[TSHE$standid == "TA01",]
+data <- TSHE[TSHE$stand_id == "TA01",]
 plot(data$annGrowth ~ data$abh, ylim = c(0, 100), ylab = "Annual Growth (cm2)",
      xlab = "Cross-sectional area at breast height (cm2)", 
      main = "Western hemlock in TA01")
 
-data <- TSHE[TSHE$standid == "PP17",]
+data <- TSHE[TSHE$stand_id == "PP17",]
 plot(data$annGrowth ~ data$abh, ylim = c(0, 100), ylab = "Annual Growth (cm2)",
      xlab = "Cross-sectional area at breast height (cm2)", 
      main = "Western hemlock in PP17")
@@ -175,7 +175,7 @@ plot(data$annGrowth ~ data$abh, ylim = c(0, 100), ylab = "Annual Growth (cm2)",
 ############################################################
 
 # Create subset of one species in one stand
-TA01TSHE <- droplevels(TSHE[TSHE$standid == "TA01",])
+TA01TSHE <- droplevels(TSHE[TSHE$stand_id == "TA01",])
 
 # Remove rows with NA for annual growth
 TA01TSHE <- TA01TSHE[!is.na(TA01TSHE$annGrowth), ]
@@ -189,25 +189,25 @@ plot(TA01TSHE$annGrowthD ~ TA01TSHE$dbh, ylab = "Annual Growth (cm)",
      main = "Western hemlock in TA01")
 
 # Identify unique tree IDs
-uniqueIDs <- unique(TA01TSHE$treeid)
+uniqueIDs <- unique(TA01TSHE$tree_id)
 
 # Randomly sample 10 tree IDs
 randIDs <- sample(uniqueIDs, size = 10)
 
 # Subset to these 10 tree IDs
-tenTrees <- TA01TSHE[TA01TSHE$treeid %in% randIDs,]
+tenTrees <- TA01TSHE[TA01TSHE$tree_id %in% randIDs,]
 
 # Plot abh vs. annual growth
-ggplot(data=tenTrees, aes(x=abh, y=annGrowth, group=treeid)) +
+ggplot(data=tenTrees, aes(x=abh, y=annGrowth, group=tree_id)) +
   geom_line() +
   geom_point()
-ggplot(data=tenTrees, aes(x=dbh, y=annGrowthD, group=treeid)) +
+ggplot(data=tenTrees, aes(x=dbh, y=annGrowthD, group=tree_id)) +
   geom_line() +
   geom_point()
 
 # Extract y-intercept and slope for linear model of annual growth ~ size for each
 # tree as well as average size of the tree during the course of monitoring
-y <- TA01TSHE %>% group_by(treeid) %>% summarize(y_intercept = unname(lm(annGrowth ~ abh)["coefficients"][[1]][1]),
+y <- TA01TSHE %>% group_by(tree_id) %>% summarize(y_intercept = unname(lm(annGrowth ~ abh)["coefficients"][[1]][1]),
                                                  slope = unname(lm(annGrowth ~ abh)["coefficients"][[1]][2]),
                                                  av_abh = mean(abh))
 

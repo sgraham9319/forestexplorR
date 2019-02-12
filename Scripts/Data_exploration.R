@@ -2,219 +2,171 @@
 # Exploring 2013 tree growth data
 #################################
 
-# This script loads the cleaned 2013 tree growth data (already includes mapping 
-# information), checks and excludes missing data, explores the quantity of data,
-#......
+# This script:
+# 1) Loads the 2017 tree growth data
+# 2) Investigates cases of NA dbh measurement to confirm they can be excluded
+# from the analysis
+# 3) Explores m2017 mapping data - 83 trees in growth data without mapping
+# 4) Calculates annual growth rates and explores NA values
+# 5) Explores how annual growth rate over the entire measurement period
+# relate to tree size - finds expected positive relationship
+# 6) Explores how annual growth rate between each census relates to size within
+# individual trees - finds too much noise to detect this relationship
 
 # Load package
 devtools::load_all()
 
-#==========================
-# Loading and checking data
-#==========================
+#=================================
+# Loading and checking growth data
+#=================================
 
-# Load cleaned 2013 data
-cleanData <- read.csv("../Data/Tree_growth_2017.csv")
+# Load growth data
+growth <- read.csv("../Data/Tree_growth_2017.csv", stringsAsFactors = F)
 
-# Remove columns not required for exploratory analysis to keep things tidy
-unneededCols <- which(names(cleanData) %in% c("dbcode", "entity", "psp_studyid", "canopy_class", 
-                                              "tree_vigor", "crown_ratio", "main_stem", "rooting", 
-                                              "crown_pct", "tree_pct", "lean_angle")) 
-cleanData <- cleanData[,-unneededCols]
+# Remove columns not required for exploratory analysis
+growth <- growth %>%
+  select(tree_id, stand_id, plot, species, tag, year, tree_status, dbh, 
+         dbh_code, new_mapping)
 
-# Determine number of trees without mapping data
-#missingCoords <- droplevels(cleanData[is.na(cleanData$Xcoord) | 
-#                                        is.na(cleanData$Ycoord), ])
-#length(unique(missingCoords$TreeID))
+# Identify trees that were never measured as 15 cm dbh or larger
+small_trees_data <- growth %>%
+  group_by(tree_id) %>% 
+  summarize(max_size = max(dbh)) %>%
+  filter(max_size < 15)
 
-# Remove these 162 trees from the dataset
-#cleanData <- droplevels(cleanData[!is.na(cleanData$Xcoord) &
-#                                    !is.na(cleanData$Ycoord), ])
+# Exclude small trees
+growth <- growth[-which(growth$tree_id %in% small_trees_data$tree_id), ]
 
-# Final check for gaps in required data
-sum(is.na(cleanData$tree_id))
-sum(is.na(cleanData$stand_id))
-sum(is.na(cleanData$species))
-sum(is.na(cleanData$year))
-sum(is.na(cleanData$dbh))
-
-#=======================
-# Attaching mapping data
-#=======================
-
-# Load 2013 mapping data
-mapping <- read.csv("../Data/Mapping_2017.csv", stringsAsFactors = F)
-
-# Extract unique tree IDs from growth data
-treeIDs <- unique(cleanData$tree_id)
-
-# How many of these trees do we have mapping data for?
-sum(treeIDs %in% mapping$tree_id)
-
-# Add mapping data to growth data
-cleanData$x_coord <- mapping[match(cleanData$tree_id, mapping$tree_id), "x_coord"]
-cleanData$y_coord <- mapping[match(cleanData$tree_id, mapping$tree_id), "y_coord"]
-
-#===========================================
-# Explore new mapping data collected in 2017
-#===========================================
-
-# Determine how many remappings there are
-table(cleanData$tree_status, cleanData$new_mapping) # 230 ingrowth and 166 old of
-                                                    # a total of 7198 measured trees
-
-# Isolate new mapping data
-newMap <- cleanData[cleanData$new_mapping == "Y",]
-update <- newMap[!is.na(newMap$x_coord), ]
-
-table(cleanData$year)
-ingrowth2017 <- cleanData[cleanData$tree_status == 2 & cleanData$new_mapping == "Y", "tree_id"]
-oldgrowth2017 <- cleanData[cleanData$tree_status == 1 & cleanData$new_mapping == "Y", "tree_id"]
-sum(ingrowth2017 %in% mapping$tree_id)
-sum(oldgrowth2017 %in% mapping$tree_id)
-table(mapping$year)
+# Check for missing size data
+sum(is.na(growth$dbh))
+# 1930 cases of missing dbh
 
 #=========================================
 # Investigate rows with no dbh measurement
 #=========================================
 
-# How many rows have NA for dbh measurement?
-sum(is.na(cleanData$dbh)) # 1930
+# Isolate missing dbh records
+no_dbh <- growth %>%
+  filter(is.na(dbh))
 
 # Do all these rows have the dbh code for "missing"
-any(cleanData$dbh_code[which(is.na(cleanData$dbh))] != "M") # Yes
+sum(no_dbh$dbh_code == "M") == nrow(no_dbh)
 
-# Do any rows have the dbh code for missing but have a dbh measurement?
-sum(is.na(cleanData$dbh)) == sum(cleanData$dbh_code == "M") # No
+# Do any rows have dbh code for missing but have a dbh measurement?
+sum(growth$dbh_code == "M") == nrow(no_dbh)
 
-# All of the trees without dbh measurements are said to be missing, but does this
-# mean they were not found or that they were dead?
-nodbh <- cleanData[cleanData$dbh_code == "M",]
-table(nodbh$tree_status)  # Of 1930 trees, 1911 were dead (tree status = 6), and
-                          # 19 were not found (tree status = 9)
+# Were trees marked as missing actually missing or were they dead?
+table(no_dbh$tree_status)
+# 1911 dead (tree status = 6), 19 not found (tree status = 9)
 
-# Check that dead trees were not recorded twice or ever came back to life
-deadTrees <- cleanData[cleanData$tree_status == 6, "tree_id"]
-deadTreeDat <- cleanData[cleanData$tree_id %in% deadTrees,]
-deadTreeSumm <- deadTreeDat %>% group_by(tree_id) %>% 
-  summarize(numDead = sum(tree_status == 6),
-            yearDead = year[which(tree_status == 6)],
-            lastYearRecorded = max(year))
-table(deadTreeSumm$numDead) # No trees recorded dead twice
-any(deadTreeSumm$yearDead != deadTreeSumm$lastYearRecorded) # no dead trees come back to life
+# Confirm that no tree was recorded dead twice or came back to life
+dead_trees <- growth[growth$tree_status == 6, "tree_id"]
+dead_tree_summary <- growth %>%
+  filter(tree_id %in% dead_trees) %>%
+  group_by(tree_id) %>%
+  summarize(times_rec_dead = sum(tree_status == 6),
+            year_dead = year[which(tree_status == 6)],
+            last_record = max(year))
+max(dead_tree_summary$times_rec_dead)
+# No trees recorded dead twice
 
-# All rows with no dbh measurement can be excluded from the analysis
-cleanData <- cleanData[!is.na(cleanData$dbh), ]
+any(dead_tree_summary$year_dead != dead_tree_summary$last_record)
+# No dead trees come back to life
+
+# Remove all rows with no dbh measurement from further analysis
+growth <- growth %>%
+  filter(!is.na(dbh))
+
+#=======================
+# Exploring mapping data
+#=======================
+
+# Load mapping data
+mapping <- read.csv("../Data/Mapping_2017.csv", stringsAsFactors = F)
+
+# Determine how many trees we do not have mapping for
+tree_ids <- unique(growth$tree_id)
+table(tree_ids %in% mapping$tree_id)
+# Have mapping for 6892 trees, missing for 54 trees
+
+# Isolate trees with no mapping data
+no_map <- growth %>%
+  filter(tree_id %in% mapping$tree_id == F)
 
 #================================
 # Calculating annual growth rates
 #================================
 
 # Calculate annual growth over entire measurement period for each tree
-annual_growth <- overall_annual_growth(cleanData)
+growth_summ <- growth_summary(growth)
+
+# How many trees were measured only once?
+sum(growth_summ$first_record == growth_summ$last_record) # 277
+
+# Is this the only cause of NA in the growth columns?
+sum(is.na(growth_summ$annual_growth)) # Yes
+sum(is.na(growth_summ$size_corr_growth)) # No
 
 # How many cases of negative growth are there?
-sum(growth$annual_growth < 0, na.rm = T) # 134
-sum(is.na(growth$annual_growth))
+sum(growth_summ$annual_growth < 0, na.rm = T) # 106
+
+# Are being measured only once and negative growth the only causes of NA?
+sum(is.na(growth_summ$size_corr_growth)) == 277 + 106 # Yes
 
 # Calculate annual growth between 1977 and 1980
-specific_annual_growth <- defined_period_annual_growth(data = cleanData,
+specific_annual_growth <- defined_period_annual_growth(data = growth,
                                                        begin = 1977, end = 1980)
 
-#==========================================
-# Exploring how growth rate relates to size
-#==========================================
-
-# Remove trees that were only measured once
-onceMeasured <- names(which(table(cleanData$tree_id) < 2))
-cleanData <- cleanData[-which(cleanData$tree_id %in% onceMeasured),]
-
-# Sort by year
-cleanData <- cleanData[order(cleanData$tree_id, cleanData$year),]
-
-# Convert DBH to area at breast height (ABH) to get more meaningful growth
-cleanData$abh <- pi*((cleanData$dbh / 2) ^ 2)
-
-# Calculate ABH difference between each row and the row below and add as new column
-growth <- diff(cleanData$abh)
-period <- diff(cleanData$year)
-annGrowth <- growth/period
-cleanData$annGrowth <- c(annGrowth, NA)
-
-growthD <- diff(cleanData$dbh)
-annGrowthD <- growthD/period
-cleanData$annGrowthD <- c(annGrowthD, NA)
-
-# Remove growth estimates that are comparing different trees
-meaninglessGrowth <- cumsum(as.vector(table(cleanData$tree_id)))
-cleanData$annGrowth[meaninglessGrowth] <- NA
-cleanData$annGrowthD[meaninglessGrowth] <- NA
+#===============================================
+# Exploring how growth rate relates to tree size
+#===============================================
 
 # Check for relationship when all species combined
-plot(cleanData$annGrowth ~ cleanData$abh, ylim = c(0, 300))
+plot(growth_summ$annual_growth, growth_summ$begin_size)
 
 # Check for relationship in western hemlock
-TSHE <- cleanData[cleanData$species == "TSHE",]
-plot(TSHE$annGrowth ~ TSHE$abh, ylim = c(0, 300), ylab = "Annual Growth (cm2)",
-     xlab = "Cross-sectional area at breast height (cm2)", 
-     main = "Western hemlock")
+tshe <- growth_summ %>%
+  filter(species == "TSHE")
+plot(tshe$annual_growth, tshe$begin_size)
 
 # Check for relationship among western hemlock growing in the same stand
-data <- TSHE[TSHE$stand_id == "TA01",]
-plot(data$annGrowth ~ data$abh, ylim = c(0, 100), ylab = "Annual Growth (cm2)",
-     xlab = "Cross-sectional area at breast height (cm2)", 
-     main = "Western hemlock in TA01")
+tshe_ta01 <- tshe %>%
+  filter(stand_id == "TA01")
+plot(tshe_ta01$annual_growth, tshe_ta01$begin_size)
 
-data <- TSHE[TSHE$stand_id == "PP17",]
-plot(data$annGrowth ~ data$abh, ylim = c(0, 100), ylab = "Annual Growth (cm2)",
-     xlab = "Cross-sectional area at breast height (cm2)", 
-     main = "Western hemlock in PP17")
+#=====================================================
+# Exploring growth rate versus size within individuals
+#=====================================================
 
-############################################################
-# Exploring changes in growth rate with size for individuals
-############################################################
-
-# Create subset of one species in one stand
-TA01TSHE <- droplevels(TSHE[TSHE$stand_id == "TA01",])
-
-# Remove rows with NA for annual growth
-TA01TSHE <- TA01TSHE[!is.na(TA01TSHE$annGrowth), ]
-
-# Create overall plot
-plot(TA01TSHE$annGrowth ~ TA01TSHE$abh, ylim = c(0, 100), ylab = "Annual Growth (cm2)",
-     xlab = "Cross-sectional area at breast height (cm2)", 
-     main = "Western hemlock in TA01")
-plot(TA01TSHE$annGrowthD ~ TA01TSHE$dbh, ylab = "Annual Growth (cm)",
-     xlab = "Cross-sectional area at breast height (cm)", 
-     main = "Western hemlock in TA01")
+# Calculate annual growth rate between each pair of consecutive censuses
+# for each tree
+partitioned_growth <- detailed_growth(growth)
 
 # Identify unique tree IDs
-uniqueIDs <- unique(TA01TSHE$tree_id)
+tree_ids <- unique(partitioned_growth$tree_id)
 
 # Randomly sample 10 tree IDs
-randIDs <- sample(uniqueIDs, size = 10)
+rand_ids <- sample(tree_ids, size = 10)
 
 # Subset to these 10 tree IDs
-tenTrees <- TA01TSHE[TA01TSHE$tree_id %in% randIDs,]
+ten_trees <- partitioned_growth[partitioned_growth$tree_id %in% rand_ids,]
 
 # Plot abh vs. annual growth
-ggplot(data=tenTrees, aes(x=abh, y=annGrowth, group=tree_id)) +
-  geom_line() +
-  geom_point()
-ggplot(data=tenTrees, aes(x=dbh, y=annGrowthD, group=tree_id)) +
+ggplot(data = ten_trees, aes(x = dbh, y = annual_growth, group = tree_id)) +
   geom_line() +
   geom_point()
 
-# Extract y-intercept and slope for linear model of annual growth ~ size for each
-# tree as well as average size of the tree during the course of monitoring
-y <- TA01TSHE %>% group_by(tree_id) %>% summarize(y_intercept = unname(lm(annGrowth ~ abh)["coefficients"][[1]][1]),
-                                                 slope = unname(lm(annGrowth ~ abh)["coefficients"][[1]][2]),
-                                                 av_abh = mean(abh))
+# May be too much noise among measurements of the same tree. Check this by
+# extracting slopes from models
+growth_vs_size <- partitioned_growth %>%
+  filter(!is.na(annual_growth)) %>%
+  group_by(tree_id) %>%
+  summarize(slope = unname(lm(annual_growth ~ dbh)["coefficients"][[1]][2]),
+            av_dbh = mean(dbh))
 
 # Plot slope of model vs average size (expect large positive slope at small size 
 # but small positive to zero slope at large size)
-plot(y$slope ~ y$av_abh, ylim = c(0, max(y$slope, na.rm = T)))
-
-# Should we be looking at dbh instead of abh?
-plot(annGrowth ~ abh, data = TA01TSHE)
-plot(annGrowthD ~ dbh, data = TA01TSHE)
+plot(growth_vs_size$slope ~ growth_vs_size$av_dbh,
+     ylim = c(0, max(growth_vs_size$slope, na.rm = T)))
+summary(lm(slope ~ av_dbh, data = growth_vs_size))
+# Relationship overall is positive - opposite to expectation

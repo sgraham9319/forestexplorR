@@ -66,16 +66,14 @@ growth_data <- growth_data[-which(growth_data$tree_id %in% small_trees), ]
 mapping <- mapping[-which(mapping$tree_id %in% small_trees), ]
 
 # Calculate annual growth over entire measurement period
-overall_growth <- overall_annual_growth(growth_data)
+overall_growth <- growth_summary(growth_data)
 
 # Add growth data to mapping
 mapping$ann_growth <- overall_growth$annual_growth[match(mapping$tree_id, overall_growth$tree_id)]
-mapping$sqrt_ann_growth <- overall_growth$sqrt_annual_growth[match(mapping$tree_id, overall_growth$tree_id)]
-mapping$size_corr_growth <- overall_growth$size_adj_sqrt_growth[match(mapping$tree_id, overall_growth$tree_id)]
+mapping$size_corr_growth <- overall_growth$size_corr_growth[match(mapping$tree_id, overall_growth$tree_id)]
 
 # Check distributions of growth data
 hist(mapping$ann_growth)
-hist(mapping$sqrt_ann_growth)
 hist(mapping$size_corr_growth)
 
 # Plot a stand with color representing sqrt(annual growth / initial size)
@@ -115,7 +113,7 @@ colnames(ab08_density)[1] <- "tree_id"
 
 # Combine density with annual growth
 ab08_density$ann_growth <- 
-  overall_growth$size_adj_sqrt_growth[match(ab08_density$tree_id,
+  overall_growth$size_corr_growth[match(ab08_density$tree_id,
                                             overall_growth$tree_id)]
 
 # Plot annual growth against density
@@ -134,7 +132,7 @@ av06_density <- nbhd_density(mapping_data = av06, stand = "AV06", x = av06$x_coo
 av06_density <- cbind(av06$tree_id, av06_density)
 colnames(av06_density)[1] <- "tree_id"
 av06_density$ann_growth <- 
-  overall_growth$size_adj_sqrt_growth[match(av06_density$tree_id,
+  overall_growth$size_corr_growth[match(av06_density$tree_id,
                                             overall_growth$tree_id)]
 plot(av06_density$ann_growth ~ av06_density$all_density)
 tshe_ids <- mapping[mapping$stand_id == "AV06" & mapping$species == "TSHE",

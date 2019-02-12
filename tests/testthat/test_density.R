@@ -9,5 +9,5 @@ context("Density calculation")
 
 
 test_that("Output data frame as expected", {
-  expect_equal(density_expected(), density_test(fake_data(), "A"))
+  expect_equal(density_expected(), density_test(fake_map(), "A"))
 })

@@ -6,10 +6,10 @@ Author: Stuart Graham
 Maintainer: Stuart Graham <sgraham3@uw.edu>
 Description: This package analyzes tree growth measurements, and their dependence
     on the tree neighborhood: what other trees are growing nearby.
-Depends:
+Imports:
     tidyverse
 License: MIT
 Encoding: UTF-8
 LazyData: true
-Suggests: 
+Suggests:
     testthat

@@ -40,3 +40,4 @@ Data/*.csv
 
 # Mac thing
 .DS_Store
+.Rproj.user

@@ -1,4 +1,14 @@
 
+
+if(getRversion() >= "2.15.1")  
+  utils::globalVariables(c(".", "year", "tree_id", "begin_dif", "end_dif", 
+                           "stand_id", "species", "dbh", "annual_growth", 
+                           "dbh_diff", "year_diff", "begin_size", "dist", 
+                           "abh", "y_azim", "st_convex_hull", "stands_locs_raw", 
+                           "gather", "location_id", "deg_min_sec", "conv_unit", 
+                           "corner_id", "coord", "dec_deg", "spread", "stand_locs_raw", 
+                           "stand_utm", "st_as_sf", "mapview", "stand_polygons"))
+
 #======================================================
 # Calculate annual growth over entire measurment period
 #======================================================

@@ -8,6 +8,6 @@ context("Density calculation")
 
 
 
-test_that("Output data frame as expected", {
+test_that("Density_summary output data frame as expected", {
   expect_equal(density_expected(), density_test(fake_map(), "A"))
 })

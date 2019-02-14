@@ -20,28 +20,25 @@ growth_summary <- function(data){
       begin_size = dbh[1],
       mean_size = mean(dbh),
       midpoint_size = (min(dbh) + max(dbh)) / 2, 
-      ann_dbh_growth = (dbh[n()] - dbh[1]) / (year[n()] - year[1])
+      annual_growth = (dbh[n()] - dbh[1]) / (year[n()] - year[1])
     ) %>% 
-    mutate(size_adj_ann_growth = sqrt(ann_dbh_growth / begin_size))
+    mutate(size_corr_growth = sqrt(annual_growth / begin_size))
 }
 
-# The function below is old and probably not needed anymore
-overall_annual_growth <- function(data){
+
+#==================================================================
+# Calculate annual growth between each pair of consecutive censuses
+#==================================================================
+
+detailed_growth <- function(data){
   data %>% 
     group_by(tree_id) %>% 
-    arrange(year) %>%
-    filter(
-      year == max(year) | 
-        year == min(year)
-    ) %>%
-    summarize(
-      annual_growth = (dbh[2] - dbh[1]) / (year[2] - year[1]),
-      begin_size = dbh[1]
-    ) %>% 
-    mutate(sqrt_annual_growth = sqrt(annual_growth),
-           size_adj_sqrt_growth = sqrt(annual_growth / begin_size))
+    arrange(tree_id, year) %>%
+    mutate(year_diff = c(diff(year), NA),
+           dbh_diff = c(diff(dbh), NA),
+           annual_growth = dbh_diff / year_diff) %>%
+    select(-year_diff, -dbh_diff)
 }
-
 
 
 #==============================================
@@ -49,7 +46,7 @@ overall_annual_growth <- function(data){
 #==============================================
 
 # Function requires a data frame where separate measurements of the same tree
-# appear in different rows. The data frame needs to have a column called "treeid"
+# appear in different rows. The data frame needs to have a column called "tree_id"
 # that contains unique tree ID values, a column named "year" containing the year
 # of the measurement, and a column named "dbh" containing the dbh measurements. The
 # function also requires the user to provide the beginning and end date (as a 4 
@@ -83,10 +80,13 @@ defined_period_annual_growth <- function(data, begin, end){
     group_by(tree_id) %>% 
     arrange(year) %>%
     summarize(
+      stand_id = stand_id[1],
+      species = species[1],
+      begin_size = dbh[1],
       annual_growth = (dbh[2] - dbh[1]) / (year[2] - year[1])
     ) %>% 
     filter(!is.na(annual_growth)) %>%
-    mutate(sqrt_annual_growth = sqrt(annual_growth))
+    mutate(size_corr_growth = sqrt(annual_growth / begin_size))
   
   # Return new data frame
   period_growth

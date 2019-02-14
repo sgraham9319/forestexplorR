@@ -41,10 +41,7 @@ mapping <- mapping[-which(mapping$tree_id %in% small_trees), ]
 growth <- growth_summary(growth_data)
 
 # Calculate neighborhood density for all trees
-densities <- nbhd_density_all(mapping)
-
-# Add tree ids to densities
-densities$tree_id <- mapping$tree_id
+densities <- density_all_stands(mapping)
 
 # Attach neighborhood information to growth
 growth <- left_join(growth, densities)

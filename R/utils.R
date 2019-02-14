@@ -211,3 +211,101 @@ nbhd_density_all <- function(all_stands){
   output
   
 }
+
+
+
+#===============================================
+# Vectorized calculation of neighborhood density
+#===============================================
+
+density_summary <- function(mapping, stand, radius){
+  
+  # Extract relevant coordinates
+  coords <- mapping %>%
+    filter(stand_id == stand) %>%
+    mutate(abh = (pi * ((dbh / 2) ^ 2)) / (pi * (radius ^ 2))) %>%
+    select(tree_id, species, abh, x_coord, y_coord)
+
+  # Create matrix of distances between each tree pair
+  dist_mat <- as.matrix(dist(coords[, 4:5], diag = T, upper = T))
+  
+  # Create matrix where each column contains dbh measurements of all trees
+  nbhds <- matrix(coords$abh, nrow = nrow(coords), ncol = nrow(coords))
+  
+  # Make each column contain only the dbh values of the trees in the
+  # neighborhood represented by that column by changing unwanted dbh values
+  # to NAs
+  nbhds[which(dist_mat > radius)] <- NA
+  
+  # Add species information
+  all <-  cbind(coords$species, as.data.frame(nbhds))
+  colnames(all)[1] <- "species"
+  
+  # Create subsets
+  tshe <- all %>%
+    filter(species == "TSHE")
+  abam <- all %>%
+    filter(species == "ABAM")
+  thpl <- all %>%
+    filter(species == "THPL")
+  tsme <- all %>%
+    filter(species == "TSME")
+  cano <- all %>%
+    filter(species == "CANO9")
+  pico <- all %>%
+    filter(species == "PICO")
+  psme <- all %>%
+    filter(species == "PSME")
+    
+  # Calculate densities
+  all_density <- apply(all[, 2:ncol(all)], 2, sum, na.rm = T)
+  tshe_density <- apply(tshe[, 2:ncol(all)], 2, sum, na.rm = T)
+  abam_density <- apply(abam[, 2:ncol(all)], 2, sum, na.rm = T)
+  thpl_density <- apply(thpl[, 2:ncol(all)], 2, sum, na.rm = T)
+  tsme_density <- apply(tsme[, 2:ncol(all)], 2, sum, na.rm = T)
+  cano_density <- apply(cano[, 2:ncol(all)], 2, sum, na.rm = T)
+  pico_density <- apply(pico[, 2:ncol(all)], 2, sum, na.rm = T)
+  psme_density <- apply(psme[, 2:ncol(all)], 2, sum, na.rm = T)
+  
+  # Combine different density measures into data frame
+  output <- data.frame(coords$tree_id, all_density, tshe_density,
+                       abam_density, thpl_density, tsme_density,
+                       cano_density, pico_density, psme_density)
+  colnames(output)[1] <- "tree_id"
+  
+  # Return output
+  output
+}
+
+#======================================================================
+# Calculate neighborhood density for all trees in a multi-stand dataset
+#======================================================================
+
+density_all_stands <- function(all_stands){
+  
+  # Identify unique stands in dataset
+  stand_ids <- unique(all_stands$stand_id)
+  
+  # Loop through stands
+  for(stand_num in 1:length(stand_ids)){
+    
+    # If first stand, make the output table
+    if(stand_num == 1){
+      
+      output <- density_summary(all_stands,
+                                stand = stand_ids[stand_num],
+                                radius = 10)
+    } else { 
+      
+      # If not first stand, append results to those from earlier stands
+      new_stand <- density_summary(all_stands,
+                                   stand = stand_ids[stand_num],
+                                   radius = 10)
+      
+      output <- rbind(output, new_stand)
+    }
+  }
+  
+  # Return output
+  output
+}

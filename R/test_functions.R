@@ -66,12 +66,13 @@ def_growth_exp <- function(){
 fake_map <- function(){
   
   # Fake stand A
+  tree_id <- c("A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9")
   stand_id <- rep("A", times = 9)
   species <- rep(c("TSHE", "ABAM"), length.out = 9)
   dbh <- rep(2, times = 9)
   x_coord <- rep(c(45, 50, 55), times = 3)
   y_coord <- rep(c(45, 50, 55), each = 3)
-  A <- data.frame(stand_id, species, dbh, x_coord, y_coord)
+  A <- data.frame(tree_id, stand_id, species, dbh, x_coord, y_coord)
   
   # Combine fake stands into single data frame
   dat <- A
@@ -85,9 +86,7 @@ fake_map <- function(){
 density_expected <- function(){
   
   # Fake stand A
-  x_coord <- rep(c(45, 50, 55), times = 3)
-  y_coord <- rep(c(45, 50, 55), each = 3)
-  num_trees <- c(6, 7, 6, 7, 9, 7, 6, 7, 6)
+  tree_id <- c("A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9")
   all_density <- c(6, 7, 6, 7, 9, 7, 6, 7, 6) * 0.01
   tshe_density <- c(4, 3, 4, 3, 5, 3, 4, 3, 4) * 0.01
   abam_density <- c(2, 4, 2, 4, 4, 4, 2, 4, 2) * 0.01
@@ -96,9 +95,10 @@ density_expected <- function(){
   cano_density <- rep(0, times = 9)
   pico_density <- rep(0, times = 9)
   psme_density <- rep(0, times = 9)
-  dat <- data.frame(x_coord, y_coord, num_trees, all_density,
+  dat <- data.frame(tree_id, all_density,
                     tshe_density, abam_density, thpl_density, tsme_density,
                     cano_density, pico_density, psme_density)
+  rownames(dat) <- c("V1", "V2", "V3", "V4", "V5", "V6", "V7", "V8", "V9")
   dat
 }
 
@@ -107,7 +107,5 @@ density_expected <- function(){
 #================================
 
 density_test <- function(data, stand_id){
-  nbhd_density(data, stand = stand_id, x = data[, "x_coord"],
-               y = data[, "y_coord"], nbhd_radius = 10)
+  density_summary(data, stand = stand_id, radius = 10)
 }
-

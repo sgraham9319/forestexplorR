@@ -319,3 +319,99 @@ density_all_stands <- function(all_stands){
   # Return output
   output
 }
+
+#=================================================================
+# Calculate neighborhood density for any user-provided coordinates
+#=================================================================
+
+# Inputs: mapping, stand, radius, focal_coords
+# focal_coords must be a data frame with 2 columns, first column named x_coord
+# and second column named y_coord. E.g.
+# x_coord <- c(30, 40, 50, 60, 70)
+# y_coord <- rep(50, times = 5)
+# focal_coords <- data.frame(x_coord, y_coord)
+a <- density_specific(mapping, stand = "AB08", radius = 10, focal_coords = "grid")
+density_specific <- function(mapping, stand, radius, focal_coords){
+  
+  # Extract relevant tree data
+  coords <- mapping %>%
+    filter(stand_id == stand) %>%
+    mutate(abh = (pi * ((dbh / 2) ^ 2)) / (pi * (radius ^ 2))) %>%
+    select(species, abh, x_coord, y_coord)
+  
+  if(focal_coords == "grid"){
+    
+    x_coord <- rep(seq(0, 100, 5), each = 21)
+    y_coord <- rep(seq(0, 100, 5), times = 21)
+    input_coords <- cbind(x_coord, y_coord)
+    
+  } else {
+    
+    input_coords <- focal_coords
+    
+  }
+  # Create matrix of distances between each focal point and each tree
+  all_coords <- rbind(coords[, 3:4], input_coords) 
+  dist_mat <- as.matrix(dist(all_coords, diag = T, upper = T))
+  dist_mat <- dist_mat[1:nrow(coords), (nrow(coords) + 1):ncol(dist_mat)]
+  
+  # Create matrix where each column contains dbh measurements of all trees
+  nbhds <- matrix(coords$abh, nrow = nrow(coords), ncol = nrow(input_coords))
+  
+  # Make each column contain only the dbh values of the trees in the
+  # neighborhood represented by that column by changing unwanted dbh values
+  # to NAs
+  nbhds[which(dist_mat > radius)] <- NA
+  
+  # Add species information
+  all <-  cbind(coords$species, as.data.frame(nbhds))
+  colnames(all)[1] <- "species"
+  
+  # Create subsets
+  tshe <- all %>%
+    filter(species == "TSHE")
+  abam <- all %>%
+    filter(species == "ABAM")
+  thpl <- all %>%
+    filter(species == "THPL")
+  tsme <- all %>%
+    filter(species == "TSME")
+  cano <- all %>%
+    filter(species == "CANO9")
+  pico <- all %>%
+    filter(species == "PICO")
+  psme <- all %>%
+    filter(species == "PSME")
+  
+  # Calculate densities
+  if(nrow(input_coords) > 2){
+    
+    all_density <- apply(all[, 2:ncol(all)], 2, sum, na.rm = T)
+    tshe_density <- apply(tshe[, 2:ncol(all)], 2, sum, na.rm = T)
+    abam_density <- apply(abam[, 2:ncol(all)], 2, sum, na.rm = T)
+    thpl_density <- apply(thpl[, 2:ncol(all)], 2, sum, na.rm = T)
+    tsme_density <- apply(tsme[, 2:ncol(all)], 2, sum, na.rm = T)
+    cano_density <- apply(cano[, 2:ncol(all)], 2, sum, na.rm = T)
+    pico_density <- apply(pico[, 2:ncol(all)], 2, sum, na.rm = T)
+    psme_density <- apply(psme[, 2:ncol(all)], 2, sum, na.rm = T)
+    
+  } else {
+    
+    all_density <- sum(all[, 2:ncol(all)], na.rm = T)
+    tshe_density <- sum(tshe[, 2:ncol(all)], na.rm = T)
+    abam_density <- sum(abam[, 2:ncol(all)], na.rm = T)
+    thpl_density <- sum(thpl[, 2:ncol(all)], na.rm = T)
+    tsme_density <- sum(tsme[, 2:ncol(all)], na.rm = T)
+    cano_density <- sum(cano[, 2:ncol(all)], na.rm = T)
+    pico_density <- sum(pico[, 2:ncol(all)], na.rm = T)
+    psme_density <- sum(psme[, 2:ncol(all)], na.rm = T)
+  }
+  
+    # Combine different density measures into data frame
+  output <- cbind(input_coords, all_density, tshe_density,
+                       abam_density, thpl_density, tsme_density,
+                       cano_density, pico_density, psme_density)
+  
+  # Return output
+  output
+}

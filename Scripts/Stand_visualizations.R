@@ -103,6 +103,13 @@ plot_ly(
   type = "contour" 
 )
 
+plot_ly(
+  x = a[, "x_coord"], 
+  y = a[, "y_coord"], 
+  z = a[, "all_density"], 
+  type = "contour" 
+)
+
 # Calculate neighborhood density for each tree in stand AB08
 ab08 <- mapping[mapping$stand_id == "AB08", ]
 

@@ -102,6 +102,14 @@ defined_period_annual_growth <- function(data, begin, end){
   period_growth
 }
 
+#======================
+# Calculate circle area
+#======================
+
+circ_area <- function(radius){
+  pi * (radius ^ 2)
+}
+
 #=======================
 # Calculate tree density
 #=======================
@@ -111,6 +119,9 @@ defined_period_annual_growth <- function(data, begin, end){
 # provided set of coordinates.
 
 nbhd_density <- function(mapping_data, stand, x, y, nbhd_radius){
+  
+  # Define neighborhood area
+  nbhd_area <- circ_area(nbhd_radius)
   
   # Subset to stand of interest
   focal_stand <- mapping_data %>%
@@ -142,20 +153,20 @@ nbhd_density <- function(mapping_data, stand, x, y, nbhd_radius){
       filter(dist <= nbhd_radius) %>%
       
       # Calculate cross-sectional area at breast height (abh) for each tree
-      mutate(abh = pi * ((dbh / 2) ^ 2)) %>%
+      mutate(abh = circ_area(dbh / 2)) %>%
       
       # Extract number of trees and total abh within neighborhood
       summarize(x_coord = x[coord_num],
                 y_coord = y[coord_num],
                 num_trees = n(),
-                all_density = sum(abh) / (pi * (nbhd_radius ^ 2)),
-                tshe_density = sum(abh[which(species == "TSHE")]) / (pi * (nbhd_radius ^ 2)),
-                abam_density = sum(abh[which(species == "ABAM")]) / (pi * (nbhd_radius ^ 2)),
-                thpl_density = sum(abh[which(species == "THPL")]) / (pi * (nbhd_radius ^ 2)),
-                tsme_density = sum(abh[which(species == "TSME")]) / (pi * (nbhd_radius ^ 2)),
-                cano_density = sum(abh[which(species == "CANO9")]) / (pi * (nbhd_radius ^ 2)),
-                pico_density = sum(abh[which(species == "PICO")]) / (pi * (nbhd_radius ^ 2)),
-                psme_density = sum(abh[which(species == "PSME")]) / (pi * (nbhd_radius ^ 2)))
+                all_density = sum(abh) / nbhd_area,
+                tshe_density = sum(abh[which(species == "TSHE")]) / nbhd_area,
+                abam_density = sum(abh[which(species == "ABAM")]) / nbhd_area,
+                thpl_density = sum(abh[which(species == "THPL")]) / nbhd_area,
+                tsme_density = sum(abh[which(species == "TSME")]) / nbhd_area,
+                cano_density = sum(abh[which(species == "CANO9")]) / nbhd_area,
+                pico_density = sum(abh[which(species == "PICO")]) / nbhd_area,
+                psme_density = sum(abh[which(species == "PSME")]) / nbhd_area)
                 
     # Append output data to vectors
     x_coord <- c(x_coord, focal_stand_summary$x_coord)
@@ -233,7 +244,7 @@ density_summary <- function(mapping, stand, radius){
   # Extract relevant coordinates
   coords <- mapping %>%
     filter(stand_id == stand) %>%
-    mutate(abh = (pi * ((dbh / 2) ^ 2)) / (pi * (radius ^ 2))) %>%
+    mutate(abh = circ_area(dbh / 2) / circ_area(radius)) %>%
     select(tree_id, species, abh, x_coord, y_coord)
 
   # Create matrix of distances between each tree pair
@@ -336,7 +347,7 @@ density_specific <- function(mapping, stand, radius, focal_coords){
   # Extract relevant tree data
   coords <- mapping %>%
     filter(stand_id == stand) %>%
-    mutate(abh = (pi * ((dbh / 2) ^ 2)) / (pi * (radius ^ 2))) %>%
+    mutate(abh = circ_area(dbh / 2) / circ_area(radius)) %>%
     select(species, abh, x_coord, y_coord)
   
   if(focal_coords == "grid"){

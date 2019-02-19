@@ -330,7 +330,7 @@ density_all_stands <- function(all_stands){
 # x_coord <- c(30, 40, 50, 60, 70)
 # y_coord <- rep(50, times = 5)
 # focal_coords <- data.frame(x_coord, y_coord)
-a <- density_specific(mapping, stand = "AB08", radius = 10, focal_coords = "grid")
+#a <- density_specific(mapping, stand = "AB08", radius = 10, focal_coords = "grid")
 density_specific <- function(mapping, stand, radius, focal_coords){
   
   # Extract relevant tree data

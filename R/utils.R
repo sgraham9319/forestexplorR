@@ -241,6 +241,9 @@ nbhd_density_all <- function(all_stands){
 
 density_summary <- function(mapping, stand, radius){
   
+  # Identify all species
+  sps_list <- unique(mapping$species_id)
+  
   # Extract relevant coordinates
   coords <- mapping %>%
     filter(stand_id == stand) %>%
@@ -260,7 +263,7 @@ density_summary <- function(mapping, stand, radius){
   
   # Add species information
   all <-  cbind(coords$species, as.data.frame(nbhds))
-  colnames(all)[1] <- "species"
+  colnames(all)[1] <- "species_id"
   
   # Create subsets
   tshe <- all %>%
@@ -425,4 +428,42 @@ density_specific <- function(mapping, stand, radius, focal_coords){
   
   # Return output
   output
+}
+
+#=================================================
+# Summarize density by species from abh data frame
+#=================================================
+
+# Input is a data frame with one row for each tree and one column for
+# each set of coordinates at which a measurement of density is desired. In
+# addition, the first column contains the species identity of each tree in 
+# the stand. The values in the cells are the sizes (abh) of the trees, with
+# values replaced by NA if a tree is not in the neighborhood of the set
+# of coordinates referred to in that column. Desired output is a data frame
+# with one row for each set of coordinates and columns for different measures
+# of neighborhood density: all trees, and specific to each tree species in the
+# dataset
+density_calc <- function(data, sps_list = sps_list){
+  
+  # Create output data frame
+  output <- as.data.frame(matrix(nrow = ncol(data) - 1,
+                                 ncol = length(sps_list) + 1))
+  colnames(output)[1] <- "all_density"
+  for(i in 1:length(sps_list)){
+    colnames(output)[i + 1] <- paste(sps_list[i], "density", sep = "_")
+  }
+  
+  # Add density includng all species to output
+  output[, "all_density"] <- apply(data[, 2:ncol(data)], 2, sum, na.rm = T)
+  
+  # Loop through species adding species-specific densities to output
+  for(sps in 1:length(sps_list)){
+    one_sps <- data %>%
+      filter(species_id == sps_list[sps])
+    output[, sps + 1] <- apply(one_sps[, 2:ncol(data)], 2, sum, na.rm = T)
+  }
+  
+  # Return output
+  output
+  
 }

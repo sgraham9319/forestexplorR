@@ -4,6 +4,7 @@ devtools::load_all()
 library(moments)
 library(glmnet)
 library(glmnetUtils)
+library(ggplot2)
 
 #==============
 # Cleaning data
@@ -159,7 +160,17 @@ coef(glmmod, s = "lambda.min")
 # Get coefficients of model corresponding to dotted line on right of plot
 coef(glmmod, s = "lambda.1se")
 
-levels(growth1$stand_id)
+
+# Compare model predictions to observed data
+predictions <- predict(glmmod, newx = dm, s = "lambda.1se")
+observations <- growth1$size_corr_growth
+comparison <- data.frame(predictions, observations)
+ggplot(comparison, aes(x = observations, y = X1)) +
+  geom_hex() +
+  theme_bw() +
+  ylim(0, 0.3) +
+  geom_abline(intercept = 0, slope = 1)
+
 
 growth1 %>%
   group_by(stand_id) %>%

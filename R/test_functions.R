@@ -109,3 +109,30 @@ density_expected <- function(){
 density_test <- function(data, stand_id){
   density_summary(data, stand = stand_id, radius = 10)
 }
+
+#================
+# density_summary
+#================
+
+
+#=============
+# density_calc
+#=============
+
+# Test input
+density_calc_test <- function(){
+  species_id <- c("TSHE", "ABAM", "PSME")
+  loc_one <- c(3, NA, 1)
+  loc_two <- c(NA, 2, 1)
+  loc_three <- c(NA, NA, 1)
+  data.frame(species_id, loc_one, loc_two, loc_three)
+}
+
+# Expected output
+density_calc_exp <- function(){
+  all_density <- c(4, 3, 1)
+  TSHE_density <- c(3, 0, 0)
+  ABAM_density <- c(0, 2, 0)
+  PSME_density <- c(1, 1, 1)
+  data.frame(all_density, TSHE_density, ABAM_density, PSME_density)
+}

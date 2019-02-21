@@ -16,4 +16,8 @@ test_that("density_calc output as expected", {
   expect_equal(density_calc_exp(), density_calc(density_calc_test()))
 })
 
+test_that("density_all_stands output as expected", {
+  expect_equal(density_all_exp(), density_all_test(fake_map()))
+})
+
 

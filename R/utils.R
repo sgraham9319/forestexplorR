@@ -264,6 +264,7 @@ density_all_stands <- function(all_stands){
   
   # Return output
   output
+  
 }
 
 #=================================================================
@@ -366,15 +367,15 @@ density_specific <- function(mapping, stand, radius, focal_coords){
 # Summarize density by species from abh data frame
 #=================================================
 
-# Input is a data frame with one row for each tree and one column for
-# each set of coordinates at which a measurement of density is desired. In
-# addition, the first column contains the species identity of each tree in 
-# the stand. The values in the cells are the sizes (abh) of the trees, with
-# values replaced by NA if a tree is not in the neighborhood of the set
-# of coordinates referred to in that column. Desired output is a data frame
-# with one row for each set of coordinates and columns for different measures
-# of neighborhood density: all trees, and specific to each tree species in the
-# dataset
+# Takes a data frame where each row represents a different tree in the stand
+# and each column represents a different set of coordinates for which a summary
+# of neighborhood density is desired. In each column, the rows representing
+# trees that are not in the neighborhood of that tree should contain NA, while
+# other cells contain the size of the tree in that row. There is also an 
+# additional column for the species identity of the trees. The function returns
+# a data frame where each row represents a set of coordinates and each column
+# represents a different summary of density at those coordinates
+
 density_calc <- function(data){
   
   # Create list of species
@@ -406,6 +407,13 @@ density_calc <- function(data){
 #===============================================
 # Vectorized calculation of neighborhood density
 #===============================================
+
+# Takes a set of mapping data and returns a species-specific summary of
+# neighborhood density for each tree in the mapping dataset. Required inputs
+# are a data frame of mapping data, the name of the stand for which 
+# neighborhood densities are to be calculated (to iterate over all stands,
+# see "density_all_stands" function which calls "density_summary") entered as
+# a character string, and the radius of the desired neighborhood size.
 
 density_summary <- function(mapping, stand, radius){
   
@@ -442,4 +450,3 @@ density_summary <- function(mapping, stand, radius){
   output
   
 }
-

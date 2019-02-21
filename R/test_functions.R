@@ -74,8 +74,17 @@ fake_map <- function(){
   y_coord <- rep(c(45, 50, 55), each = 3)
   A <- data.frame(tree_id, stand_id, species, dbh, x_coord, y_coord)
   
+  # Fake stand B
+  tree_id <- c("B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9")
+  stand_id <- rep("B", times = 9)
+  species <- rep("TSHE", times = 9)
+  dbh <- rep(2, times = 9)
+  x_coord <- rep(c(45, 50, 55), times = 3)
+  y_coord <- rep(c(45, 50, 55), each = 3)
+  B <- data.frame(tree_id, stand_id, species, dbh, x_coord, y_coord)
+  
   # Combine fake stands into single data frame
-  dat <- A
+  dat <- rbind(A, B)
   dat
 }
 
@@ -86,7 +95,9 @@ fake_map <- function(){
 
 # Test input
 density_summ_test <- function(data, stand_id){
-  density_summary(data, stand = stand_id, radius = 10)
+  output <- density_summary(data, stand = stand_id, radius = 10)
+  output[] <- lapply(output, as.character)
+  output
 }
 
 # Expected output
@@ -97,8 +108,8 @@ density_summ_exp <- function(){
   all_density <- c(6, 7, 6, 7, 9, 7, 6, 7, 6) * 0.01
   ABAM_density <- c(2, 4, 2, 4, 4, 4, 2, 4, 2) * 0.01
   TSHE_density <- c(4, 3, 4, 3, 5, 3, 4, 3, 4) * 0.01
-  dat <- data.frame(tree_id, all_density,
-                    ABAM_density, TSHE_density)
+  dat <- data.frame(tree_id, all_density, ABAM_density, TSHE_density)
+  dat[] <- lapply(dat, as.character)
   dat
 }
 
@@ -122,4 +133,32 @@ density_calc_exp <- function(){
   PSME_density <- c(1, 1, 1)
   TSHE_density <- c(3, 0, 0)
   data.frame(all_density, ABAM_density, PSME_density, TSHE_density)
+}
+
+#===================
+# density_all_stands
+#===================
+
+# Test input
+density_all_test <- function(data){
+  output <- density_all_stands(data)
+  output[] <- lapply(output, as.character)
+  output
+}
+
+# Expected output
+density_all_exp <- function(){
+  
+  # Create expected density_summary output for fake stand B
+  tree_id <- c("B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9")
+  all_density <- c(6, 7, 6, 7, 9, 7, 6, 7, 6) * 0.01
+  ABAM_density <- rep(0, times = 9)
+  TSHE_density <- c(6, 7, 6, 7, 9, 7, 6, 7, 6) * 0.01
+  output <- data.frame(tree_id, all_density,
+                    ABAM_density, TSHE_density)
+  
+  # Combine with expected density_summary output for fake stand A 
+  output <- rbind(density_summ_exp(), output)
+  output[] <- lapply(output, as.character)
+  output
 }

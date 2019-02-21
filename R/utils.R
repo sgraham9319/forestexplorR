@@ -233,74 +233,6 @@ nbhd_density_all <- function(all_stands){
   
 }
 
-
-
-#===============================================
-# Vectorized calculation of neighborhood density
-#===============================================
-
-density_summary <- function(mapping, stand, radius){
-  
-  # Identify all species
-  sps_list <- unique(mapping$species_id)
-  
-  # Extract relevant coordinates
-  coords <- mapping %>%
-    filter(stand_id == stand) %>%
-    mutate(abh = circ_area(dbh / 2) / circ_area(radius)) %>%
-    select(tree_id, species, abh, x_coord, y_coord)
-
-  # Create matrix of distances between each tree pair
-  dist_mat <- as.matrix(dist(coords[, 4:5], diag = T, upper = T))
-  
-  # Create matrix where each column contains dbh measurements of all trees
-  nbhds <- matrix(coords$abh, nrow = nrow(coords), ncol = nrow(coords))
-  
-  # Make each column contain only the dbh values of the trees in the
-  # neighborhood represented by that column by changing unwanted dbh values
-  # to NAs
-  nbhds[which(dist_mat > radius)] <- NA
-  
-  # Add species information
-  all <-  cbind(coords$species, as.data.frame(nbhds))
-  colnames(all)[1] <- "species_id"
-  
-  # Create subsets
-  tshe <- all %>%
-    filter(species == "TSHE")
-  abam <- all %>%
-    filter(species == "ABAM")
-  thpl <- all %>%
-    filter(species == "THPL")
-  tsme <- all %>%
-    filter(species == "TSME")
-  cano <- all %>%
-    filter(species == "CANO9")
-  pico <- all %>%
-    filter(species == "PICO")
-  psme <- all %>%
-    filter(species == "PSME")
-    
-  # Calculate densities
-  all_density <- apply(all[, 2:ncol(all)], 2, sum, na.rm = T)
-  tshe_density <- apply(tshe[, 2:ncol(all)], 2, sum, na.rm = T)
-  abam_density <- apply(abam[, 2:ncol(all)], 2, sum, na.rm = T)
-  thpl_density <- apply(thpl[, 2:ncol(all)], 2, sum, na.rm = T)
-  tsme_density <- apply(tsme[, 2:ncol(all)], 2, sum, na.rm = T)
-  cano_density <- apply(cano[, 2:ncol(all)], 2, sum, na.rm = T)
-  pico_density <- apply(pico[, 2:ncol(all)], 2, sum, na.rm = T)
-  psme_density <- apply(psme[, 2:ncol(all)], 2, sum, na.rm = T)
-  
-  # Combine different density measures into data frame
-  output <- data.frame(coords$tree_id, all_density, tshe_density,
-                       abam_density, thpl_density, tsme_density,
-                       cano_density, pico_density, psme_density)
-  colnames(output)[1] <- "tree_id"
-  
-  # Return output
-  output
-}
-
 #======================================================================
 # Calculate neighborhood density for all trees in a multi-stand dataset
 #======================================================================
@@ -443,7 +375,10 @@ density_specific <- function(mapping, stand, radius, focal_coords){
 # with one row for each set of coordinates and columns for different measures
 # of neighborhood density: all trees, and specific to each tree species in the
 # dataset
-density_calc <- function(data, sps_list = sps_list){
+density_calc <- function(data){
+  
+  # Create list of species
+  sps_list <- levels(data$species_id)
   
   # Create output data frame
   output <- as.data.frame(matrix(nrow = ncol(data) - 1,
@@ -467,3 +402,44 @@ density_calc <- function(data, sps_list = sps_list){
   output
   
 }
+
+#===============================================
+# Vectorized calculation of neighborhood density
+#===============================================
+
+density_summary <- function(mapping, stand, radius){
+  
+  # Convert species_id column to factor
+  mapping$species <- as.factor(mapping$species)
+   
+  # Extract relevant coordinates
+  coords <- mapping %>%
+    filter(stand_id == stand) %>%
+    mutate(abh = circ_area(dbh / 2) / circ_area(radius)) %>%
+    select(tree_id, species, abh, x_coord, y_coord)
+  
+  # Create matrix of distances between each tree pair
+  dist_mat <- as.matrix(dist(coords[, 4:5], diag = T, upper = T))
+  
+  # Create matrix where each column contains abh measurements of all trees
+  nbhds <- matrix(coords$abh, nrow = nrow(coords), ncol = nrow(coords))
+  
+  # Change abh values of trees not in each neighborhood to NA
+  nbhds[which(dist_mat > radius)] <- NA
+  
+  # Add species information
+  all <-  cbind(coords$species, as.data.frame(nbhds))
+  colnames(all)[1] <- "species_id"
+  
+  # Summarize density data
+  output <- density_calc(all)
+  
+  # Add tree_id column
+  output <- cbind(coords$tree_id, output)
+  colnames(output)[1] <- "tree_id"
+  
+  # Return output
+  output
+  
+}
+

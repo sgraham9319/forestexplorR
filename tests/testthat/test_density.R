@@ -8,12 +8,12 @@ context("Density calculation")
 
 
 
-test_that("Density_summary output data frame as expected", {
-  expect_equal(density_expected(), density_test(fake_map(), "A"))
+test_that("density_summary output as expected", {
+  expect_equal(density_summ_exp(), density_summ_test(fake_map(), stand = "A"))
 })
 
-test_that("Density_calc output data frame as expected", {
-  expect_equal(density_calc_exp(),
-               density_calc(density_calc_test(),
-                            sps_list = unique(density_calc_test()[, "species_id"])))
+test_that("density_calc output as expected", {
+  expect_equal(density_calc_exp(), density_calc(density_calc_test()))
 })
+
+

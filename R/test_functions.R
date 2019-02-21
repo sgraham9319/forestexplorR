@@ -79,41 +79,28 @@ fake_map <- function(){
   dat
 }
 
-#=====================================================
-# Create expected nbhd_density output for fake dataset
-#=====================================================
-
-density_expected <- function(){
-  
-  # Fake stand A
-  tree_id <- c("A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9")
-  all_density <- c(6, 7, 6, 7, 9, 7, 6, 7, 6) * 0.01
-  tshe_density <- c(4, 3, 4, 3, 5, 3, 4, 3, 4) * 0.01
-  abam_density <- c(2, 4, 2, 4, 4, 4, 2, 4, 2) * 0.01
-  thpl_density <- rep(0, times = 9)
-  tsme_density <- rep(0, times = 9)
-  cano_density <- rep(0, times = 9)
-  pico_density <- rep(0, times = 9)
-  psme_density <- rep(0, times = 9)
-  dat <- data.frame(tree_id, all_density,
-                    tshe_density, abam_density, thpl_density, tsme_density,
-                    cano_density, pico_density, psme_density)
-  rownames(dat) <- c("V1", "V2", "V3", "V4", "V5", "V6", "V7", "V8", "V9")
-  dat
-}
-
-#================================
-# Apply nbhd_density to fake data
-#================================
-
-density_test <- function(data, stand_id){
-  density_summary(data, stand = stand_id, radius = 10)
-}
 
 #================
 # density_summary
 #================
 
+# Test input
+density_summ_test <- function(data, stand_id){
+  density_summary(data, stand = stand_id, radius = 10)
+}
+
+# Expected output
+density_summ_exp <- function(){
+  
+  # Fake stand A
+  tree_id <- c("A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9")
+  all_density <- c(6, 7, 6, 7, 9, 7, 6, 7, 6) * 0.01
+  ABAM_density <- c(2, 4, 2, 4, 4, 4, 2, 4, 2) * 0.01
+  TSHE_density <- c(4, 3, 4, 3, 5, 3, 4, 3, 4) * 0.01
+  dat <- data.frame(tree_id, all_density,
+                    ABAM_density, TSHE_density)
+  dat
+}
 
 #=============
 # density_calc
@@ -131,8 +118,8 @@ density_calc_test <- function(){
 # Expected output
 density_calc_exp <- function(){
   all_density <- c(4, 3, 1)
-  TSHE_density <- c(3, 0, 0)
   ABAM_density <- c(0, 2, 0)
   PSME_density <- c(1, 1, 1)
-  data.frame(all_density, TSHE_density, ABAM_density, PSME_density)
+  TSHE_density <- c(3, 0, 0)
+  data.frame(all_density, ABAM_density, PSME_density, TSHE_density)
 }

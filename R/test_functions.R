@@ -88,31 +88,6 @@ fake_map <- function(){
   dat
 }
 
-
-#================
-# density_summary
-#================
-
-# Test input
-density_summ_test <- function(data, stand_id){
-  output <- density_summary(data, stand = stand_id, radius = 10)
-  output[] <- lapply(output, as.character)
-  output
-}
-
-# Expected output
-density_summ_exp <- function(){
-  
-  # Fake stand A
-  tree_id <- c("A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9")
-  all_density <- c(6, 7, 6, 7, 9, 7, 6, 7, 6) * 0.01
-  ABAM_density <- c(2, 4, 2, 4, 4, 4, 2, 4, 2) * 0.01
-  TSHE_density <- c(4, 3, 4, 3, 5, 3, 4, 3, 4) * 0.01
-  dat <- data.frame(tree_id, all_density, ABAM_density, TSHE_density)
-  dat[] <- lapply(dat, as.character)
-  dat
-}
-
 #=============
 # density_calc
 #=============
@@ -133,6 +108,30 @@ density_calc_exp <- function(){
   PSME_density <- c(1, 1, 1)
   TSHE_density <- c(3, 0, 0)
   data.frame(all_density, ABAM_density, PSME_density, TSHE_density)
+}
+
+#================
+# density_summary
+#================
+
+# Test input
+density_summ_test <- function(data, stand_id){
+  output <- density_summary(data, stand_id, radius = 10)
+  output[] <- lapply(output, as.character)
+  output
+}
+
+# Expected output
+density_summ_exp <- function(){
+  
+  # Fake stand A
+  tree_id <- c("A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9")
+  all_density <- c(6, 7, 6, 7, 9, 7, 6, 7, 6) * 0.01
+  ABAM_density <- c(2, 4, 2, 4, 4, 4, 2, 4, 2) * 0.01
+  TSHE_density <- c(4, 3, 4, 3, 5, 3, 4, 3, 4) * 0.01
+  dat <- data.frame(tree_id, all_density, ABAM_density, TSHE_density)
+  dat[] <- lapply(dat, as.character)
+  dat
 }
 
 #===================
@@ -161,4 +160,28 @@ density_all_exp <- function(){
   output <- rbind(density_summ_exp(), output)
   output[] <- lapply(output, as.character)
   output
+}
+
+#=================
+# density_specific
+#=================
+
+# Test input
+density_spec_test <- function(data, stand_id){
+  x_coord <- c(60, 40, 50)
+  y_coord <- c(60, 50, 50)
+  focal_coords <- data.frame(x_coord, y_coord)
+  output <- density_specific(data, stand_id, 10, focal_coords)
+  output
+}
+
+# Expected output
+density_spec_exp <- function(){
+  x_coord <- c(60, 40, 50)
+  y_coord <- c(60, 50, 50)
+  all_density <- c(1, 4, 9) * 0.01
+  ABAM_density <- c(0, 1, 4) * 0.01
+  TSHE_density <- c(1, 3, 5) * 0.01
+  dat <- data.frame(x_coord, y_coord, all_density, ABAM_density, TSHE_density)
+  dat
 }

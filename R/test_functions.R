@@ -119,11 +119,11 @@ density_summ_exp <- function(){
 
 # Test input
 density_calc_test <- function(){
-  species_id <- c("TSHE", "ABAM", "PSME")
+  species <- c("TSHE", "ABAM", "PSME")
   loc_one <- c(3, NA, 1)
   loc_two <- c(NA, 2, 1)
   loc_three <- c(NA, NA, 1)
-  data.frame(species_id, loc_one, loc_two, loc_three)
+  data.frame(species, loc_one, loc_two, loc_three)
 }
 
 # Expected output
@@ -141,7 +141,7 @@ density_calc_exp <- function(){
 
 # Test input
 density_all_test <- function(data){
-  output <- density_all_stands(data)
+  output <- density_all_stands(data, radius = 10)
   output[] <- lapply(output, as.character)
   output
 }

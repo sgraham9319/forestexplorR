@@ -43,13 +43,13 @@ mapping <- mapping[-which(mapping$tree_id %in% small_trees), ]
 #=================
 
 # Summarize growth for all trees
-growth <- growth_summary(growth_data)
+growth_summ <- growth_summary(growth_data)
 
 # Calculate neighborhood density for all trees
 densities <- density_all_stands(mapping)
 
 # Attach neighborhood information to growth
-growth <- left_join(growth, densities)
+growth <- left_join(growth_summ, densities)
 
 
 # SHOULD WE EXCLUDE UNCOMMON TREE SPECIES?
@@ -75,7 +75,10 @@ dm_factors <- model.matrix(growth1$size_corr_growth ~ growth1$stand_id +
                              growth1$species)[, -1]
 
 # Combine matrix of factors with matrix of continuous predictor variables
+# Only all_density
 dm <- as.matrix(data.frame(growth1$all_density, dm_factors))
+# All species-specific densities
+#dm <- as.matrix(data.frame(growth1[, 11:ncol(growth1)], dm_factors))
 
 # Fit model
 glmmod <- cv.glmnet(dm, y = growth1$size_corr_growth, family = "gaussian")
@@ -84,6 +87,8 @@ glmmod <- cv.glmnet(dm, y = growth1$size_corr_growth, family = "gaussian")
 # on the top show the number of variables included. Region delimited by dotted
 # vertical lines represents equally good model fit
 plot(glmmod)
+
+# For each model I want: log(lambda), cvm, cvup, cvlo
 
 # Get coefficients for minimum lambda model
 coef(glmmod, s = "lambda.min")
@@ -177,3 +182,64 @@ growth1 %>%
   summarize(num_tshe = sum(species == "TSHE"),
             num_abam = sum(species == "ABAM"),
             num_psme = sum(species == "PSME"))
+
+
+#====================
+# Metaparameter sweep
+#====================
+
+
+x <- glmnet_mods(mapping, growth_summ, radius_list = seq(5, 100, 5))
+
+glmnet_mods <- function(mapping, growth_summ, radius_list){
+  
+  # Create output table
+  output <- data.frame(matrix(NA, ncol = 5, nrow = 1))
+  colnames(output) <- c("radius", "log_lambda", "mean_sq_err", "mean_plus_sd",
+                        "mean_minus_sd")
+  
+  for(i in 1:length(radius_list)){
+    
+    # Calculate neighborhood density for all trees
+    densities <- density_all_stands(mapping, radius = radius_list[i])
+    
+    # Attach neighborhood information to growth
+    growth <- left_join(growth_summ, densities)
+    
+    # Exclude missing growth and density values
+    growth <- growth %>%
+      filter(!is.na(size_corr_growth) &
+               !is.na(all_density))
+    
+    # Change stand_id and species to factors
+    growth$stand_id <- as.factor(growth$stand_id)
+    growth$species <- as.factor(growth$species)
+    
+    # First create a model matrix of factorized predictor variables
+    dm_factors <- model.matrix(size_corr_growth ~ stand_id + species, growth,
+                               contrasts.arg = list(stand_id = contrasts(growth$stand_id, contrasts = F),
+                                                    species = contrasts(growth$species, contrasts = F)))
+    
+    # Combine matrix of factors with matrix of continuous predictor variables
+    dm <- as.matrix(data.frame(growth$all_density, dm_factors))
+    
+    # Fit model
+    mod <- cv.glmnet(dm, y = growth$size_corr_growth, family = "gaussian")
+    
+    # Extract model information
+    radius <- rep(radius_list[i], times = length(mod$lambda))
+    log_lambda <- log(mod$lambda)
+    mean_sq_err <- mod$cvm
+    mean_plus_sd <- mod$cvup
+    mean_minus_sd <- mod$cvlo
+    loop_output <- data.frame(radius, log_lambda, mean_sq_err, mean_plus_sd,
+                              mean_minus_sd)
+    
+    # Add loop output to overall output
+    output <- rbind(output, loop_output)
+  }
+  # Return output
+  output[-1,]
+}
+
+plot(mean_sq_err ~ log_lambda, col = radius, data = x)

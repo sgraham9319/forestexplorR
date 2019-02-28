@@ -46,25 +46,122 @@ mapping <- mapping[-which(mapping$tree_id %in% small_trees), ]
 growth_summ <- growth_summary(growth_data)
 
 # Calculate neighborhood density for all trees
-densities <- density_all_stands(mapping)
+densities <- density_all_stands(mapping, radius = 10)
 
 # Attach neighborhood information to growth
 growth <- left_join(growth_summ, densities)
-
-
-# SHOULD WE EXCLUDE UNCOMMON TREE SPECIES?
 
 # Check if Gaussian
 kurtosis(growth$size_corr_growth, na.rm = T)
 
 # Exclude missing growth and density values
-growth1 <- growth %>%
+growth <- growth %>%
   filter(!is.na(size_corr_growth) &
            !is.na(all_density))
 
 # Change stand_id and species to factors
-growth1$stand_id <- as.factor(growth1$stand_id)
-growth1$species <- as.factor(growth1$species)
+growth$stand_id <- as.factor(growth$stand_id)
+growth$species <- as.factor(growth$species)
+
+#=======================================================
+# Creating full model to compare with graph matrix model
+#=======================================================
+
+# Create model matrix of factorized predictor variables
+dm_factors <- model.matrix(size_corr_growth ~ stand_id + species, growth,
+                           contrasts.arg = list(stand_id = contrasts(growth$stand_id, contrasts = F),
+                                                species = contrasts(growth$species, contrasts = F)))
+
+# Combine factorized predictors with continuous predictors
+dm <- cbind(dm_factors, growth$all_density, growth$ABAM_density,
+            growth$TSHE_density, growth$PSME_density)
+colnames(dm)[(ncol(dm_factors) + 1):ncol(dm)] <- c("all_density", "ABAM_density",
+                                                   "TSHE_density", "PSME_density")
+
+# Standardize variables
+dm[,2:ncol(dm)] <- apply(dm[,2:ncol(dm)], 2, z_trans)
+
+# Fit model
+glmmod <- cv.glmnet(dm, y = growth$size_corr_growth, family = "gaussian")
+
+predictions <- predict(glmmod, newx = dm, s = "lambda.1se")
+observations <- growth$size_corr_growth
+comparison <- data.frame(predictions, observations)
+ggplot(comparison, aes(x = observations, y = X1)) +
+  geom_hex() +
+  theme_bw() +
+  ylim(0, 0.3) +
+  geom_abline(intercept = 0, slope = 1)
+
+coef_det(comparison) # 0.260, 0.262, 0.253, 0.253, 0.253
+
+#====================================================================
+# Create simple model with no species-specific competitor information
+#====================================================================
+
+# Create model matrix of factorized predictor variables
+dm_factors <- model.matrix(size_corr_growth ~ stand_id + species, growth,
+                           contrasts.arg = list(stand_id = contrasts(growth$stand_id, contrasts = F),
+                                                species = contrasts(growth$species, contrasts = F)))
+
+# Combine factorized predictors with continuous predictors
+dm <- cbind(dm_factors, growth$all_density)
+colnames(dm)[(ncol(dm_factors) + 1):ncol(dm)] <- c("all_density")
+
+# Standardize variables
+dm[,2:ncol(dm)] <- apply(dm[,2:ncol(dm)], 2, z_trans)
+
+# Fit model
+glmmod <- cv.glmnet(dm, y = growth$size_corr_growth, family = "gaussian")
+
+predictions <- predict(glmmod, newx = dm, s = "lambda.1se")
+observations <- growth$size_corr_growth
+comparison <- data.frame(predictions, observations)
+ggplot(comparison, aes(x = observations, y = X1)) +
+  geom_hex() +
+  theme_bw() +
+  ylim(0, 0.3) +
+  geom_abline(intercept = 0, slope = 1)
+
+coef_det(comparison) # 0.247, 0.243, 0.253, 0.239, 0.239
+
+
+#=============================
+# Creating basic model 2/26/19
+#=============================
+
+# Subset to common species
+comm_sps <- growth %>%
+  filter(species %in% c("ABAM", "PSME", "TSHE"))
+comm_sps <- droplevels(comm_sps)
+
+# Explore how these species are distributed among stands
+table(comm_sps[, c("species", "stand_id")])
+
+# Create model matrix of factorized predictor variables
+dm_factors <- model.matrix(size_corr_growth ~ stand_id + species, comm_sps,
+                           contrasts.arg = list(stand_id = contrasts(comm_sps$stand_id, contrasts = F),
+                                                species = contrasts(comm_sps$species, contrasts = F)))
+
+# Combine factorized predictors with continuous predictors
+dm <- cbind(dm_factors, comm_sps$all_density, comm_sps$ABAM_density,
+            comm_sps$TSHE_density, comm_sps$PSME_density)
+colnames(dm)[(ncol(dm_factors) + 1):ncol(dm)] <- c("all_density", "ABAM_density",
+                                                   "TSHE_density", "PSME_density")
+
+# Standardize variables
+z_trans <- function(x){
+  (x - mean(x)) / sd(x)
+}
+dm[,2:ncol(dm)] <- apply(dm[,2:ncol(dm)], 2, z_trans)
+
+# Fit model
+glmmod <- cv.glmnet(dm, y = comm_sps$size_corr_growth, family = "gaussian")
+
+# Look at coefficients
+coef(glmmod, s = "lambda.min")
+coef(glmmod, s = "lambda.1se")
+
 
 #=======================
 # Creating design matrix
@@ -187,9 +284,14 @@ growth1 %>%
 #====================
 # Metaparameter sweep
 #====================
+# Minus the mean and divide by sd
+a <- matrix(1:25, ncol = 5, nrow = 5)
+a[,2:3] <- apply(a[, 2:3], 2, z_trans)
+z_trans <- function(x){
+  (x - mean(x)) / sd(x)
+}
 
-
-x <- glmnet_mods(mapping, growth_summ, radius_list = seq(5, 100, 5))
+x <- glmnet_mods(mapping, growth_summ, radius_list = c(1, 10, 20))
 
 glmnet_mods <- function(mapping, growth_summ, radius_list){
   
@@ -221,7 +323,8 @@ glmnet_mods <- function(mapping, growth_summ, radius_list){
                                                     species = contrasts(growth$species, contrasts = F)))
     
     # Combine matrix of factors with matrix of continuous predictor variables
-    dm <- as.matrix(data.frame(growth$all_density, dm_factors))
+    dm <- cbind(dm_factors, growth$all_density)
+    dm[,2:ncol(dm)] <- apply(dm[,2:ncol(dm)], 2, z_trans)
     
     # Fit model
     mod <- cv.glmnet(dm, y = growth$size_corr_growth, family = "gaussian")
@@ -242,4 +345,111 @@ glmnet_mods <- function(mapping, growth_summ, radius_list){
   output[-1,]
 }
 
-plot(mean_sq_err ~ log_lambda, col = radius, data = x)
+x$radius_f <- as.factor(x$radius)
+ggplot(x, aes(x = log_lambda, y = mean_sq_err, col = radius_f)) +
+  geom_point()
+
+x10 <- x %>% filter(radius == 10)
+plot(x10$mean_sq_err ~ x10$log_lambda, col = "red")
+points(x = x10$log_lambda, y = x10$mean_plus_sd, col = "red")
+x20 <- x %>% filter(radius == 20)
+points(x = x20$log_lambda, y = x20$mean_sq_err, col = "blue")
+points(x = x20$log_lambda, y = x20$mean_plus_sd, col = "blue")
+x1 <- x %>% filter(radius == 1)
+points(y = x1$mean_sq_err, x = x1$log_lambda)
+points(x = x1$log_lambda, y = x1$mean_plus_sd)
+
+
+hist(x$mean_plus_sd - x$mean_sq_err)
+levels(x$radius_f)
+
+# x = 1, y = 10, nothing = 20
+density1 <- density_all_stands(mapping, radius = 1) 
+density10 <- density_all_stands(mapping, radius = 10)
+density20 <- density_all_stands(mapping, radius = 20)
+dens <- merge(density1, density10, by = "tree_id")
+dens <- merge(dens, density20, by = "tree_id")
+
+# Attach neighborhood information to growth
+growth <- left_join(growth_summ, dens)
+
+# Exclude missing growth and density values
+growth <- growth %>%
+  filter(!is.na(size_corr_growth) &
+           !is.na(all_density) &
+           !is.na(all_density.x) &
+           !is.na(all_density.y))
+
+# Change stand_id and species to factors
+growth$stand_id <- as.factor(growth$stand_id)
+growth$species <- as.factor(growth$species)
+
+# First create a model matrix of factorized predictor variables
+dm_factors <- model.matrix(size_corr_growth ~ stand_id + species, growth,
+                           contrasts.arg = list(stand_id = contrasts(growth$stand_id, contrasts = F),
+                                                species = contrasts(growth$species, contrasts = F)))
+
+# Combine matrix of factors with matrix of continuous predictor variables
+dm <- cbind(dm_factors, growth$all_density, growth$all_density.x, growth$all_density.y)
+dm[,2:ncol(dm)] <- apply(dm[,2:ncol(dm)], 2, z_trans)
+
+# Fit model
+mod <- cv.glmnet(dm, y = growth$size_corr_growth, family = "gaussian")
+plot(mod)
+# Get coefficients for minimum lambda model
+coef(mod, s = "lambda.min")
+# Get coefficients of model corresponding to dotted line on right of plot
+coef(mod, s = "lambda.1se")
+
+#===========================================
+# Finding most informative neighborhood size
+#===========================================
+radius_list <- seq(1, 20, 1)
+
+density <- data.frame(matrix(NA, ncol = length(radius_list), nrow = nrow(mapping)))
+colnames(density) <- paste("all_density", radius_list, sep = "")
+for(i in 1:length(radius_list)){
+  density[, i] <- density_all_stands(mapping, radius = radius_list[i])$all_density
+}
+
+# Add tree-id column for joining
+density$tree_id <- mapping$tree_id
+
+# Attach neighborhood information to growth
+growth <- left_join(growth_summ, density)
+
+# Exclude missing growth and density values
+growth <- growth %>%
+  filter(!is.na(size_corr_growth) &
+           !is.na(all_density1))
+
+# Change stand_id and species to factors
+growth$stand_id <- as.factor(growth$stand_id)
+growth$species <- as.factor(growth$species)
+
+# Create a model matrix of factorized predictor variables
+dm_factors <- model.matrix(size_corr_growth ~ stand_id + species, growth,
+                           contrasts.arg = list(stand_id = contrasts(growth$stand_id, contrasts = F),
+                                                species = contrasts(growth$species, contrasts = F)))
+
+# Identify columns of growth containing continuous predictor variables
+predictors <- (ncol(growth) - (length(radius_list) - 1)):ncol(growth)
+
+# Combine factor and continuous predictor variables in design matrix
+dm <- cbind(dm_factors, as.matrix(growth[, predictors]))
+
+# Standardize predictor variables
+dm[,2:ncol(dm)] <- apply(dm[,2:ncol(dm)], 2, z_trans)
+
+# Fit and plot model
+mod <- cv.glmnet(dm, y = growth$size_corr_growth, family = "gaussian")
+plot(mod)
+
+# Get coefficients for minimum lambda model
+desired_coef <- (length(coef(mod, s = 0)) - (length(radius_list) - 1)):length(coef(mod, s = 0))
+coefficient <- coef(mod, s = 0)[desired_coef]
+coef_table <- data.frame(radius_list, coefficient)
+
+# Plot magnitude of density coefficient vs. neighborhood radius
+plot(abs(coef_table$coefficient) ~ coef_table$radius_list,
+     ylab = "Coefficient magnitude", xlab = "Neighborhood radius")

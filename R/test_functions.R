@@ -13,10 +13,16 @@ fake_growth <- function(){
   dat
 }
 
-#=======================================================
-# Create expected growth_summary output for fake dataset
-#=======================================================
+#===============
+# growth_summary
+#===============
 
+# Test input
+growth_summ_test <- function(data){
+  as.data.frame(growth_summary(data))
+}
+
+# Expected output
 growth_summ_exp <- function(){
   tree_id <- c("tree1", "tree2", "tree3")
   stand_id <- rep("A", times = 3)
@@ -34,19 +40,31 @@ growth_summ_exp <- function(){
   dat
 }
 
-#========================================================
-# Create expected detailed_growth output for fake dataset
-#========================================================
+#================
+# detailed_growth
+#================
 
+# Test input
+det_growth_test <- function(data){
+  as.data.frame(detailed_growth(data))
+}
+
+# Expected output
 det_growth_exp <- function(){
   fake_growth() %>%
     mutate(annual_growth = c(0.2, 0.2, NA, 1, 1, NA, 2, 2, NA))
 }
 
-#=====================================================================
-# Create expected defined_period_annual_growth output for fake dataset
-#=====================================================================
+#=============================
+# defined_period_annual_growth
+#=============================
 
+# Test input
+def_growth_test <- function(data){
+  as.data.frame(defined_period_annual_growth(data, 2005, 2010))
+}
+
+# Expected output
 def_growth_exp <- function(){
   tree_id <- c("tree1", "tree2", "tree3")
   stand_id <- rep("A", times = 3)
@@ -184,4 +202,23 @@ density_spec_exp <- function(){
   TSHE_density <- c(1, 3, 5) * 0.01
   dat <- data.frame(x_coord, y_coord, all_density, ABAM_density, TSHE_density)
   dat
+}
+
+#=============
+# graph_matrix
+#=============
+
+exp <- function(){
+  
+  # Fake stand A
+  tree_id <- c("A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9")
+  all_density <- c(5, 6, 5, 6, 8, 6, 5, 6, 5) * 0.01
+  ABAM_density <- c(2, 3, 2, 3, 4, 3, 2, 3, 2) * 0.01
+  TSHE_density <- c(3, 3, 3, 3, 4, 3, 3, 3, 3) * 0.01
+  dat <- data.frame(tree_id, all_density, ABAM_density, TSHE_density)
+  output <- dat[c(rep(1, times = 5), rep(2, times = 6), rep(3, times = 5),
+                  rep(4, times = 6), rep(5, times = 8), rep(6, times = 6),
+                  rep(7, times = 5), rep(8, times = 6), rep(9, times = 5)), ]
+  rownames(output) <- 1:nrow(output)
+  output
 }

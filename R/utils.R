@@ -9,6 +9,12 @@ if(getRversion() >= "2.15.1")
                            "corner_id", "coord", "dec_deg", "spread", "stand_locs_raw", 
                            "stand_utm", "st_as_sf", "mapview", "stand_polygons"))
 
+#==================================
+# Get variable length excluding NAs
+#==================================
+
+non_na_len <- function(x){length(na.omit(x))}
+
 #======================================================
 # Calculate annual growth over entire measurment period
 #======================================================
@@ -49,7 +55,6 @@ detailed_growth <- function(data){
            annual_growth = dbh_diff / year_diff) %>%
     select(-year_diff, -dbh_diff)
 }
-
 
 #==============================================
 # Calculate annual growth over a defined period
@@ -193,7 +198,7 @@ density_summary <- function(mapping, stand, radius){
   nbhds <- matrix(coords$abh, nrow = nrow(coords), ncol = nrow(coords))
   
   # Change abh values of trees not in each neighborhood to NA
-  nbhds[which(dist_mat > radius)] <- NA
+  nbhds[which(dist_mat > radius | dist_mat == 0)] <- NA
   
   # Add species information
   all <-  cbind(coords$species, as.data.frame(nbhds))
@@ -295,4 +300,113 @@ density_specific <- function(mapping, stand, radius, focal_coords){
   
   # Return output
   output
+}
+
+#==========================================================================
+# Generate matrix from mapping data with one row for every interacting pair
+#==========================================================================
+
+graph_matrix <- function(mapping, stand, radius){
+  
+  # Convert species column to factor
+  mapping$species <- as.factor(mapping$species)
+  
+  # Subset to focal stand
+  one_stand <- mapping %>%
+    filter(stand_id == stand) %>%
+    mutate(abh = circ_area(dbh / 2) / circ_area(radius)) %>%
+    select(tree_id, stand_id, species, abh, x_coord, y_coord)
+  
+  # Create distance, species, and size matrices
+  dist_mat <- as.matrix(dist(one_stand[, c("x_coord", "y_coord")], diag = T, upper = T))
+  sps_mat <- matrix(one_stand$species, nrow = nrow(one_stand), ncol = nrow(one_stand))
+  size_mat <- matrix(one_stand$abh, nrow = nrow(one_stand), ncol = nrow(one_stand))
+  
+  # Convert values of non-competitors to NA
+  non_comp <- which(dist_mat > radius | dist_mat == 0)
+  dist_mat[non_comp] <- NA
+  sps_mat[non_comp] <- NA
+  size_mat[non_comp] <- NA
+  
+  # Create dist, species and size vectors not including NAs
+  prox <- dist_mat[!is.na(dist_mat)]
+  sps_comp <- sps_mat[!is.na(sps_mat)]
+  size_comp <- size_mat[!is.na(size_mat)]
+  comp_dat <- data.frame(prox, sps_comp, size_comp)
+  
+  # Get vector of how many rows each focal tree should have
+  repeats <- unname(apply(dist_mat, 2, non_na_len))
+  
+  # Create data frame with repeated rows
+  all_rows <- one_stand[rep(1:nrow(one_stand), repeats), ]
+  
+  # Combine focal and comp data
+  all_dat <- cbind(all_rows, comp_dat)
+  
+  # Add species information
+  nbhds <-  cbind(one_stand$species, as.data.frame(size_mat))
+  colnames(nbhds)[1] <- "species"
+  
+  # Summarize density data
+  dens <- density_calc(nbhds)
+  
+  # Add tree_id column
+  dens <- cbind(one_stand$tree_id, dens)
+  colnames(dens)[1] <- "tree_id"
+  
+  # Add density information to all_dat
+  output <- left_join(all_dat, dens)
+  
+  # Return output
+  output
+}
+
+#=================================
+# Apply graph_matrix to all stands
+#=================================
+
+graph_mat_all <- function(all_stands, radius){
+  
+  # Identify unique stands in dataset
+  stand_ids <- unique(all_stands$stand_id)
+  
+  # Loop through stands
+  for(stand_num in 1:length(stand_ids)){
+    
+    # If first stand, make the output table
+    if(stand_num == 1){
+      
+      output <- graph_matrix(all_stands,
+                                stand = stand_ids[stand_num],
+                                radius = radius)
+    } else { 
+      
+      # If not first stand, append results to those from earlier stands
+      new_stand <- graph_matrix(all_stands,
+                                   stand = stand_ids[stand_num],
+                                   radius = radius)
+      
+      output <- rbind(output, new_stand)
+    }
+  }
+  
+  # Return output
+  output
+}
+
+#===============================
+# Standardize values in a matrix
+#===============================
+
+z_trans <- function(x){
+  (x - mean(x)) / sd(x)
+}
+
+#=======================================
+# Calculate coefficient of determination
+#=======================================
+
+coef_det <- function(x){
+  1 - (sum((x$observations - x$X1)^2) / 
+         sum((x$observations - mean(x$observations))^2))
 }

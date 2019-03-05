@@ -34,10 +34,11 @@ densities <- density_all_stands(mapping, radius = 10)
 # Attach neighborhood information to growth
 no_int_mat <- left_join(growth_summ, densities)
 
-# Exclude missing growth and density values
+# Exclude missing growth and density values and zero density values
 no_int_mat <- no_int_mat %>%
   filter(!is.na(size_corr_growth),
-         !is.na(all_density))
+         !is.na(all_density),
+         all_density > 0)
 
 # Remove trees whose neighborhood extends beyond stand edge
 no_int_mat <- no_int_mat %>%

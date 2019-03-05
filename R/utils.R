@@ -207,9 +207,9 @@ density_summary <- function(mapping, stand, radius){
   # Summarize density data
   output <- density_calc(all)
   
-  # Add tree_id column
-  output <- cbind(coords$tree_id, output)
-  colnames(output)[1] <- "tree_id"
+  # Add tree_id and x/y coordinate columns
+  output <- cbind(coords$tree_id, coords$x_coord, coords$y_coord, output)
+  colnames(output)[1:3] <- c("tree_id", "x_coord", "y_coord")
   
   # Return output
   output
@@ -398,15 +398,13 @@ graph_mat_all <- function(all_stands, radius){
 # Standardize values in a matrix
 #===============================
 
-z_trans <- function(x){
-  (x - mean(x)) / sd(x)
-}
+z_trans <- function(x){(x - mean(x)) / sd(x)}
 
 #=======================================
 # Calculate coefficient of determination
 #=======================================
 
 coef_det <- function(x){
-  1 - (sum((x$observations - x$X1)^2) / 
+  1 - (sum((x$observations - x$predictions)^2) / 
          sum((x$observations - mean(x$observations))^2))
 }

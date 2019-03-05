@@ -94,6 +94,7 @@ des_x <- rep(seq(0, 100, 5), each = 21)
 des_y <- rep(seq(0, 100, 5), times = 21)
 result <- nbhd_density(mapping_data = mapping_raw, stand = "AB08", x = des_x, 
                        y = des_y, nbhd_radius = 10)
+result <- density_specific(mapping_raw, "AB08", 10, "grid")
 
 # Create a contour plot of density for AB08
 plot_ly(

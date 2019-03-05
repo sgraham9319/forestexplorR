@@ -39,6 +39,10 @@ no_int_mat <- no_int_mat %>%
   filter(!is.na(size_corr_growth),
          !is.na(all_density))
 
+# Remove trees whose neighborhood extends beyond stand edge
+no_int_mat <- no_int_mat %>%
+  filter(x_coord >= 10 & x_coord <= 90 & y_coord >= 10 & y_coord <= 90)
+
 # Change stand_id and species to factors
 no_int_mat$stand_id <- as.factor(no_int_mat$stand_id)
 no_int_mat$species <- as.factor(no_int_mat$species)
@@ -100,7 +104,7 @@ ggplot(comparison, aes(x = observations, y = predictions)) +
   geom_abline(intercept = 0, slope = 1)
 
 # Return coefficient of determination
-coef_det(comparison)
+coef_det(comparison) # 0.231
 
 #=============================================
 # Model 2: species-specific densities included
@@ -146,4 +150,4 @@ ggplot(comparison, aes(x = observations, y = predictions)) +
   geom_abline(intercept = 0, slope = 1)
 
 # Return coefficient of determination
-coef_det(comparison)
+coef_det(comparison) # 0.239

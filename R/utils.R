@@ -408,3 +408,9 @@ coef_det <- function(x){
   1 - (sum((x$observations - x$predictions)^2) / 
          sum((x$observations - mean(x$observations))^2))
 }
+
+#=========================
+# Calculate standard error
+#=========================
+
+st_err <- function(x){sd(x, na.rm = T) / sqrt(length(na.omit(x)))}

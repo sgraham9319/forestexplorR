@@ -1,6 +1,11 @@
 devtools::load_all()
 library(glmnet)
+library(ggplot2)
+library(tidyr)
 
+#===========================
+# Loading and formating data
+#===========================
 
 # Load mapping data
 mapping <- read.csv("../Data/Mapping_2017.csv", stringsAsFactors = F)
@@ -48,6 +53,43 @@ int_mat <- int_mat %>%
 # Change focal species and stand_id columns to factors
 int_mat$species <- as.factor(int_mat$species)
 int_mat$stand_id <- as.factor(int_mat$stand_id)
+
+#==================
+# Create full model
+#==================
+
+# Create matrices of factor variables
+dm_fac <- model.matrix(size_corr_growth ~ species + sps_comp + stand_id, int_mat,
+                         contrasts.arg = list(species = contrasts(int_mat$species, contrasts = F),
+                                              sps_comp = contrasts(int_mat$sps_comp, contrasts = F),
+                                              stand_id = contrasts(int_mat$stand_id, contrasts = F)))
+
+# Combine factor predictors with continous predictors
+dm <- cbind(dm_fac, int_mat$prox, int_mat$size_comp,
+              int_mat$all_density, int_mat$ABAM_density,
+              int_mat$TSHE_density, int_mat$PSME_density)
+colnames(dm)[(ncol(dm_fac) + 1):ncol(dm)] <- c("proximity", "comp_size",
+                                               "all_density", "ABAM_density",
+                                               "TSHE_density", "PSME_density")
+
+# Standardize variables except for first column (intercept)
+dm[, 2:ncol(dm)] <- apply(dm[, 2:ncol(dm)], 2, z_trans)
+
+# Change columns of NaNs (no variation) to zeros
+dm[, which(is.nan(dm[1, ]))] <- 0
+
+# Fit models
+mod <- cv.glmnet(dm, y = int_mat$size_corr_growth, family = "gaussian")
+
+# Make predictions
+pred <- predict(mod, newx = dm, s = "lambda.1se")
+obs <- int_mat %>% select(tree_id, species, sps_comp, size_corr_growth)
+all_pred <- cbind(obs, pred)
+colnames(all_pred)[4:5] <- c("obs", "pred")
+
+#=====================
+# Cross-validate model
+#=====================
 
 # Divide int_mat data into two cross-validation groups
 int_mat$cv_group <- "A"
@@ -119,3 +161,64 @@ ggplot(comparison, aes(x = observations, y = predictions)) +
 
 # Return coefficient of determination
 coef_det(comparison) # 0.257
+
+#=================================
+# Quantifying species interactions
+#=================================
+
+# Next steps: also produce SE output and sample size output matrices
+
+# Get species list
+all_sps <- unique(c(as.character(all_pred$species),
+                    as.character(all_pred$sps_comp)))
+
+# Create output matrix
+result <- matrix(NA, nrow = length(all_sps), ncol = length(all_sps))
+rownames(result) <- all_sps
+colnames(result) <- all_sps
+
+# Create se and sample size output matrices
+se_mat <- result
+samp_size <- result
+
+for(focal in 1:length(all_sps)){
+  
+  # Obtain single prediction for each focal by averaging over interactions
+  complete_nbhd <- all_pred %>%
+    filter(species == all_sps[focal]) %>%
+    group_by(tree_id) %>%
+    summarize(pred = mean(pred))
+  
+  for(comp in 1:length(all_sps)){
+    
+    # Calculate average predictions with one competitor species excluded
+    reduced_nbhd <- all_pred %>%
+      filter(species == all_sps[focal] & sps_comp != all_sps[comp]) %>%
+      group_by(tree_id) %>%
+      summarize(pred_sub = mean(pred))
+    
+    # Match and drop those with no prediction (those that only had this competitor
+    # species as a competitor)
+    pred_comparison <- left_join(reduced_nbhd, complete_nbhd)
+    
+    # Obtain average effect of this competitor species on this focal species
+    result[focal, comp] <- mean(pred_comparison$pred - pred_comparison$pred_sub)
+    se_mat[focal, comp] <- st_err(pred_comparison$pred - pred_comparison$pred_sub)
+    samp_size[focal, comp] <- sum(pred_comparison$pred != pred_comparison$pred_sub)
+  }
+}
+
+# Each cell is the effect of a neighbor of species (column name) on the growth
+# of species (row name)
+gathered_result <- gather(data.frame(result), key = "comp_sps",
+                          value = "growth_effect") %>%
+  mutate(focal_sps = rep(rownames(result), times = ncol(result)))
+gathered_result <- gathered_result[, c(3, 1, 2)]
+
+# Create heat map
+ggplot(data = gathered_result, aes(x = comp_sps, y = focal_sps,
+                                   fill = growth_effect)) + 
+  geom_tile(color = "white") +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+                       midpoint = 0, name = "Effect on annual growth (cm2)") +
+  theme_minimal()

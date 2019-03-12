@@ -65,12 +65,7 @@ dm_fac <- model.matrix(size_corr_growth ~ species + sps_comp + stand_id, int_mat
                                               stand_id = contrasts(int_mat$stand_id, contrasts = F)))
 
 # Combine factor predictors with continous predictors
-dm <- cbind(dm_fac, int_mat$prox, int_mat$size_comp,
-              int_mat$all_density, int_mat$ABAM_density,
-              int_mat$TSHE_density, int_mat$PSME_density)
-colnames(dm)[(ncol(dm_fac) + 1):ncol(dm)] <- c("proximity", "comp_size",
-                                               "all_density", "ABAM_density",
-                                               "TSHE_density", "PSME_density")
+dm <- cbind(dm_fac, as.matrix(int_mat[c(7, 9, 10, 11, 24, 27)]))
 
 # Standardize variables except for first column (intercept)
 dm[, 2:ncol(dm)] <- apply(dm[, 2:ncol(dm)], 2, z_trans)
@@ -86,6 +81,8 @@ pred <- predict(mod, newx = dm, s = "lambda.1se")
 obs <- int_mat %>% select(tree_id, species, sps_comp, size_corr_growth)
 all_pred <- cbind(obs, pred)
 colnames(all_pred)[4:5] <- c("obs", "pred")
+
+pred1 <- predict(mod, newx = dm, s = "lambda.1se")
 
 #=====================
 # Cross-validate model
@@ -111,18 +108,8 @@ dm_fac_b <- model.matrix(size_corr_growth ~ species + sps_comp + stand_id, b,
                                               stand_id = contrasts(b$stand_id, contrasts = F)))
 
 # Combine factor predictors with continous predictors
-dm_a <- cbind(dm_fac_a, a$prox, a$size_comp,
-              a$all_density, a$ABAM_density,
-              a$TSHE_density, a$PSME_density)
-colnames(dm_a)[(ncol(dm_fac_a) + 1):ncol(dm_a)] <- c("proximity", "comp_size",
-                                                     "all_density", "ABAM_density",
-                                                     "TSHE_density", "PSME_density")
-dm_b <- cbind(dm_fac_b, b$prox, b$size_comp,
-              b$all_density, b$ABAM_density,
-              b$TSHE_density, b$PSME_density)
-colnames(dm_b)[(ncol(dm_fac_b) + 1):ncol(dm_b)] <- c("proximity", "comp_size",
-                                                     "all_density", "ABAM_density",
-                                                     "TSHE_density", "PSME_density")
+dm_a <- cbind(dm_fac_a, as.matrix(a[c(7, 9, 10, 11, 24, 27)]))
+dm_b <- cbind(dm_fac_b, as.matrix(b[c(7, 9, 10, 11, 24, 27)]))
 
 # Standardize variables except for first column (intercept)
 dm_a[, 2:ncol(dm_a)] <- apply(dm_a[, 2:ncol(dm_a)], 2, z_trans)
@@ -165,8 +152,6 @@ coef_det(comparison) # 0.257
 #=================================
 # Quantifying species interactions
 #=================================
-
-# Next steps: also produce SE output and sample size output matrices
 
 # Get species list
 all_sps <- unique(c(as.character(all_pred$species),
@@ -215,10 +200,89 @@ gathered_result <- gather(data.frame(result), key = "comp_sps",
   mutate(focal_sps = rep(rownames(result), times = ncol(result)))
 gathered_result <- gathered_result[, c(3, 1, 2)]
 
+# Remove rare species (appear less than 100 times as competitor or focal in
+# interaction matrix)
+rare_sps <- unique(c(names(which(table(int_mat$species) < 100)),
+                     names(which(table(int_mat$sps_comp) < 100))))
+gathered_result <- gathered_result %>%
+  filter(!(focal_sps %in% rare_sps) &
+           !(comp_sps %in% rare_sps))
+
 # Create heat map
 ggplot(data = gathered_result, aes(x = comp_sps, y = focal_sps,
-                                   fill = growth_effect)) + 
-  geom_tile(color = "white") +
-  scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
-                       midpoint = 0, name = "Effect on annual growth (cm2)") +
+                                   fill = growth_effect)) +
+  labs(x = "Competitor species", y = "Focal species") +
+  geom_tile() +
+  scale_fill_gradient2(breaks = c(min(gathered_result$growth_effect), 0, 
+                                  max(gathered_result$growth_effect)),
+                       labels = c("Negative", "No effect", "Positive"), 
+                       low = "purple", high = "green", mid = "black",
+                       midpoint = 0, name = "Effect on annual growth") +
+  theme_minimal()
+
+#===============================================================
+# Comparing no competitor growth to growth with focal competitor
+#===============================================================
+
+# Create output matrix
+result1 <- matrix(NA, nrow = length(all_sps), ncol = length(all_sps))
+rownames(result1) <- all_sps
+colnames(result1) <- all_sps
+
+# Create se and sample size output matrices
+se_mat1 <- result1
+samp_size1 <- result1
+
+for(focal in 1:length(all_sps)){
+  
+  # Obtain single prediction for each focal by averaging over interactions
+  complete_nbhd <- all_pred %>%
+    filter(species == all_sps[focal]) %>%
+    group_by(tree_id) %>%
+    summarize(pred = mean(pred))
+  
+  for(comp in 1:length(all_sps)){
+    
+    # Calculate average predictions with one competitor species excluded
+    reduced_nbhd <- all_pred %>%
+      filter(species == all_sps[focal] & sps_comp != all_sps[comp]) %>%
+      group_by(tree_id) %>%
+      summarize(pred_sub = mean(pred))
+    
+    # Match and drop those with no prediction (those that only had this competitor
+    # species as a competitor)
+    pred_comparison <- left_join(reduced_nbhd, complete_nbhd)
+    
+    # Obtain average effect of this competitor species on this focal species
+    result[focal, comp] <- mean(pred_comparison$pred - pred_comparison$pred_sub)
+    se_mat[focal, comp] <- st_err(pred_comparison$pred - pred_comparison$pred_sub)
+    samp_size[focal, comp] <- sum(pred_comparison$pred != pred_comparison$pred_sub)
+  }
+}
+
+# Each cell is the effect of a neighbor of species (column name) on the growth
+# of species (row name)
+gathered_result <- gather(data.frame(result), key = "comp_sps",
+                          value = "growth_effect") %>%
+  mutate(focal_sps = rep(rownames(result), times = ncol(result)))
+gathered_result <- gathered_result[, c(3, 1, 2)]
+
+# Remove rare species (appear less than 100 times as competitor or focal in
+# interaction matrix)
+rare_sps <- unique(c(names(which(table(int_mat$species) < 100)),
+                     names(which(table(int_mat$sps_comp) < 100))))
+gathered_result <- gathered_result %>%
+  filter(!(focal_sps %in% rare_sps) &
+           !(comp_sps %in% rare_sps))
+
+# Create heat map
+ggplot(data = gathered_result, aes(x = comp_sps, y = focal_sps,
+                                   fill = growth_effect)) +
+  labs(x = "Competitor species", y = "Focal species") +
+  geom_tile() +
+  scale_fill_gradient2(breaks = c(min(gathered_result$growth_effect), 0, 
+                                  max(gathered_result$growth_effect)),
+                       labels = c("Negative", "No effect", "Positive"), 
+                       low = "purple", high = "green", mid = "black",
+                       midpoint = 0, name = "Effect on annual growth") +
   theme_minimal()

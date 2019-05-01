@@ -82,8 +82,6 @@ obs <- int_mat %>% select(tree_id, species, sps_comp, size_corr_growth)
 all_pred <- cbind(obs, pred)
 colnames(all_pred)[4:5] <- c("obs", "pred")
 
-pred1 <- predict(mod, newx = dm, s = "lambda.1se")
-
 #=====================
 # Cross-validate model
 #=====================
@@ -213,8 +211,34 @@ ggplot(data = gathered_result, aes(x = comp_sps, y = focal_sps,
                                    fill = growth_effect)) +
   labs(x = "Competitor species", y = "Focal species") +
   geom_tile() +
+  coord_equal() +
   scale_fill_gradient2(breaks = c(min(gathered_result$growth_effect), 0, 
                                   max(gathered_result$growth_effect)),
+                       labels = c("Negative", "No effect", "Positive"), 
+                       low = "purple", high = "green", mid = "black",
+                       midpoint = 0, name = "Effect on annual growth") +
+  theme_minimal()
+
+
+# Removing those interactions whose standard error overlaps with zero
+result2 <- result
+result2[which((abs(result2) - se_mat) <= 0)] <- NA
+gathered_result2 <- gather(data.frame(result2), key = "comp_sps",
+                          value = "growth_effect") %>%
+  mutate(focal_sps = rep(rownames(result2), times = ncol(result2)))
+gathered_result2 <- gathered_result2[, c(3, 1, 2)]
+rare_sps <- unique(c(names(which(table(int_mat$species) < 100)),
+                     names(which(table(int_mat$sps_comp) < 100))))
+gathered_result2 <- gathered_result2 %>%
+  filter(!(focal_sps %in% rare_sps) &
+           !(comp_sps %in% rare_sps))
+ggplot(data = gathered_result2, aes(x = comp_sps, y = focal_sps,
+                                   fill = growth_effect)) +
+  labs(x = "Competitor species", y = "Focal species") +
+  geom_tile() +
+  coord_equal() +
+  scale_fill_gradient2(breaks = c(min(gathered_result2$growth_effect), 0, 
+                                  max(gathered_result2$growth_effect)),
                        labels = c("Negative", "No effect", "Positive"), 
                        low = "purple", high = "green", mid = "black",
                        midpoint = 0, name = "Effect on annual growth") +

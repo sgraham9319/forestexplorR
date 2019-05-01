@@ -2,13 +2,13 @@
 devtools::load_all()
 
 # Load new mapping data
-new_map <- read.csv("../Data/new_mapping_2017.csv", stringsAsFactors = F)
+new_map <- read.csv("Data/new_mapping_2017.csv", stringsAsFactors = F)
 
 # Load old mapping data
-old_map <- read.csv("../Data/Mapping_2013.csv", stringsAsFactors = F)
+old_map <- read.csv("Data/Mapping_2013.csv", stringsAsFactors = F)
 
 # Load location data for stands
-stand_locs <- read.csv("../Data/Stand_locations.csv", stringsAsFactors = F)
+stand_locs <- read.csv("Data/Stand_locations.csv", stringsAsFactors = F)
 
 # Calculate degrees to radians conversion factor
 cf <- pi / 180

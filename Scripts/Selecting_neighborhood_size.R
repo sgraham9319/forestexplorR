@@ -6,7 +6,7 @@ devtools::load_all()
 #==============
 
 # Load growth data
-growth_data <- read.csv("../Data/Tree_growth_2017.csv", stringsAsFactors = F)
+growth_data <- read.csv("Data/Tree_growth_2017.csv", stringsAsFactors = F)
 
 # Remove test data (2017 measurements and stands TO04, AE10, and AV02)
 growth_data <- growth_data %>%
@@ -28,7 +28,7 @@ small_trees <- unique(small_trees_data$tree_id)
 growth_data <- growth_data[-which(growth_data$tree_id %in% small_trees), ]
 
 # Load mapping data for individual trees
-mapping <- read.csv("../Data/Mapping_2017.csv", stringsAsFactors = F)
+mapping <- read.csv("Data/Mapping_2017.csv", stringsAsFactors = F)
 
 # Exclude small trees from mapping data
 mapping <- mapping[-which(mapping$tree_id %in% small_trees), ]

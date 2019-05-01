@@ -21,7 +21,7 @@ devtools::load_all()
 #=================================
 
 # Load growth data
-growth <- read.csv("../Data/Tree_growth_2017.csv", stringsAsFactors = F)
+growth <- read.csv("Data/Tree_growth_2017.csv", stringsAsFactors = F)
 
 # Remove columns not required for exploratory analysis
 growth <- growth %>%
@@ -82,7 +82,7 @@ growth <- growth %>%
 #=======================
 
 # Load mapping data
-mapping <- read.csv("../Data/Mapping_2017.csv", stringsAsFactors = F)
+mapping <- read.csv("Data/Mapping_2017.csv", stringsAsFactors = F)
 
 # Determine how many trees we do not have mapping for
 tree_ids <- unique(growth$tree_id)

@@ -1,7 +1,7 @@
 
 # Load mapping and growth data
-mapping <- read.csv("../Data/Mapping_2017.csv", stringsAsFactors = F)
-growth <- read.csv("../Data/Tree_growth_2017.csv", stringsAsFactors = F)
+mapping <- read.csv("Data/Mapping_2017.csv", stringsAsFactors = F)
+growth <- read.csv("Data/Tree_growth_2017.csv", stringsAsFactors = F)
 
 # Remove test data (2017 measurements and stands TO04, AE10, and AV02)
 growth <- growth %>%

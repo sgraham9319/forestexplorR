@@ -12,10 +12,10 @@ devtools::load_all()
 #=====================================
 
 # Load 2013 within-stand location data for individual trees
-mapping_raw <- read.csv("../Data/Mapping_2017.csv", stringsAsFactors = F)
+mapping_raw <- read.csv("Data/Mapping_2017.csv", stringsAsFactors = F)
 
 # Load location data for stands
-stand_locs_raw <- read.csv("../Data/Stand_locations.csv", stringsAsFactors = F)
+stand_locs_raw <- read.csv("Data/Stand_locations.csv", stringsAsFactors = F)
 
 # Remap individual trees with the western-most corner of each stand as
 # the origin
@@ -48,7 +48,7 @@ stand_utm$y <- as.vector(st_coordinates(stand_utm)[,2])
 #===============================================
 
 # Load growth data
-growth_data <- read.csv("../Data/Tree_growth_2017.csv", stringsAsFactors = F)
+growth_data <- read.csv("Data/Tree_growth_2017.csv", stringsAsFactors = F)
 
 # Remove rows without dbh measurement
 growth_data <- growth_data[!is.na(growth_data$dbh), ]
@@ -77,7 +77,7 @@ hist(mapping$ann_growth)
 hist(mapping$size_corr_growth)
 
 # Plot a stand with color representing sqrt(annual growth / initial size)
-utm_mapping(tree_x_y = mapping, stand = "AG05", color_var = "size_corr_growth")
+utm_mapping(tree_x_y = mapping, stand = "TO04", color_var = "species")
 
 #=====================================
 # Calculating density around each tree

@@ -8,10 +8,10 @@ library(tidyr)
 #===========================
 
 # Load mapping data
-mapping <- read.csv("../Data/Mapping_2017.csv", stringsAsFactors = F)
+mapping <- read.csv("Data/Mapping_2017.csv", stringsAsFactors = F)
 
 # Create interaction matrix
-int_mat <- graph_mat_all(mapping, 10)
+int_mat <- graph_mat_all(mapping, radius = 10)
 
 # Remove trees whose neighborhood extends beyond stand edge
 int_mat <- int_mat %>%

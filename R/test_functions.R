@@ -13,10 +13,16 @@ fake_growth <- function(){
   dat
 }
 
-#=======================================================
-# Create expected growth_summary output for fake dataset
-#=======================================================
+#===============
+# growth_summary
+#===============
 
+# Test input
+growth_summ_test <- function(data){
+  as.data.frame(growth_summary(data))
+}
+
+# Expected output
 growth_summ_exp <- function(){
   tree_id <- c("tree1", "tree2", "tree3")
   stand_id <- rep("A", times = 3)
@@ -34,19 +40,31 @@ growth_summ_exp <- function(){
   dat
 }
 
-#========================================================
-# Create expected detailed_growth output for fake dataset
-#========================================================
+#================
+# detailed_growth
+#================
 
+# Test input
+det_growth_test <- function(data){
+  as.data.frame(detailed_growth(data))
+}
+
+# Expected output
 det_growth_exp <- function(){
   fake_growth() %>%
     mutate(annual_growth = c(0.2, 0.2, NA, 1, 1, NA, 2, 2, NA))
 }
 
-#=====================================================================
-# Create expected defined_period_annual_growth output for fake dataset
-#=====================================================================
+#=============================
+# defined_period_annual_growth
+#=============================
 
+# Test input
+def_growth_test <- function(data){
+  as.data.frame(defined_period_annual_growth(data, 2005, 2010))
+}
+
+# Expected output
 def_growth_exp <- function(){
   tree_id <- c("tree1", "tree2", "tree3")
   stand_id <- rep("A", times = 3)
@@ -74,38 +92,138 @@ fake_map <- function(){
   y_coord <- rep(c(45, 50, 55), each = 3)
   A <- data.frame(tree_id, stand_id, species, dbh, x_coord, y_coord)
   
+  # Fake stand B
+  tree_id <- c("B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9")
+  stand_id <- rep("B", times = 9)
+  species <- rep("TSHE", times = 9)
+  dbh <- rep(2, times = 9)
+  x_coord <- rep(c(45, 50, 55), times = 3)
+  y_coord <- rep(c(45, 50, 55), each = 3)
+  B <- data.frame(tree_id, stand_id, species, dbh, x_coord, y_coord)
+  
   # Combine fake stands into single data frame
-  dat <- A
+  dat <- rbind(A, B)
   dat
 }
 
-#=====================================================
-# Create expected nbhd_density output for fake dataset
-#=====================================================
+#=============
+# density_calc
+#=============
 
-density_expected <- function(){
+# Test input
+density_calc_test <- function(){
+  species <- c("TSHE", "ABAM", "PSME")
+  loc_one <- c(3, NA, 1)
+  loc_two <- c(NA, 2, 1)
+  loc_three <- c(NA, NA, 1)
+  data.frame(species, loc_one, loc_two, loc_three)
+}
+
+# Expected output
+density_calc_exp <- function(){
+  all_density <- c(4, 3, 1)
+  ABAM_density <- c(0, 2, 0)
+  PSME_density <- c(1, 1, 1)
+  TSHE_density <- c(3, 0, 0)
+  data.frame(all_density, ABAM_density, PSME_density, TSHE_density)
+}
+
+#================
+# density_summary
+#================
+
+# Test input
+density_summ_test <- function(data, stand_id){
+  output <- density_summary(data, stand_id, radius = 10)
+  output[] <- lapply(output, as.character)
+  output
+}
+
+# Expected output
+density_summ_exp <- function(){
   
   # Fake stand A
   tree_id <- c("A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9")
-  all_density <- c(6, 7, 6, 7, 9, 7, 6, 7, 6) * 0.01
-  tshe_density <- c(4, 3, 4, 3, 5, 3, 4, 3, 4) * 0.01
-  abam_density <- c(2, 4, 2, 4, 4, 4, 2, 4, 2) * 0.01
-  thpl_density <- rep(0, times = 9)
-  tsme_density <- rep(0, times = 9)
-  cano_density <- rep(0, times = 9)
-  pico_density <- rep(0, times = 9)
-  psme_density <- rep(0, times = 9)
-  dat <- data.frame(tree_id, all_density,
-                    tshe_density, abam_density, thpl_density, tsme_density,
-                    cano_density, pico_density, psme_density)
-  rownames(dat) <- c("V1", "V2", "V3", "V4", "V5", "V6", "V7", "V8", "V9")
+  x_coord <- rep(c(45, 50, 55), times = 3)
+  y_coord <- rep(c(45, 50, 55), each = 3)
+  all_density <- c(5, 6, 5, 6, 8, 6, 5, 6, 5) * 0.01
+  ABAM_density <- c(2, 3, 2, 3, 4, 3, 2, 3, 2) * 0.01
+  TSHE_density <- c(3, 3, 3, 3, 4, 3, 3, 3, 3) * 0.01
+  dat <- data.frame(tree_id, x_coord, y_coord, all_density, ABAM_density,
+                    TSHE_density)
+  dat[] <- lapply(dat, as.character)
   dat
 }
 
-#================================
-# Apply nbhd_density to fake data
-#================================
+#===================
+# density_all_stands
+#===================
 
-density_test <- function(data, stand_id){
-  density_summary(data, stand = stand_id, radius = 10)
+# Test input
+density_all_test <- function(data){
+  output <- density_all_stands(data, radius = 10)
+  output[] <- lapply(output, as.character)
+  output
+}
+
+# Expected output
+density_all_exp <- function(){
+  
+  # Create expected density_summary output for fake stand B
+  tree_id <- c("B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9")
+  all_density <- c(5, 6, 5, 6, 8, 6, 5, 6, 5) * 0.01
+  x_coord <- rep(c(45, 50, 55), times = 3)
+  y_coord <- rep(c(45, 50, 55), each = 3)
+  ABAM_density <- rep(0, times = 9)
+  TSHE_density <- c(5, 6, 5, 6, 8, 6, 5, 6, 5) * 0.01
+  output <- data.frame(tree_id, all_density, x_coord, y_coord,
+                    ABAM_density, TSHE_density)
+  
+  # Combine with expected density_summary output for fake stand A 
+  output <- rbind(density_summ_exp(), output)
+  output[] <- lapply(output, as.character)
+  output
+}
+
+#=================
+# density_specific
+#=================
+
+# Test input
+density_spec_test <- function(data, stand_id){
+  x_coord <- c(60, 40, 50)
+  y_coord <- c(60, 50, 50)
+  focal_coords <- data.frame(x_coord, y_coord)
+  output <- density_specific(data, stand_id, 10, focal_coords)
+  output
+}
+
+# Expected output
+density_spec_exp <- function(){
+  x_coord <- c(60, 40, 50)
+  y_coord <- c(60, 50, 50)
+  all_density <- c(1, 4, 9) * 0.01
+  ABAM_density <- c(0, 1, 4) * 0.01
+  TSHE_density <- c(1, 3, 5) * 0.01
+  dat <- data.frame(x_coord, y_coord, all_density, ABAM_density, TSHE_density)
+  dat
+}
+
+#=============
+# graph_matrix
+#=============
+
+exp <- function(){
+  
+  # Fake stand A
+  tree_id <- c("A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9")
+  all_density <- c(5, 6, 5, 6, 8, 6, 5, 6, 5) * 0.01
+  ABAM_density <- c(2, 3, 2, 3, 4, 3, 2, 3, 2) * 0.01
+  TSHE_density <- c(3, 3, 3, 3, 4, 3, 3, 3, 3) * 0.01
+  dat <- data.frame(tree_id, all_density, ABAM_density, TSHE_density)
+  output <- dat[c(rep(1, times = 5), rep(2, times = 6), rep(3, times = 5),
+                  rep(4, times = 6), rep(5, times = 8), rep(6, times = 6),
+                  rep(7, times = 5), rep(8, times = 6), rep(9, times = 5)), ]
+  rownames(output) <- 1:nrow(output)
+  output
 }

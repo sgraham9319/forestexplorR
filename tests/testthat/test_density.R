@@ -1,13 +1,17 @@
 context("Density calculation")
 
+test_that("density_calc output as expected", {
+  expect_equal(density_calc_exp(), density_calc(density_calc_test()))
+})
 
-# Needed columns: stand_id, species, dbh, x_coord, y_coord
-# To test whether the data frame output by your function (outdat) is identical
-# to the data frame you expect in this case (dat - created manually)
-# expect_true(identical(dat, outdat))
+test_that("density_summary output as expected", {
+  expect_equal(density_summ_exp(), density_summ_test(fake_map(), stand = "A"))
+})
 
+test_that("density_all_stands output as expected", {
+  expect_equal(density_all_exp(), density_all_test(fake_map()))
+})
 
-
-test_that("Density_summary output data frame as expected", {
-  expect_equal(density_expected(), density_test(fake_map(), "A"))
+test_that("density_specific output as expected", {
+  expect_equal(density_spec_exp(), density_spec_test(fake_map(), stand = "A"))
 })

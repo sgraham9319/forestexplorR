@@ -1,7 +1,8 @@
 context("Density calculation")
 
 test_that("density_calc output as expected", {
-  expect_equal(density_calc_exp(), density_calc(density_calc_test()))
+  expect_equal(density_calc_exp(), density_calc(density_calc_test(),
+                                                radius = sqrt(1/pi)))
 })
 
 test_that("density_summary output as expected", {

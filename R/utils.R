@@ -115,6 +115,15 @@ circ_area <- function(radius){
   pi * (radius ^ 2)
 }
 
+#============================================
+# Convert neighborhood density to m^2/hectare
+#============================================
+
+density_conv <- function(dens, radius){
+  (dens / 10000) * 10000/circ_area(radius)
+}
+density_conv(0.2, 10)
+
 #=================================================
 # Summarize density by species from abh data frame
 #=================================================
@@ -128,7 +137,7 @@ circ_area <- function(radius){
 # a data frame where each row represents a set of coordinates and each column
 # represents a different summary of density at those coordinates
 
-density_calc <- function(data){
+density_calc <- function(data, radius){
   
   # Create list of species
   sps_list <- levels(data$species)
@@ -154,7 +163,7 @@ density_calc <- function(data){
     }
   } else {
     
-    # Add density includng all species to output
+    # Add density including all species to output
     output[, "all_density"] <- sum(data[, 2], na.rm = T)
     
     # Loop through species adding species-specific densities to output
@@ -165,10 +174,17 @@ density_calc <- function(data){
     }
   }
   
+  # Convert densities to m^2/hectare
+  output <- output %>%
+    mutate_all(density_conv, radius)
+  
   # Return output
   output
 }
 
+#result1 <- result %>% 
+#@ select(-x_coord, -y_coord) %>%
+#  mutate_all(density_conv, radius = 10)
 #===============================
 # Calculate neighborhood density
 #===============================
@@ -205,7 +221,7 @@ density_summary <- function(mapping, stand, radius){
   colnames(all)[1] <- "species"
   
   # Summarize density data
-  output <- density_calc(all)
+  output <- density_calc(all, radius)
   
   # Add tree_id and x/y coordinate columns
   output <- cbind(coords$tree_id, coords$x_coord, coords$y_coord, output)
@@ -265,7 +281,7 @@ density_specific <- function(mapping, stand, radius, focal_coords){
   # Extract relevant tree data
   coords <- mapping %>%
     filter(stand_id == stand) %>%
-    mutate(abh = circ_area(dbh / 2) / circ_area(radius)) %>%
+    mutate(abh = circ_area(dbh / 2)) %>% #/ circ_area(radius)) %>%
     select(species, abh, x_coord, y_coord)
   
   if(any(focal_coords == "grid")){
@@ -277,6 +293,7 @@ density_specific <- function(mapping, stand, radius, focal_coords){
     
     input_coords <- focal_coords
   }
+  
   # Create matrix of distances between each focal point and each tree
   all_coords <- rbind(coords[, 3:4], input_coords) 
   dist_mat <- as.matrix(dist(all_coords, diag = T, upper = T))
@@ -293,7 +310,7 @@ density_specific <- function(mapping, stand, radius, focal_coords){
   colnames(all)[1] <- "species"
   
   # Summarize density data
-  output <- density_calc(all)
+  output <- density_calc(all, radius)
   
   # Add input coordinates to output
   output <- cbind(input_coords, output)
@@ -308,57 +325,63 @@ density_specific <- function(mapping, stand, radius, focal_coords){
 
 graph_matrix <- function(mapping, stand, radius){
   
-  # Convert species column to factor
-  mapping$species <- as.factor(mapping$species)
-  
-  # Subset to focal stand
-  one_stand <- mapping %>%
-    filter(stand_id == stand) %>%
-    mutate(abh = circ_area(dbh / 2) / circ_area(radius)) %>%
-    select(tree_id, stand_id, species, abh, x_coord, y_coord)
-  
-  # Create distance, species, and size matrices
-  dist_mat <- as.matrix(dist(one_stand[, c("x_coord", "y_coord")], diag = T, upper = T))
-  sps_mat <- matrix(one_stand$species, nrow = nrow(one_stand), ncol = nrow(one_stand))
-  size_mat <- matrix(one_stand$abh, nrow = nrow(one_stand), ncol = nrow(one_stand))
-  
-  # Convert values of non-competitors to NA
-  non_comp <- which(dist_mat > radius | dist_mat == 0)
-  dist_mat[non_comp] <- NA
-  sps_mat[non_comp] <- NA
-  size_mat[non_comp] <- NA
-  
-  # Create dist, species and size vectors not including NAs
-  prox <- dist_mat[!is.na(dist_mat)]
-  sps_comp <- sps_mat[!is.na(sps_mat)]
-  size_comp <- size_mat[!is.na(size_mat)]
-  comp_dat <- data.frame(prox, sps_comp, size_comp)
-  
-  # Get vector of how many rows each focal tree should have
-  repeats <- unname(apply(dist_mat, 2, non_na_len))
-  
-  # Create data frame with repeated rows
-  all_rows <- one_stand[rep(1:nrow(one_stand), repeats), ]
-  
-  # Combine focal and comp data
-  all_dat <- cbind(all_rows, comp_dat)
-  
-  # Add species information
-  nbhds <-  cbind(one_stand$species, as.data.frame(size_mat))
-  colnames(nbhds)[1] <- "species"
-  
-  # Summarize density data
-  dens <- density_calc(nbhds)
-  
-  # Add tree_id column
-  dens <- cbind(one_stand$tree_id, dens)
-  colnames(dens)[1] <- "tree_id"
-  
-  # Add density information to all_dat
-  output <- left_join(all_dat, dens)
-  
-  # Return output
-  output
+  # Determine if stand exists
+  if(stand %in% mapping$stand_id == F){
+    print("Error: stand ID not found in mapping data")
+  } else {
+    
+    # Convert species column to factor
+    mapping$species <- as.factor(mapping$species)
+    
+    # Subset to focal stand
+    one_stand <- mapping %>%
+      filter(stand_id == stand) %>%
+      mutate(abh = circ_area(dbh / 2) / circ_area(radius)) %>%
+      select(tree_id, stand_id, species, abh, x_coord, y_coord)
+    
+    # Create distance, species, and size matrices
+    dist_mat <- as.matrix(dist(one_stand[, c("x_coord", "y_coord")], diag = T, upper = T))
+    sps_mat <- matrix(one_stand$species, nrow = nrow(one_stand), ncol = nrow(one_stand))
+    size_mat <- matrix(one_stand$abh, nrow = nrow(one_stand), ncol = nrow(one_stand))
+    
+    # Convert values of non-competitors to NA
+    non_comp <- which(dist_mat > radius | dist_mat == 0)
+    dist_mat[non_comp] <- NA
+    sps_mat[non_comp] <- NA
+    size_mat[non_comp] <- NA
+    
+    # Create dist, species and size vectors not including NAs
+    prox <- dist_mat[!is.na(dist_mat)]
+    sps_comp <- sps_mat[!is.na(sps_mat)]
+    size_comp <- size_mat[!is.na(size_mat)]
+    comp_dat <- data.frame(prox, sps_comp, size_comp)
+    
+    # Get vector of how many rows each focal tree should have
+    repeats <- unname(apply(dist_mat, 2, non_na_len))
+    
+    # Create data frame with repeated rows
+    all_rows <- one_stand[rep(1:nrow(one_stand), repeats), ]
+    
+    # Combine focal and comp data
+    all_dat <- cbind(all_rows, comp_dat)
+    
+    # Add species information
+    nbhds <-  cbind(one_stand$species, as.data.frame(size_mat))
+    colnames(nbhds)[1] <- "species"
+    
+    # Summarize density data
+    dens <- density_calc(nbhds, radius)
+    
+    # Add tree_id column
+    dens <- cbind(one_stand$tree_id, dens)
+    colnames(dens)[1] <- "tree_id"
+    
+    # Add density information to all_dat
+    output <- left_join(all_dat, dens)
+    
+    # Return output
+    output
+  }
 }
 
 #=================================

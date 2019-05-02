@@ -3,6 +3,7 @@ library(measurements)
 library(sf)
 library(mapview)
 library(plotly)
+library(tidyr)
 
 # Load package
 devtools::load_all()
@@ -97,6 +98,7 @@ result <- nbhd_density(mapping_data = mapping_raw, stand = "AB08", x = des_x,
 result <- density_specific(mapping_raw, "AB08", 10, "grid")
 
 # Create a contour plot of density for AB08
+result <- density_specific(mapping_raw, "AB08", 10, "grid")
 plot_ly(
   x = result$x_coord, 
   y = result$y_coord, 
@@ -104,6 +106,8 @@ plot_ly(
   type = "contour" 
 )
 
+result1 <- result
+result1[, 3:ncol(result1)] <- (result1[, 3:ncol(result1)] / 10000) * (10000 / circ_area(10))
 plot_ly(
   x = a[, "x_coord"], 
   y = a[, "y_coord"], 

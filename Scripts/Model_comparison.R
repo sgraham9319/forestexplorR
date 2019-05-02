@@ -30,7 +30,7 @@ growth_summ <- growth_summary(growth)
 
 # Calculate neighborhood density for all trees
 densities <- density_all_stands(mapping, radius = 10)
-
+dens2 <- graph_mat_all(mapping, 10)
 # Attach neighborhood information to growth
 no_int_mat <- left_join(growth_summ, densities)
 

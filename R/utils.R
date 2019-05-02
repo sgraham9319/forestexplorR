@@ -122,7 +122,6 @@ circ_area <- function(radius){
 density_conv <- function(dens, radius){
   (dens / 10000) * 10000/circ_area(radius)
 }
-density_conv(0.2, 10)
 
 #=================================================
 # Summarize density by species from abh data frame
@@ -182,9 +181,6 @@ density_calc <- function(data, radius){
   output
 }
 
-#result1 <- result %>% 
-#@ select(-x_coord, -y_coord) %>%
-#  mutate_all(density_conv, radius = 10)
 #===============================
 # Calculate neighborhood density
 #===============================
@@ -204,7 +200,7 @@ density_summary <- function(mapping, stand, radius){
   # Extract relevant coordinates
   coords <- mapping %>%
     filter(stand_id == stand) %>%
-    mutate(abh = circ_area(dbh / 2) / circ_area(radius)) %>%
+    mutate(abh = circ_area(dbh / 2)) %>%
     select(tree_id, species, abh, x_coord, y_coord)
   
   # Create matrix of distances between each tree pair
@@ -281,7 +277,7 @@ density_specific <- function(mapping, stand, radius, focal_coords){
   # Extract relevant tree data
   coords <- mapping %>%
     filter(stand_id == stand) %>%
-    mutate(abh = circ_area(dbh / 2)) %>% #/ circ_area(radius)) %>%
+    mutate(abh = circ_area(dbh / 2)) %>%
     select(species, abh, x_coord, y_coord)
   
   if(any(focal_coords == "grid")){

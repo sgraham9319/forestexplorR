@@ -4,7 +4,7 @@
 
 # Author: Stuart Graham
 # Created: 4/3/2020
-# Last edited: 4/23/2020
+# Last edited: 4/24/2020
 
 # Load TreeNeighborhood package
 devtools::load_all()
@@ -13,10 +13,10 @@ devtools::load_all()
 library(tictoc)
 
 # Source general functions from TreeNeigborhood package
-source("R/utils.R")
+#source("R/utils.R")
 
 # Source data rearrangement functions for likelihood model
-source("R/likelihood_model_functions.R")
+#source("R/likelihood_model_functions.R")
 
 ######################
 # Part 1. Loading data
@@ -170,13 +170,13 @@ lkhd <- function(par){
   Xb <- par[3]
   alpha <- par[4]
   beta <- par[5]
-  lambda1 <- par[6]
-  lambda2 <- par[7]
-  lambda3 <- par[8]
-  lambda4 <- par[9]
-  C <- par[10]
-  D <- par[11]
-  sigma <- par[12]
+  C <- par[6]
+  D <- par[7]
+  sigma <- par[8]
+  #lambda1 <- par[9]
+  #lambda2 <- par[10]
+  #lambda3 <- par[11]
+  #lambda4 <- par[12]
   if(sigma<0) {return(Inf)}
   if(gmax<0 | X0<0) {return(Inf)}
   if(Xb<0 | Xb>20) {return(Inf)}           # from Uriarte: Xb[0,20]
@@ -184,18 +184,19 @@ lkhd <- function(par){
   if(D<1 | D>5) {return(Inf)}              # from Uriarte: D [1,5]   
   if(alpha<0 | alpha>4) {return(Inf)}      # from Uriarte: alpha [0,4]
   if(beta<0 | beta>4) {return(Inf)}
-  if(lambda1<0 | lambda1>1) {return(Inf)}
-  if(lambda2<0 | lambda2>1) {return(Inf)}
-  if(lambda3<0 | lambda3>1) {return(Inf)}
-  if(lambda4<0 | lambda4>1) {return(Inf)}
-  pred <- growth_pred(tsme, gmax, X0, Xb, alpha, beta, lambda1, lambda2, lambda3, lambda4, C, D)[, 2]
+  #if(lambda1<0 | lambda1>1) {return(Inf)}
+  #if(lambda2<0 | lambda2>1) {return(Inf)}
+  #if(lambda3<0 | lambda3>1) {return(Inf)}
+  #if(lambda4<0 | lambda4>1) {return(Inf)}
+  #pred <- growth_pred(tsme, gmax, X0, Xb, alpha, beta, lambda1, lambda2, lambda3, lambda4, C, D)[, 2]
+  pred <- growth_pred(tsme, gmax, X0, Xb, alpha, beta, lambda1=1, lambda2=1, lambda3=1, lambda4=1, C, D)[, 2]
   NLL <- (-sum(dnorm(tsme$radial_growth, mean = pred, sd = sigma, log = T)))
   return(NLL)
 }
 
 # Fit the model - TAKES ABOUT 10 MINUTES TO RUN
 tic("model fitting")
-fit <- optim(par = c(5, 100, 8, 3, 3, 0.5, 0.5, 0.5, 0.5, 0.5, 2, 5), fn = lkhd, method = "SANN")
+fit <- optim(par = c(5, 100, 8, 3, 3, 0.5, 2, 5, 0.5, 0.5, 0.5, 0.5), fn = lkhd, method = "SANN")
 toc()
 
 # View parameters and compare to set parameter values
@@ -205,3 +206,64 @@ initial_val <- c(5, 100, 8, 3, 3, 0.5, 0.5, 0.5, 0.5, 0.5, 2, 5)
 optim_val <- fit$par
 result <- data.frame(par_names, initial_val, optim_val)
 View(result)
+
+# No lambdas - TAKES ABOUT 14 MINUTES TO RUN
+tic("model fitting")
+fit <- optim(par = c(5, 100, 8, 3, 3, 0.5, 2, 5), fn = lkhd, method = "SANN")
+toc()
+
+par_names <- c("gmax", "X0", "Xb", "alpha", "beta", "C", "D", "sigma")
+initial_val <- c(5, 100, 8, 3, 3, 0.5, 2, 5)
+optim_val <- fit$par
+result <- data.frame(par_names, initial_val, optim_val)
+View(result)
+result$attempt3 <- fit$par
+
+# Parameter values still change every time
+
+#############################################
+# Part 8. Applying simple models to TSME data
+#############################################
+
+# Extract growth of each individual
+tsme_focal <- tsme %>% group_by(tree_id) %>% summarize(dbh = dbh[1], radial_growth = radial_growth[1])
+
+# Visualize relationship between focal size and growth
+plot(radial_growth ~ dbh, data = tsme_focal)
+
+# Define deviance calculation function
+size_dev <- function(par) {
+  gmax <- par[1]
+  X0 <- par[2]
+  Xb <- par[3]
+  sigma <- par[4]
+  if(sigma <= 0 | gmax < 0 | X0 < 0| Xb < 0) {deviance <- 10000000} else {
+       likelihoods <- dnorm(tsme_focal$radial_growth,
+                            mean = gmax * exp((-1/2) * ((log(tsme_focal$dbh / X0) / Xb) ^ 2)),
+                            sd = sigma)
+       log.likelihoods <- log(likelihoods)
+       deviance <- -2 * sum(log.likelihoods)
+     }
+  return(deviance)
+}
+
+# Try different parameter values manually and return deviance
+dev_temp <- size_dev(c(0.09, 100, 2, 0.04))
+dev_temp
+
+# Optimize
+parameter_fits <- optim(par = c(2, 50, 6, 5), fn = size_dev, hessian = T)
+parameter_fits$par
+# Repeating with same initial values results in the same optimized values, but using different
+# initial values leads to different optimized values of X0 and Xb
+
+# Try calculating parameter confidence intervals
+hessian <- parameter_fits$hessian
+hessian_inv <- solve(hessian)
+parameter_se <- sqrt(diag(hessian_inv))
+# Cannot calculate standard error for Xb
+
+# Try using "SANN" method
+parameter_fits2 <- optim(par = c(2, 50, 6, 5), fn = size_dev, method = "SANN")
+parameter_fits2$par
+# Same initial values can lead to different optimized values????

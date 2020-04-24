@@ -23,7 +23,7 @@ growth_summ_test <- function(data){
 }
 
 # Expected output
-growth_summ_exp <- function(){
+growth_summ_expt <- function(){
   tree_id <- c("tree1", "tree2", "tree3")
   stand_id <- rep("A", times = 3)
   species <- rep("TSHE", times = 3)
@@ -50,7 +50,7 @@ det_growth_test <- function(data){
 }
 
 # Expected output
-det_growth_exp <- function(){
+det_growth_expt <- function(){
   fake_growth() %>%
     mutate(annual_growth = c(0.2, 0.2, NA, 1, 1, NA, 2, 2, NA))
 }
@@ -65,7 +65,7 @@ def_growth_test <- function(data){
 }
 
 # Expected output
-def_growth_exp <- function(){
+def_growth_expt <- function(){
   tree_id <- c("tree1", "tree2", "tree3")
   stand_id <- rep("A", times = 3)
   species <- rep("TSHE", times = 3)
@@ -120,7 +120,7 @@ density_calc_test <- function(){
 }
 
 # Expected output
-density_calc_exp <- function(){
+density_calc_expt <- function(){
   all_density <- c(4, 3, 1)
   ABAM_density <- c(0, 2, 0)
   PSME_density <- c(1, 1, 1)
@@ -140,7 +140,7 @@ density_summ_test <- function(data, stand_id){
 }
 
 # Expected output
-density_summ_exp <- function(){
+density_summ_expt <- function(){
   
   # Fake stand A
   tree_id <- c("A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9")
@@ -167,7 +167,7 @@ density_all_test <- function(data){
 }
 
 # Expected output
-density_all_exp <- function(){
+density_all_expt <- function(){
   
   # Create expected density_summary output for fake stand B
   tree_id <- c("B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9")
@@ -180,7 +180,7 @@ density_all_exp <- function(){
                     ABAM_density, TSHE_density)
   
   # Combine with expected density_summary output for fake stand A 
-  output <- rbind(density_summ_exp(), output)
+  output <- rbind(density_summ_expt(), output)
   output[] <- lapply(output, as.character)
   output
 }
@@ -199,7 +199,7 @@ density_spec_test <- function(data, stand_id){
 }
 
 # Expected output
-density_spec_exp <- function(){
+density_spec_expt <- function(){
   x_coord <- c(60, 40, 50)
   y_coord <- c(60, 50, 50)
   all_density <- c(1, 4, 9) * 0.01
@@ -213,7 +213,7 @@ density_spec_exp <- function(){
 # graph_matrix
 #=============
 
-exp <- function(){
+expt <- function(){
   
   # Fake stand A
   tree_id <- c("A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9")

@@ -115,12 +115,19 @@ circ_area <- function(radius){
   pi * (radius ^ 2)
 }
 
-#============================================
-# Convert neighborhood density to m^2/hectare
-#============================================
+#================================================
+# Calculate densities (m^2/hectare) from abh sums
+#================================================
+
+# This function takes abh values and converts them into densities with units
+# of m^2/hectare. The formula looks surprisingly simple because it is a 
+# simplified version of: abh/10000 * 10000/neighborhood_area. The abh values
+# are in cm^2 so must be divided by 10000 to convert to m^2, then to get the 
+# density for a hectare we divide a hectar (10000 m^2) by the size of our
+# sample area (neighborhood). The 10000s cancel to give this simple formula
 
 density_conv <- function(dens, radius){
-  (dens / 10000) * 10000/circ_area(radius)
+  dens / circ_area(radius)
 }
 
 #=================================================
@@ -332,7 +339,7 @@ graph_matrix <- function(mapping, stand, radius){
     # Subset to focal stand
     one_stand <- mapping %>%
       filter(stand_id == stand) %>%
-      mutate(abh = circ_area(dbh / 2) / circ_area(radius)) %>%
+      mutate(abh = circ_area(dbh / 2)) %>%
       select(tree_id, stand_id, species, abh, x_coord, y_coord)
     
     # Create distance, species, and size matrices

@@ -221,49 +221,140 @@ result$attempt3 <- fit$par
 
 # Parameter values still change every time
 
-#############################################
-# Part 8. Applying simple models to TSME data
-#############################################
+# Save optimized parameters
+params <- fit$par[1:7]
+
+# Predict growth using model parameters
+predictions <- growth_pred(tsme, params[1], params[2], params[3], params[4], params[5],
+                    lambda1=1, lambda2=1, lambda3=1, lambda4=1, params[6], params[7])
+names(predictions) <- c("tree_id", "predictions")
+
+# Extract observations
+observations <- tsme %>% group_by(tree_id) %>% summarize(growth = radial_growth[1])
+names(observations)[2] <- "observations"
+
+# Combine into table
+comparison <- inner_join(predictions, observations, by = "tree_id")
+
+# Plot predictions vs. observations
+ggplot(comparison, aes(x = observations, y = predictions)) +
+  geom_hex() +
+  theme_bw() +
+  ylim(0, max(c(max(comparison$predictions), max(comparison$observations)))) +
+  xlim(0, max(c(max(comparison$predictions), max(comparison$observations)))) +
+  geom_abline(intercept = 0, slope = 1)
+
+# Calculate R^2
+coef_det(comparison) # -4
+plot(observations~predictions, data = comparison)
+
+# Explore prediction for a single tree
+one_tree2 <- tsme[tsme$tree_id == unique(tsme$tree_id)[1], ]
+one_tree <- tsme[tsme$tree_id == comparison$tree_id[42], ]
+growth_pred(one_tree, params[1], params[2], params[3], params[4], params[5],
+            lambda1=1, lambda2=1, lambda3=1, lambda4=1, params[6], params[7])
+params[1] # 5.64
+exp((-1/2) * ((log(one_tree$dbh[1] / params[2]) / params[3]) ^ 2)) # 0.98
+exp(-params[6] * (NCI_calc(one_tree2, params[4], params[5], 1, 1, 1, 1) ^ params[7])) # 9.3e-82
+# neighborhood effect is definitely the problem here
+
+#######################################################
+# Part 8. Applying simple models to single-species data
+#######################################################
+
+# Subset to TSME focals
+sing_sp <- droplevels(full[full$species == "TSME", ])
 
 # Extract growth of each individual
-tsme_focal <- tsme %>% group_by(tree_id) %>% summarize(dbh = dbh[1], radial_growth = radial_growth[1])
+focals <- sing_sp %>% group_by(tree_id) %>% summarize(dbh = dbh[1], radial_growth = radial_growth[1])
 
 # Visualize relationship between focal size and growth
-plot(radial_growth ~ dbh, data = tsme_focal)
+plot(radial_growth ~ dbh, data = focals, xlim = c(0, max(focals$dbh)))
 
-# Define deviance calculation function
-size_dev <- function(par) {
-  gmax <- par[1]
-  X0 <- par[2]
-  Xb <- par[3]
+# Define negative log likelihood function to be minimized
+simp_NLL <- function(par) {
+  
+  # Define parameters
+  gmax <- par[1]    # Maximum annual growth
+  X0 <- par[2]      # DBH at which maximum growth occurs
+  Xb <- par[3]      # Breadth of size-effect function
   sigma <- par[4]
-  if(sigma <= 0 | gmax < 0 | X0 < 0| Xb < 0) {deviance <- 10000000} else {
-       likelihoods <- dnorm(tsme_focal$radial_growth,
-                            mean = gmax * exp((-1/2) * ((log(tsme_focal$dbh / X0) / Xb) ^ 2)),
-                            sd = sigma)
-       log.likelihoods <- log(likelihoods)
-       deviance <- -2 * sum(log.likelihoods)
-     }
-  return(deviance)
+  
+  # Prevent parameter values from becoming nonsensical (i.e. negative)
+  if(sigma <= 0 | gmax < 0 | X0 < 0| Xb < 0) {NLL <- 10000000} else {
+    
+    # Calculate negative log likelihood
+    NLL <- -sum(dnorm(focals$radial_growth,
+                      # LINE BELOW IS MODEL FORMULA
+                      mean = gmax * exp((-1/2) * ((log(focals$dbh / X0) / Xb) ^ 2)),
+                      sd = sigma,
+                      log = T))
+  }
+  return(NLL)
 }
 
-# Try different parameter values manually and return deviance
-dev_temp <- size_dev(c(0.09, 100, 2, 0.04))
-dev_temp
+# Create function to predict growth using model parameters
+simp_pred <- function(data, par){
+  par[1] * exp((-1/2) * ((log(data$dbh / par[2]) / par[3]) ^ 2))
+}
 
-# Optimize
-parameter_fits <- optim(par = c(2, 50, 6, 5), fn = size_dev, hessian = T)
-parameter_fits$par
-# Repeating with same initial values results in the same optimized values, but using different
-# initial values leads to different optimized values of X0 and Xb
+# Create set of starting values
+gmax_vals <- seq(0.03, 0.15, 0.03)
+X0_vals <- seq(450, 1000, 50)
+Xb_vals <- seq(0.5, 5.5, 1)
+gmax <- rep(gmax_vals, each = length(X0_vals) * length(Xb_vals))
+X0 <- rep(rep(X0_vals, each = length(Xb_vals)), times = length(gmax_vals))
+Xb <- rep(Xb_vals, times = length(gmax_vals) * length(X0_vals))
+starting_vals <- data.frame(gmax, X0, Xb)
 
-# Try calculating parameter confidence intervals
-hessian <- parameter_fits$hessian
-hessian_inv <- solve(hessian)
-parameter_se <- sqrt(diag(hessian_inv))
-# Cannot calculate standard error for Xb
+# Create empty matrix for optimized values and minimized NLL
+optim_vals <- as.data.frame(matrix(NA, nrow = nrow(starting_vals), ncol = 5))
+names(optim_vals) <- c("gmax_opt", "X0_opt", "Xb_opt", "sigma_opt", "NLL")
 
-# Try using "SANN" method
-parameter_fits2 <- optim(par = c(2, 50, 6, 5), fn = size_dev, method = "SANN")
-parameter_fits2$par
-# Same initial values can lead to different optimized values????
+# Loop through sets of starting values, optimizing and extracting results
+for(i in 1:nrow(starting_vals)) {
+  fit <- optim(par = c(starting_vals[i, 1], starting_vals[i, 2], starting_vals[i, 3], 5),
+               fn = simp_NLL, method = "SANN")
+  optim_vals[i, 1:4] <- fit$par
+  optim_vals[i, 5] <- fit$value
+}
+
+# Combine starting and optimized values
+output <- cbind(starting_vals, optim_vals)
+
+#=============================================
+# Exploring results of varying starting values
+#=============================================
+# Some repeated optimizations were run on a different machine - results can be loaded
+# with this line
+#output <- read.csv("Data/abam_3_param.csv")
+
+# Exploring results
+hist(output$NLL)
+plot(NLL~gmax_opt, data = output)
+plot(NLL~X0_opt, data = output)
+plot(NLL~Xb_opt, data = output)
+plot(gmax_opt~gmax, data = output)
+plot(X0_opt~X0, data = output)
+plot(Xb_opt~Xb, data = output)
+
+# Order by increasing NLL
+output <- output %>% arrange(NLL)
+
+# Extract parameters of best fitting model
+params <- c(output[1, 4], output[1, 5], output[1, 6])
+
+# Calculate coefficient of determination
+1 - (sum((focals$radial_growth - simp_pred(focals, params)) ^ 2) / 
+       sum((focals$radial_growth - mean(focals$radial_growth)) ^ 2))
+# psme: 0.07, tsme: 0.007, thpl: 0.16, tshe: 0.16, cano: 0.06, abam: 0.02
+# with X0 <- seq(200, 600, 50), psme R^2 = 0.08
+# with X0 <- seq(450, 1000, 50), psme R^2 = 0.083
+
+# Plot optimized function over data
+plot(radial_growth ~ dbh, data = focals, xlim = c(0, max(focals$dbh)))
+curve(params[1]*exp((-0.5)*((log(x/params[2])/params[3])^2)), from = 0, to = max(focals$dbh), add = T)
+
+#################################
+# Part 9. Trying no lambda models
+#################################

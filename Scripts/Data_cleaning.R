@@ -55,7 +55,7 @@ max(tree_ids_summ$num_stands)
 # Q5. How many trees in tree data do not have mapping data?
 tree_data_ids <- unique(tree$tree_id)
 length(tree_data_ids) - sum(tree_data_ids %in% mapping$tree_id)
-# 83 tree_ids in tree data (<1% of trees) do not have mapping data.
+# 86 tree_ids in tree data (<1% of trees) do not have mapping data.
 # This will add noise to the data unfortunately, but they must be
 # dropped
 
@@ -64,10 +64,10 @@ tree <- tree[tree$tree_id %in% mapping$tree_id, ]
 
 # Q6. Are there trees with missing dbh data?
 sum(is.na(tree$dbh))
-# Yes, 1887 occurences of missing dbh data. Why is data missing?
+# Yes, 2053 occurences of missing dbh data. Why is data missing?
 no_dbh <- tree[is.na(tree$dbh), ]
 table(no_dbh$tree_status)
-# 1870 were dead (code 6) and 17 were not found (code 9)
+# 2033 were dead (code 6) and 20 were not found (code 9)
 
 # Q7. Do we have any dbh data for trees reported missing?
 missing_ids <- no_dbh[no_dbh$tree_status == 9, "tree_id"]
@@ -89,11 +89,14 @@ sum(!is.na(tree$species)) == nrow(tree)
 # Q9. Are there any trees that were never observed to have dbh of 15cm or greater?
 small_trees_data <- tree %>%
   group_by(tree_id) %>% 
-  summarize(max_size = max(dbh)) %>%
+  summarize(max_size = max(dbh), stand = stand_id[1]) %>%
   filter(max_size < 15)
-# Yes, there are many (2487) because of the detail plots where 5 cm was the
-# minimum dbh. Need to remove these trees to keep all plots consistent
-tree <- tree[-which(tree$tree_id %in% small_trees_data$tree_id), ]
+# Yes, there are many (2577) because of the detail plots where 5 cm was the
+# minimum dbh.
+
+# Q10. Are there detail plots in every stand?
+table(small_trees_data$stand)
+# Yes, there is a good number of small trees in each stand
 
 #====================
 # Saving cleaned data
@@ -102,6 +105,10 @@ tree <- tree[-which(tree$tree_id %in% small_trees_data$tree_id), ]
 # Before saving to file, remove trees from mapping data that don't occur
 # in tree data
 mapping <- mapping[mapping$tree_id %in% tree$tree_id, ]
+
+# Identify mapped trees that were never measured as > 15cm dbh
+mapping$size_cat <- "regular"
+mapping$size_cat[mapping$tree_id %in% small_trees_data$tree_id] <- "small"
 
 # Save cleaned mapping data
 write.csv(mapping, "Data/Cleaned_mapping_2017.csv", row.names = F)

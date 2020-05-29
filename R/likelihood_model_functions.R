@@ -32,7 +32,7 @@ neighborhoods <- function(mapping, stand, radius) {
   # Subset to focal stand and remove unneeded columns
   one_stand <- mapping %>%
     filter(stand_id == stand) %>%
-    select(tree_id, stand_id, species, dbh, x_coord, y_coord)
+    select(tree_id, stand_id, species, dbh, x_coord, y_coord, size_cat)
   
   # Create distance matrix - element i,j is the distance (in meters) between trees in
   # rows i and j in one_stand
@@ -41,6 +41,8 @@ neighborhoods <- function(mapping, stand, radius) {
   sps_mat <- matrix(one_stand$species, nrow = nrow(one_stand), ncol = nrow(one_stand))
   # Create size matrix - each column is a replica of one_stand$dbh
   size_mat <- matrix(one_stand$dbh, nrow = nrow(one_stand), ncol = nrow(one_stand))
+  # Create size category matrix - each column is a replica of one_stand$size_cat
+  cat_mat <- matrix(one_stand$size_cat, nrow = nrow(one_stand), ncol = nrow(one_stand))
   
   # Find distances greater than radius or equal to zero in distance matrix - these
   # elements represent pairs of trees that are not in each other's neighborhood or
@@ -51,12 +53,14 @@ neighborhoods <- function(mapping, stand, radius) {
   dist_mat[non_comp] <- NA
   sps_mat[non_comp] <- NA
   size_mat[non_comp] <- NA
+  cat_mat[non_comp] <- NA
   
-  # Create dist, species and size vectors not including NAs
+  # Create dist, species, size and size category vectors not including NAs
   prox <- dist_mat[!is.na(dist_mat)]
   sps_comp <- sps_mat[!is.na(sps_mat)]
   size_comp <- size_mat[!is.na(size_mat)]
-  comp_dat <- data.frame(prox, sps_comp, size_comp)
+  size_cat_comp <- cat_mat[!is.na(cat_mat)]
+  comp_dat <- data.frame(prox, sps_comp, size_comp, size_cat_comp)
   
   # Get vector of how many rows (competitors) each focal tree should have
   repeats <- unname(apply(dist_mat, 2, non_na_len))

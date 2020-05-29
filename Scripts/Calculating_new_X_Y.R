@@ -10,6 +10,33 @@ old_map <- read.csv("Data/Mapping_2013.csv", stringsAsFactors = F)
 # Load location data for stands
 stand_locs <- read.csv("Data/Stand_locations.csv", stringsAsFactors = F)
 
+# Check for repeated tree ids in mapping data
+length(unique(new_map$tree_id)) == nrow(new_map)
+length(unique(old_map$tree_id)) == nrow(old_map) # repeats in old data
+
+# Identify repeats in old mapping
+repeats <- names(which(table(old_map$tree_id) > 1))
+
+# View repeats
+View(old_map[old_map$tree_id %in% repeats, ])
+
+# Both repeats appear to be cases of double mapping with very similar x and y
+# coordinates for the two mapping events. Average the values
+average_trees <- old_map[old_map$tree_id %in% repeats, ]
+average_trees <- average_trees %>%
+  group_by(tree_id) %>%
+  summarize(psp_study_id = psp_study_id[1], stand_id = stand_id[1], plot = plot[1],
+            tag = tag[1], species = species[1], year = year[1], tree_status = tree_status[1], 
+            live_dead = live_dead[1], mort_year = mort_year[1], dbh = dbh[1],
+            x_coord = round(mean(x_coord), 2) , y_coord = round(mean(y_coord), 2))
+
+# Replace repeats with averages in old mapping
+old_map <- old_map[old_map$tree_id %in% repeats == F, ]
+old_map <- rbind(old_map, average_trees)
+
+# Recheck for repeated mapping data
+length(unique(old_map$tree_id)) == nrow(old_map)
+
 # Calculate degrees to radians conversion factor
 cf <- pi / 180
 
@@ -52,7 +79,10 @@ combined_map <- new_map %>%
 # matches multiple trees in their stand
 unmappable_trees <- names(which(table(combined_map$tree_id) > 1))
 
-# Remove these trees from dataset
+# View these cases
+View(combined_map[combined_map$tree_id %in% unmappable_trees, ])
+
+# This single case matches two totally different trees, so must remove it
 combined_map <- combined_map[-which(combined_map$tree_id %in% unmappable_trees), ]
 
 # Create data frame of trees in new mapping data that could not be mapped
@@ -68,7 +98,7 @@ failed_update_data$ref_tree_problem[which(failed_update_data$tree_id %in%
                                             unmappable_trees)] <- "Ref tag duplicated"
 
 # Write failed mapping update data to file
-write.csv(failed_update_data, "../Data/Unusable_new_mapping.csv", row.names = F)
+write.csv(failed_update_data, "Data/Unusable_new_mapping.csv", row.names = F)
 
 # Remove columns in combined_map that are no longer needed
 combined_map <- combined_map %>%
@@ -88,17 +118,8 @@ updated_map <- rbind(old_map, combined_map)
 updated_map <- updated_map[-which(updated_map$tree_id %in% failed_update_ids), ]
 
 # Check for any tree IDs that appear in dataset multiple times
-length(unique(updated_map$tree_id))
-
-# Identify these tree IDs and look at their data
-repeated_ids <- names(which(table(updated_map$tree_id) > 1))
-View(updated_map[updated_map$tree_id %in% repeated_ids, ])
-
-# As the repeats have very similar X, Y coordinates, remove the second occurence
-# of each from the dataset
-rows_to_remove <- c(which(updated_map$tree_id == repeated_ids[1])[2],
-                    which(updated_map$tree_id == repeated_ids[2])[2])
-updated_map <- updated_map[-rows_to_remove, ]
+length(unique(updated_map$tree_id)) == nrow(updated_map)
+# No more repeats present
 
 # Write updated mapping to file
-write.csv(updated_map, "../Data/Mapping_2017.csv", row.names = F)
+write.csv(updated_map, "Data/Mapping_2017.csv", row.names = F)

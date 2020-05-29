@@ -180,7 +180,7 @@ lkhd <- function(par){
   if(sigma<0) {return(Inf)}
   if(gmax<0 | X0<0) {return(Inf)}
   if(Xb<0 | Xb>20) {return(Inf)}           # from Uriarte: Xb[0,20]
-  if(C<0 | C>1) {return(Inf)}              # from Uriarte: C [0,10] 
+  if(C<0 | C>10) {return(Inf)}              # from Uriarte: C [0,10] 
   if(D<1 | D>5) {return(Inf)}              # from Uriarte: D [1,5]   
   if(alpha<0 | alpha>4) {return(Inf)}      # from Uriarte: alpha [0,4]
   if(beta<0 | beta>4) {return(Inf)}
@@ -358,3 +358,6 @@ curve(params[1]*exp((-0.5)*((log(x/params[2])/params[3])^2)), from = 0, to = max
 #################################
 # Part 9. Trying no lambda models
 #################################
+# Use THPL data because it has a smaller sample size but got good R^2 in 
+# size effect model
+

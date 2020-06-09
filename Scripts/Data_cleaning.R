@@ -110,6 +110,21 @@ mapping <- mapping[mapping$tree_id %in% tree$tree_id, ]
 mapping$size_cat <- "regular"
 mapping$size_cat[mapping$tree_id %in% small_trees_data$tree_id] <- "small"
 
+# Check species names
+unique(mapping$species)
+unique(tree$species)
+
+# Correct species names in mapping
+mapping$species[mapping$species == "TABR2"] <- "TABR"
+mapping$species[mapping$species == "CANO9"] <- "CANO"
+mapping$species[mapping$species == "CHNO"] <- "CANO"
+mapping$species[mapping$species == "ALVI3"] <- "ALVI"
+mapping$species[mapping$species == "PIMO3"] <- "PIMO"
+mapping$species[mapping$species == "ALRU2"] <- "ALRU"
+mapping$species[mapping$species == "ABLA2"] <- "ABLA"
+mapping$species[mapping$species == "ABLA2"] <- "ABLA"
+mapping$species[mapping$species == "POBAT"] <- "POBA"
+
 # Save cleaned mapping data
 write.csv(mapping, "Data/Cleaned_mapping_2017.csv", row.names = F)
 

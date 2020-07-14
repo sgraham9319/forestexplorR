@@ -230,6 +230,10 @@ density_summary <- function(mapping, stand, radius){
   output <- cbind(coords$tree_id, coords$x_coord, coords$y_coord, output)
   colnames(output)[1:3] <- c("tree_id", "x_coord", "y_coord")
   
+  # Remove focals whose neighborhood overlaps with stand boundary
+  output <- output %>%
+    filter(x_coord >= radius & x_coord <= 100 - radius & y_coord >= radius & y_coord <= 100 - radius)
+  
   # Return output
   output
 }
@@ -340,24 +344,30 @@ graph_matrix <- function(mapping, stand, radius){
     one_stand <- mapping %>%
       filter(stand_id == stand) %>%
       mutate(abh = circ_area(dbh / 2)) %>%
-      select(tree_id, stand_id, species, abh, x_coord, y_coord)
+      select(tree_id, stand_id, species, dbh, abh, size_cat, x_coord, y_coord)
     
     # Create distance, species, and size matrices
     dist_mat <- as.matrix(dist(one_stand[, c("x_coord", "y_coord")], diag = T, upper = T))
     sps_mat <- matrix(one_stand$species, nrow = nrow(one_stand), ncol = nrow(one_stand))
-    size_mat <- matrix(one_stand$abh, nrow = nrow(one_stand), ncol = nrow(one_stand))
+    size_mat_dens <- matrix(one_stand$abh, nrow = nrow(one_stand), ncol = nrow(one_stand))
+    size_mat <- matrix(one_stand$dbh, nrow = nrow(one_stand), ncol = nrow(one_stand))
+    cat_mat <- matrix(one_stand$size_cat, nrow = nrow(one_stand), ncol = nrow(one_stand))
     
     # Convert values of non-competitors to NA
     non_comp <- which(dist_mat > radius | dist_mat == 0)
     dist_mat[non_comp] <- NA
     sps_mat[non_comp] <- NA
+    size_mat_dens[non_comp] <- NA
     size_mat[non_comp] <- NA
+    cat_mat[non_comp] <- NA
     
     # Create dist, species and size vectors not including NAs
     prox <- dist_mat[!is.na(dist_mat)]
     sps_comp <- sps_mat[!is.na(sps_mat)]
-    size_comp <- size_mat[!is.na(size_mat)]
-    comp_dat <- data.frame(prox, sps_comp, size_comp)
+    size_comp_abh <- size_mat_dens[!is.na(size_mat_dens)]
+    size_comp_dbh <- size_mat[!is.na(size_mat)]
+    size_cat_comp <- cat_mat[!is.na(cat_mat)]
+    comp_dat <- data.frame(prox, sps_comp, size_comp_abh, size_comp_dbh, size_cat_comp)
     
     # Get vector of how many rows each focal tree should have
     repeats <- unname(apply(dist_mat, 2, non_na_len))
@@ -369,7 +379,7 @@ graph_matrix <- function(mapping, stand, radius){
     all_dat <- cbind(all_rows, comp_dat)
     
     # Add species information
-    nbhds <-  cbind(one_stand$species, as.data.frame(size_mat))
+    nbhds <-  cbind(one_stand$species, as.data.frame(size_mat_dens))
     colnames(nbhds)[1] <- "species"
     
     # Summarize density data
@@ -378,6 +388,7 @@ graph_matrix <- function(mapping, stand, radius){
     # Add tree_id column
     dens <- cbind(one_stand$tree_id, dens)
     colnames(dens)[1] <- "tree_id"
+    dens$tree_id <- as.character(dens$tree_id)
     
     # Add density information to all_dat
     output <- left_join(all_dat, dens)

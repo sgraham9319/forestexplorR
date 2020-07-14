@@ -4,29 +4,23 @@
 
 # Author: Stuart Graham
 # Created: 4/3/2020
-# Last edited: 4/24/2020
+# Last edited: 6/9/2020
 
 # Load TreeNeighborhood package
 devtools::load_all()
-
-# Load package to time functions
-library(tictoc)
-
-# Source general functions from TreeNeigborhood package
-#source("R/utils.R")
-
-# Source data rearrangement functions for likelihood model
-#source("R/likelihood_model_functions.R")
 
 ######################
 # Part 1. Loading data
 ######################
 
 # Load mapping data
-mapping <- read.csv("../TreeNeighborhood/Data/Cleaned_mapping_2017.csv", stringsAsFactors = F)
+mapping <- read.csv("Data/Cleaned_mapping_2017.csv", stringsAsFactors = F)
 
 # Load tree measurement data
-tree <- read.csv("../TreeNeighborhood/Data/Cleaned_tree_growth_2017.csv", stringsAsFactors = F)
+tree <- read.csv("Data/Cleaned_tree_growth_2017.csv", stringsAsFactors = F)
+
+# Load abiotic data
+env <- read.csv("Data/stand_abiotic_data.csv", stringsAsFactors = F)
 
 #############################
 # Part 2. Excluding test data
@@ -90,9 +84,9 @@ sum(is.nan(growth$size_corr_growth))
 # Calculate radial growth to be consistent with Fortunel and Canham
 growth$radial_growth <- growth$annual_growth / 2
 
-################################################
-# Part 5. Combining growth and neighborhood data
-################################################
+##########################################################
+# Part 5. Combining growth, neighborhood, and abiotic data
+##########################################################
 
 # Extract required columns from growth data
 growth_cols <- growth[, c("tree_id", "midpoint_size", "radial_growth")]
@@ -100,6 +94,9 @@ growth_cols <- growth[, c("tree_id", "midpoint_size", "radial_growth")]
 # Join growth and neighborhood data. Use inner join because there will be
 # no growth data for focals measured only once or with negative growth
 full <- inner_join(neighbors, growth_cols, by = "tree_id")
+
+# Add abiotic data
+full <- left_join(full, env)
 
 ################################
 # Part 6. Exploring sample sizes

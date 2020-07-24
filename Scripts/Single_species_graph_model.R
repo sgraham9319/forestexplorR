@@ -44,16 +44,43 @@ mapping <- mapping %>%
 # Part 3. Creating neighborhoods
 ################################
 
-# Obtain all neighborhood data
-neighbors <- graph_mat_all(mapping, radius = 10)
+# Obtain all neighborhood data - different radius for each species
+#neighbors <- graph_mat_all(mapping, radius = 10)
+neighbors_PSME <- graph_mat_all(mapping, radius = 15)
+neighbors_TSHE <- graph_mat_all(mapping, radius = 12)
+neighbors_TSME <- graph_mat_all(mapping, radius = 15)
+neighbors_THPL <- graph_mat_all(mapping, radius = 16)
+neighbors_ABAM <- graph_mat_all(mapping, radius = 3)
+neighbors_CANO <- graph_mat_all(mapping, radius = 7)
+
+# Subset to single species of focal
+neighbors_PSME <- neighbors_PSME %>% filter(species == "PSME")
+neighbors_TSHE <- neighbors_TSHE %>% filter(species == "TSHE")
+neighbors_TSME <- neighbors_TSME %>% filter(species == "TSME")
+neighbors_THPL <- neighbors_THPL %>% filter(species == "THPL")
+neighbors_ABAM <- neighbors_ABAM %>% filter(species == "ABAM")
+neighbors_CANO <- neighbors_CANO %>% filter(species == "CANO")
 
 # Remove focals whose neighborhood overlaps stand boundary
-neighbors <- neighbors %>%
-  filter(x_coord >= 10 & x_coord <= 90 & y_coord >= 10 & y_coord <= 90)
+#neighbors <- neighbors %>% filter(x_coord >= 10 & x_coord <= 90 & y_coord >= 10 & y_coord <= 90)
+neighbors_PSME <- neighbors_PSME %>% filter(x_coord >= 15 & x_coord <= 85 & y_coord >= 15 & y_coord <= 85)
+neighbors_TSHE <- neighbors_TSHE %>% filter(x_coord >= 12 & x_coord <= 88 & y_coord >= 12 & y_coord <= 88)
+neighbors_TSME <- neighbors_TSME %>% filter(x_coord >= 15 & x_coord <= 85 & y_coord >= 15 & y_coord <= 85)
+neighbors_THPL <- neighbors_THPL %>% filter(x_coord >= 16 & x_coord <= 84 & y_coord >= 16 & y_coord <= 84)
+neighbors_ABAM <- neighbors_ABAM %>% filter(x_coord >= 3 & x_coord <= 97 & y_coord >= 3 & y_coord <= 97)
+neighbors_CANO <- neighbors_CANO %>% filter(x_coord >= 7 & x_coord <= 93 & y_coord >= 7 & y_coord <= 93)
+
+# Recombine single species neighborhoods
+neighbors <- rbind(neighbors_PSME, neighbors_TSHE, neighbors_TSME, neighbors_THPL, neighbors_ABAM, neighbors_CANO)
 
 # Remove small competitors
-neighbors <- neighbors %>%
-  filter(size_cat_comp == "regular")
+neighbors <- neighbors %>% filter(size_cat_comp == "regular")
+#neighbors_PSME <- neighbors_PSME %>% filter(size_cat_comp == "regular")
+#neighbors_TSHE <- neighbors_TSHE %>% filter(size_cat_comp == "regular")
+#neighbors_TSME <- neighbors_TSME %>% filter(size_cat_comp == "regular")
+#neighbors_THPL <- neighbors_THPL %>% filter(size_cat_comp == "regular")
+#neighbors_ABAM <- neighbors_ABAM %>% filter(size_cat_comp == "regular")
+#neighbors_CANO <- neighbors_CANO %>% filter(size_cat_comp == "regular")
 
 ###################################
 # Part 4. Calculating annual growth
@@ -168,6 +195,7 @@ ggplot(comparison, aes(x = predictions, y = observations)) +
 coef_det(comparison) # psme: 0.61, tshe: 0.28, tsme: -0.24 to -0.27, thpl: 0.03, abam: 0.20, cano: -0.01
 # outliers removed; psme: 0.57, tshe: 0.27, tsme: negative still, thpl: 0.06-0.08, abam: 0.19, cano: 0.01
 # stand replaced with precip and temp, outliers retained; psme: 0.52, tshe: 0.25, tsme: neg, thpl: 0-0.01, abam: 0.09, cano: 0.04
+# best nbhd size: psme 0.60, tshe 0.27, tsme -0.13, thpl 0.16, abam 0.06, cano 0.09
 
 # Calculate slope of observed growth vs. predicted growth
 slope_fit <- lm(observations ~ 0 + predictions, comparison)
@@ -224,6 +252,7 @@ ggplot(comparison, aes(x = predictions, y = observations)) +
 coef_det(comparison) # psme: 0.63, tshe: 0.37, tsme: 0.07-0.09, thpl: 0.17, abam: 0.27, cano: 0.23-0.26
 # outliers removed; psme: 0.62, tshe: 0.38, tsme: 0.07-0.08, thpl: 0.15, abam: 0.28, cano: 0.12-0.13
 # stand replaced with precip and temp, outliers retained; psme: 0.58, tshe: 0.31, tsme: 0.07, thpl: 0.13, abam: 0.15, cano: 0.25
+# best nbhd size: psme 0.63, tshe 0.34, tsme 0.18, thpl 0.26, abam 0.10, cano 0.20
 
 # Calculate slope of observed growth vs. predicted growth
 slope_fit <- lm(observations ~ 0 + predictions, comparison)

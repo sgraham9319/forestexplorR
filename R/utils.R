@@ -123,7 +123,7 @@ circ_area <- function(radius){
 # of m^2/hectare. The formula looks surprisingly simple because it is a 
 # simplified version of: abh/10000 * 10000/neighborhood_area. The abh values
 # are in cm^2 so must be divided by 10000 to convert to m^2, then to get the 
-# density for a hectare we divide a hectar (10000 m^2) by the size of our
+# density for a hectare we divide a hectare (10000 m^2) by the size of our
 # sample area (neighborhood). The 10000s cancel to give this simple formula
 
 density_conv <- function(dens, radius){

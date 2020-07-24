@@ -43,12 +43,15 @@ mapping <- mapping %>%
 # Part 3. Creating neighborhoods
 ################################
 
+# Define neighborhood radius
+nb_rad <- 10
+
 # Obtain all neighborhood data
-neighbors <- neighborhoods_all(mapping, 10)
+neighbors <- neighborhoods_all(mapping, nb_rad)
 
 # Remove focals whose neighborhood overlaps stand boundary
 neighbors <- neighbors %>%
-  filter(x_coord >= 10 & x_coord <= 90 & y_coord >= 10 & y_coord <= 90)
+  filter(x_coord >= nb_rad & x_coord <= 100 - nb_rad & y_coord >= nb_rad & y_coord <= 100 - nb_rad)
 
 # Remove small competitors
 neighbors <- neighbors %>%

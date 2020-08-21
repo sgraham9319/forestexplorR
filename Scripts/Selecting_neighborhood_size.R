@@ -283,7 +283,7 @@ grow_env <- grow_env[, c("tree_id", "size_corr_growth", "precip_mm", "temp_C")]
 output <- array(NA, dim = c(6, 20, 14))
 #output <- array(NA, dim = c(6, 20, 11))
 
-# Define radii and species to invesigate
+# Define radii and species to investigate
 radius_list <- seq(1, 20, 1)
 species_list <- c("PSME", "TSHE", "TSME", "THPL", "ABAM", "CANO")
 
@@ -301,6 +301,9 @@ for(i in radius_list){
   
   # Join neighborhoods with growth and environmental data
   full <- inner_join(neighbors, grow_env, by = "tree_id")
+  
+  # Convert competitor species to factor
+  full$sps_comp <- as.factor(full$sps_comp)
   
   # Loop through species
   for(j in 1:length(species_list)){
@@ -423,7 +426,7 @@ names(ABAM_output) <- names(PSME_output)
 names(CANO_output) <- names(PSME_output)
 
 # Look at R square and mse patterns for one species
-dat <- CANO_output
+dat <- ABAM_output
 plot(R_square ~ radius, dat)
 plot(mse_a ~ radius, data = dat,
      ylim = c(min(c(dat$mse_min_se_a, dat$mse_min_se_b), na.rm = T),
@@ -437,10 +440,12 @@ points(dat$radius, dat$mse_min_se_b, col = "blue", pch = 4)
 # Subset to neighborhood sizes that give model with positive R-square and
 # that retains at least one neighborhood variable
 posr <- dat[dat$R_square > 0 & (dat$comp_sps > 0 | dat$prox > 0 | dat$size_comp > 0 | dat$dens > 0), ]
-posr$radius[which.min(posr$mse_a)]
-posr$radius[which(posr$mse_min_se_a < posr$mse_plus_se_a[which.min(posr$mse_a)])]
-posr$radius[which.min(posr$mse_b)]
-posr$radius[which(posr$mse_min_se_b < posr$mse_plus_se_b[which.min(posr$mse_b)])]
+posr$radius[which.max(posr$R_square)]
+max(posr$R_square, na.rm = T)
+#posr$radius[which.min(posr$mse_a)]
+#posr$radius[which(posr$mse_min_se_a < posr$mse_plus_se_a[which.min(posr$mse_a)])]
+#posr$radius[which.min(posr$mse_b)]
+#posr$radius[which(posr$mse_min_se_b < posr$mse_plus_se_b[which.min(posr$mse_b)])]
 
 #plot(mse ~ radius, data = dat,
 #     ylim = c(min(dat$mse_min_se), max(dat$mse_plus_se)))

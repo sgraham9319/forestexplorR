@@ -155,3 +155,108 @@ full_new <- left_join(full_new, env, by = "stand_id")
 focals_new <- full_new %>% group_by(tree_id) %>% summarize(species = species[1])
 table(focals_new$species)
 # PSME 178, TSHE 637, TSME 74, THPL 81, ABAM 476, CANO 103
+
+#========================
+# k-fold cross-validation
+#========================
+
+#--------------
+# Load raw data
+#--------------
+
+# Load mapping data
+mapping_raw <- read.csv("Data/Cleaned_mapping_2017.csv", stringsAsFactors = F)
+
+# Load tree measurement data
+tree_raw <- read.csv("Data/Cleaned_tree_growth_2017.csv", stringsAsFactors = F)
+
+# Load abiotic data
+env <- read.csv("Data/stand_abiotic_data.csv", stringsAsFactors = F)
+
+
+
+# Remove 2017 growth from tree data
+tree <- tree_raw %>% filter(year != 2017)
+
+# Calculate annual growth for all trees
+growth <- growth_summary(tree)
+
+# Count number of NAs in annual growth
+sum(is.nan(growth$annual_growth)) # 459
+
+# Remove those that result from a tree being measured only once
+growth <- growth[growth$first_record != growth$last_record, ]
+sum(is.nan(growth$annual_growth)) # 0
+
+# Count number remaining NAs in size corrected growth
+sum(is.nan(growth$size_corr_growth)) # 119
+
+# Investigate NaN values of size_corrected_growth
+no_grow <- growth[is.nan(growth$size_corr_growth), ]
+max(no_grow$annual_growth)
+
+# NaN values caused by negative annual growth values. These must be caused by
+# measurement inaccuracies because trees can't shrink. Converting them to 0s
+# would change the distribution of the data in a biased way. Better to treat
+# them as missing data and just remove them
+growth <- growth[growth$annual_growth >= 0, ]
+
+# Check data one more time
+sum(is.nan(growth$size_corr_growth))
+
+# Calculate radial growth for likelihood model
+growth$radial_growth <- growth$annual_growth / 2
+
+# Obtain all neighborhood data
+neighbors <- neighborhoods_all(mapping_raw, 20)
+
+# Remove small competitors
+neighbors <- neighbors %>%
+  filter(size_cat_comp == "regular")
+
+# Extract required columns from growth data
+growth_cols <- growth[, c("tree_id", "midpoint_size", "radial_growth", "size_corr_growth")]
+
+# Join growth and neighborhood data. Use inner join because there will be
+# no growth data for focals measured only once or with negative growth
+full <- inner_join(neighbors, growth_cols, by = "tree_id")
+
+# Add abiotic data
+full <- left_join(full, env, by = "stand_id")
+
+# Group by tree id to get one row per focal tree
+focals <- full %>% group_by(tree_id) %>%
+  summarize(species = species[1], x_coord = x_coord[1], y_coord = y_coord[1])
+
+# Create subset for each focal species
+PSME <- focals %>% filter(species == "PSME")
+TSHE <- focals %>% filter(species == "TSHE")
+TSME <- focals %>% filter(species == "TSME")
+THPL <- focals %>% filter(species == "THPL")
+ABAM <- focals %>% filter(species == "ABAM")
+CANO <- focals %>% filter(species == "CANO")
+
+# Create list of radii
+rad <- c(18, 20, 15, 17, 20, 17)
+
+# Remove focals whose neighborhood overlaps stand boundary for each species
+PSME_sub <- PSME %>%
+  filter(x_coord >= rad[1] & x_coord <= 100 - rad[1] & y_coord >= rad[1] & y_coord <= 100 - rad[1])
+TSHE_sub <- TSHE %>%
+  filter(x_coord >= rad[2] & x_coord <= 100 - rad[2] & y_coord >= rad[2] & y_coord <= 100 - rad[2])
+TSME_sub <- TSME %>%
+  filter(x_coord >= rad[3] & x_coord <= 100 - rad[3] & y_coord >= rad[3] & y_coord <= 100 - rad[3])
+THPL_sub <- THPL %>%
+  filter(x_coord >= rad[4] & x_coord <= 100 - rad[4] & y_coord >= rad[4] & y_coord <= 100 - rad[4])
+ABAM_sub <- ABAM %>%
+  filter(x_coord >= rad[5] & x_coord <= 100 - rad[5] & y_coord >= rad[5] & y_coord <= 100 - rad[5])
+CANO_sub <- CANO %>%
+  filter(x_coord >= rad[6] & x_coord <= 100 - rad[6] & y_coord >= rad[6] & y_coord <= 100 - rad[6])
+
+# Check expected test and training sample sizes (based on rad list)
+dat <- CANO_sub
+quad1 <- dat %>% filter(x_coord <= 50, y_coord <= 50)
+quad2 <- dat %>% filter(x_coord <= 50, y_coord > 50)
+quad3 <- dat %>% filter(x_coord > 50, y_coord > 50)
+quad4 <- dat %>% filter(x_coord > 50, y_coord <= 50)
+nrow(quad1); nrow(quad2); nrow(quad3); nrow(quad4)

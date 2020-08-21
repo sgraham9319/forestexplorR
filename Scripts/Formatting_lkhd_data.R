@@ -23,28 +23,28 @@ tree <- read.csv("Data/Cleaned_tree_growth_2017.csv", stringsAsFactors = F)
 env <- read.csv("Data/stand_abiotic_data.csv", stringsAsFactors = F)
 
 #############################
-# Part 2. Excluding test data
+# Part 2. Excluding test data - if using original training set
 #############################
 
-# Remove test data from tree dataset (2017 measurements and stands TO04, AE10, and AV02)
-tree <- tree %>%
-  filter(year != 2017,
-         stand_id != "TO04",
-         stand_id != "AE10",
-         stand_id != "AV02")
+# Remove original test data from tree dataset (2017 measurements and stands TO04, AE10, and AV02)
+#tree <- tree %>%
+#  filter(year != 2017,
+#         stand_id != "TO04",
+#         stand_id != "AE10",
+#         stand_id != "AV02")
 
-# Remove test data from mapping dataset (stands TO04, AE10, and AV02)
-mapping <- mapping %>%
-  filter(stand_id != "TO04",
-         stand_id != "AE10",
-         stand_id != "AV02")
+# Remove original test data from mapping dataset (stands TO04, AE10, and AV02)
+#mapping <- mapping %>%
+#  filter(stand_id != "TO04",
+#         stand_id != "AE10",
+#         stand_id != "AV02")
 
 ################################
 # Part 3. Creating neighborhoods
 ################################
 
 # Define neighborhood radius
-nb_rad <- 10
+nb_rad <- 20
 
 # Obtain all neighborhood data
 neighbors <- neighborhoods_all(mapping, nb_rad)
@@ -101,12 +101,38 @@ full <- inner_join(neighbors, growth_cols, by = "tree_id")
 # Add abiotic data
 full <- left_join(full, env)
 
+####################################
+# Part 6. Defining new training data - unless using original training set
+####################################
+
+# Training 1
+train_sub1 <- full %>% filter(y_coord <= 40)
+train_sub2 <- full %>% filter(x_coord >= 60 & y_coord > 40)
+training <- rbind(train_sub1, train_sub2)
+
+# Training 2
+train_sub1 <- full %>% filter(x_coord <= 40)
+train_sub2 <- full %>% filter(y_coord <= 40 & x_coord > 40)
+training <- rbind(train_sub1, train_sub2)
+
+# Training 3
+train_sub1 <- full %>% filter(y_coord >= 60)
+train_sub2 <- full %>% filter(x_coord <= 40 & y_coord < 60)
+training <- rbind(train_sub1, train_sub2)
+
+# Training 4
+train_sub1 <- full %>% filter(x_coord >= 60)
+train_sub2 <- full %>% filter(y_coord >= 60 & x_coord < 60)
+training <- rbind(train_sub1, train_sub2)
+
 ################################
-# Part 6. Exploring sample sizes
+# Part 7. Exploring sample sizes
 ################################
 
 # Find number of focals per species
-focal_summ <- full %>% group_by(tree_id) %>% summarize(species = species[1])
+#focal_summ <- full %>% group_by(tree_id) %>% summarize(species = species[1])
+#table(focal_summ$species)
+focal_summ <- training %>% group_by(tree_id) %>% summarize(species = species[1])
 table(focal_summ$species)
 
 # Find number of competitors per species for each focal species
@@ -118,8 +144,9 @@ comp_summ <- function(data, focal_sps) {
 comp_summ(full, "TSME")
 
 ####################################
-# Part 7. Writing out formatted data
+# Part 8. Writing out formatted data
 ####################################
 
 # Write data for likelihood models
-write.csv(full, "Data/lkhd_data.csv", row.names = F)
+#write.csv(full, paste("Data/lkhd_", nb_rad, "m.csv", sep = ""), row.names = F)
+write.csv(training, paste("Data/new_train4_", nb_rad, "m.csv", sep = ""), row.names = F)

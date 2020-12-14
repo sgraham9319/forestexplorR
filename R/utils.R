@@ -451,3 +451,80 @@ coef_det <- function(x){
 #=========================
 
 st_err <- function(x){sd(x, na.rm = T) / sqrt(length(na.omit(x)))}
+
+#============================================================================
+# Calculate percentage of values in a vector greater or less than a threshold
+#============================================================================
+
+pct_dif <- function(x, direction, value){
+  if(direction == "greater"){
+    sum(x > value) * 100 / length(x)
+  } else if(direction == "less"){
+    sum(x < value) * 100 / length(x)
+  } else {
+    print("direction input not recognized")
+  }
+}
+
+
+#============================================
+# Fit regularized regression model many times
+#============================================
+
+# This function takes as input a design matrix already formatted for the 
+# regularized regression model, a data frame of the tree growth and neighborhood
+# data used to build the design matrix, and the desired number of runs for the
+# model. It fits the model this many times and outputs a matrix containing the
+# fitted parameter values, coefficient of determination for the training data, 
+# and the cross-validated mean square error for each model run. The function 
+# also keeps track of the best model (lowest MSE) and includes this model object
+# in the list output
+
+mod_iter <- function(des_mat, growth_dat, runs){
+  
+  # Create output table
+  results <- matrix(NA, nrow = runs, ncol = ncol(des_mat) + 3)
+  
+  # Iterate model fitting process
+  for(i in 1:runs){
+    
+    # Fit model
+    mod <- cv.glmnet(des_mat, y = growth_dat$size_corr_growth, family = "gaussian")
+    
+    # Store model coefficients
+    results[i, 1:(ncol(des_mat) + 1)] <- as.vector(as.matrix(coef(mod)))
+    
+    # Make data frame of growth predictions and observations
+    int_pred <- predict(mod, newx = des_mat, s = "lambda.1se")
+    int_obs <- growth_dat %>% select(tree_id, size_corr_growth)
+    comparison <- cbind(int_obs, int_pred)
+    colnames(comparison)[2:3] <- c("obs", "pred")
+    comparison <- comparison %>%
+      group_by(tree_id) %>%
+      summarize(observations = obs[1],
+                predictions = mean(pred))
+    
+    # Store coefficient of determination
+    results[i, ncol(des_mat) + 2] <- coef_det(comparison)
+    
+    # Store mean square error of 1se model
+    results[i, ncol(des_mat) + 3] <- mod$cvm[mod$lambda == mod$lambda.1se]
+    
+    # Remove added intercept column and name remaining columns
+    colnames(results) <- c(rownames(coef(mod)), "R_square", "MSE")
+    
+    # Store/update best model
+    if(i == 1){
+      best_mod <- mod
+    } else if(mod$cvm[mod$lambda == mod$lambda.1se] < 
+              best_mod$cvm[best_mod$lambda == best_mod$lambda.1se]){
+      best_mod <- mod
+    }
+    
+  }
+  
+  # Convert results to data frame and output results table and best mod
+  results <- as.data.frame(results)
+  output <- list(results, best_mod)
+  
+}

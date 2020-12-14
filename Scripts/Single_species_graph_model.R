@@ -266,7 +266,7 @@ mod_coef <- cbind(mod_coef, as.matrix(coef(mod_b)))
 colnames(mod_coef) <- c("cv_a", "cv_b")
 
 #################################
-# Preformance on data used to fit
+# Performance on data used to fit
 #################################
 
 # Create matrices of factor variables

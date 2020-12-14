@@ -44,7 +44,7 @@ env <- read.csv("Data/stand_abiotic_data.csv", stringsAsFactors = F)
 ################################
 
 # Define neighborhood radius
-nb_rad <- 20
+nb_rad <- 15
 
 # Obtain all neighborhood data
 neighbors <- neighborhoods_all(mapping, nb_rad)
@@ -101,29 +101,34 @@ full <- inner_join(neighbors, growth_cols, by = "tree_id")
 # Add abiotic data
 full <- left_join(full, env)
 
-####################################
-# Part 6. Defining new training data - unless using original training set
-####################################
+#############################################
+# Part 6. Defining new training and test data - unless using original training set
+#############################################
 
 # Training 1
-train_sub1 <- full %>% filter(y_coord <= 40)
-train_sub2 <- full %>% filter(x_coord >= 60 & y_coord > 40)
+train_sub1 <- full %>% filter(y_coord <= 50 - (nb_rad / 2))
+train_sub2 <- full %>% filter(x_coord >= 50 + (nb_rad / 2) & y_coord > 50 - (nb_rad / 2))
 training <- rbind(train_sub1, train_sub2)
+test <- full %>% filter(y_coord >= 50 + (nb_rad / 2) & x_coord <= 50 - (nb_rad / 2))
+cross_val <- full %>% filter(x_coord >= 50 + (nb_rad / 2) & y_coord >= 50 + (nb_rad / 2))
 
 # Training 2
-train_sub1 <- full %>% filter(x_coord <= 40)
-train_sub2 <- full %>% filter(y_coord <= 40 & x_coord > 40)
+train_sub1 <- full %>% filter(x_coord <= 50 - (nb_rad / 2))
+train_sub2 <- full %>% filter(y_coord <= 50 - (nb_rad / 2) & x_coord > 50 - (nb_rad / 2))
 training <- rbind(train_sub1, train_sub2)
+test <- full %>% filter(y_coord >= 50 + (nb_rad / 2) & x_coord >= 50 + (nb_rad / 2))
 
 # Training 3
-train_sub1 <- full %>% filter(y_coord >= 60)
-train_sub2 <- full %>% filter(x_coord <= 40 & y_coord < 60)
+train_sub1 <- full %>% filter(y_coord >= 50 + (nb_rad / 2))
+train_sub2 <- full %>% filter(x_coord <= 50 - (nb_rad / 2) & y_coord < 50 + (nb_rad / 2))
 training <- rbind(train_sub1, train_sub2)
+test <- full %>% filter(y_coord <= 50 - (nb_rad / 2) & x_coord >= 50 + (nb_rad / 2))
 
 # Training 4
-train_sub1 <- full %>% filter(x_coord >= 60)
-train_sub2 <- full %>% filter(y_coord >= 60 & x_coord < 60)
+train_sub1 <- full %>% filter(x_coord >= 50 + (nb_rad / 2))
+train_sub2 <- full %>% filter(y_coord >= 50 + (nb_rad / 2) & x_coord < 50 + (nb_rad / 2))
 training <- rbind(train_sub1, train_sub2)
+test <- full %>% filter(y_coord <= 50 - (nb_rad / 2) & x_coord <= 50 - (nb_rad / 2))
 
 ################################
 # Part 7. Exploring sample sizes
@@ -149,4 +154,7 @@ comp_summ(full, "TSME")
 
 # Write data for likelihood models
 #write.csv(full, paste("Data/lkhd_", nb_rad, "m.csv", sep = ""), row.names = F)
-write.csv(training, paste("Data/new_train4_", nb_rad, "m.csv", sep = ""), row.names = F)
+#write.csv(training, paste("Data/new_train4_", nb_rad, "m.csv", sep = ""), row.names = F)
+write.csv(test, paste("Data/new_test4_", nb_rad, "m.csv", sep = ""), row.names = F)
+write.csv(train_sub1, paste("Data/small_train1_", nb_rad, "m.csv", sep = ""), row.names = F)
+write.csv(cross_val, paste("Data/cv1_", nb_rad, "m.csv", sep = ""), row.names = F)

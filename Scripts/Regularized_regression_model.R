@@ -23,6 +23,9 @@ mapping <- read.csv("Data/Cleaned_mapping_2017.csv", stringsAsFactors = F)
 # Load tree measurement data
 tree <- read.csv("Data/Cleaned_tree_growth_2017.csv", stringsAsFactors = F)
 
+# Load stand elevation data
+elev <- read.csv("Data/stand_elevations.csv", stringsAsFactors = F)
+
 ################################
 # Part 2. Creating neighborhoods
 ################################
@@ -70,6 +73,9 @@ growth_cols <- growth[, c("tree_id", "midpoint_size", "size_corr_growth")]
 # no growth data for focals measured only once or with negative growth
 full <- inner_join(neighbors, growth_cols, by = "tree_id")
 
+# Add elevation and side
+full <- left_join(full, elev, by = "stand_id")
+
 # Change stand_id column to factor
 full$stand_id <- as.factor(full$stand_id)
 
@@ -78,23 +84,23 @@ full$stand_id <- as.factor(full$stand_id)
 ##############################################
 
 # Specify training data subsets
-#full_sub1 <- full %>% filter(y_coord <= 50 - (15 / 2)) # Training 1
-#full_sub2 <- full %>% filter(x_coord >= 50 + (15 / 2) & y_coord > 50 - (15 / 2)) # Training 1
+full_sub1 <- full %>% filter(y_coord <= 50 - (15 / 2)) # Training 1
+full_sub2 <- full %>% filter(x_coord >= 50 + (15 / 2) & y_coord > 50 - (15 / 2)) # Training 1
 #full_sub1 <- full %>% filter(x_coord <= 50 - (15 / 2)) # Training 2
 #full_sub2 <- full %>% filter(y_coord <= 50 - (15 / 2) & x_coord > 50 - (15 / 2)) # Training 2
 #full_sub1 <- full %>% filter(y_coord >= 50 + (15 / 2)) # Training 3
 #full_sub2 <- full %>% filter(x_coord <= 50 - (15 / 2) & y_coord < 50 + (15 / 2)) # Training 3
-full_sub1 <- full %>% filter(x_coord >= 50 + (15 / 2)) # Training 4
-full_sub2 <- full %>% filter(y_coord >= 50 + (15 / 2) & x_coord < 50 + (15 / 2)) # Training 4
+#full_sub1 <- full %>% filter(x_coord >= 50 + (15 / 2)) # Training 4
+#full_sub2 <- full %>% filter(y_coord >= 50 + (15 / 2) & x_coord < 50 + (15 / 2)) # Training 4
 
 # Define full training set
 training <- rbind(full_sub1, full_sub2)
 
 # Define test data
-#test <- full %>% filter(y_coord >= 50 + (15 / 2) & x_coord <= 50 - (15 / 2)) # Test 1
+test <- full %>% filter(y_coord >= 50 + (15 / 2) & x_coord <= 50 - (15 / 2)) # Test 1
 #test <- full %>% filter(y_coord >= 50 + (15 / 2) & x_coord >= 50 + (15 / 2)) # Test 2
 #test <- full %>% filter(y_coord <= 50 - (15 / 2) & x_coord >= 50 + (15 / 2)) # Test 3
-test <- full %>% filter(y_coord <= 50 - (15 / 2) & x_coord <= 50 - (15 / 2)) # Test 4
+#test <- full %>% filter(y_coord <= 50 - (15 / 2) & x_coord <= 50 - (15 / 2)) # Test 4
 
 
 ######################################
@@ -103,6 +109,13 @@ test <- full %>% filter(y_coord <= 50 - (15 / 2) & x_coord <= 50 - (15 / 2)) # T
 
 # Subset to a single species
 sing_sp <- droplevels(training[training$species == "CANO", ])
+
+# Explore rare competitors
+#rare_comp_table <- table(sing_sp$sps_comp)[which(table(sing_sp$sps_comp) < 100)]
+#length(rare_comp_table)
+#sum(rare_comp_table)
+#rare_comp_table
+#prop.table(rare_comp_table)
 
 # Find common competitors
 comps <- names(which(table(sing_sp$sps_comp) >= 100))
@@ -123,16 +136,22 @@ sing_sp$OTHR_density <- apply(sing_sp[, other_cols], 1, sum)
 sing_sp$intra <- 0
 sing_sp$intra[sing_sp$sps_comp == sing_sp$species] <- 1
 
-# Convert competitor species to factor
+# Convert competitor species and side to factor
 sing_sp$sps_comp <- as.factor(sing_sp$sps_comp)
+sing_sp$side <- as.factor(sing_sp$side)
 
 # Create matrix of factor variables
-dm_fac <- model.matrix(size_corr_growth ~ sps_comp + stand_id, sing_sp,
+#dm_fac <- model.matrix(size_corr_growth ~ sps_comp + stand_id, sing_sp,
+#                       contrasts.arg = list(sps_comp = contrasts(sing_sp$sps_comp, contrasts = F),
+#                       stand_id = contrasts(sing_sp$stand_id, contrasts = F)))
+#dm_fac <- model.matrix(size_corr_growth ~ sps_comp, sing_sp,
+#                       contrasts.arg = list(sps_comp = contrasts(sing_sp$sps_comp, contrasts = F)))
+dm_fac <- model.matrix(size_corr_growth ~ sps_comp + side, sing_sp,
                        contrasts.arg = list(sps_comp = contrasts(sing_sp$sps_comp, contrasts = F),
-                       stand_id = contrasts(sing_sp$stand_id, contrasts = F)))
+                       side = contrasts(sing_sp$side, contrasts = F)))
 
 # Combine factor predictors with continuous predictors (prox, size_comp_dbh, all_density, species-specific densities)
-dm <- cbind(dm_fac, as.matrix(sing_sp[c(9, 12, density_cols, 35, 36)])) # including intra
+dm <- cbind(dm_fac, as.matrix(sing_sp[c(9, 12, density_cols, 36:38)])) # including intra and elev
 
 # Standardize variables except for first column (intercept)
 dm[, 2:ncol(dm)] <- apply(dm[, 2:ncol(dm)], 2, z_trans)
@@ -214,14 +233,26 @@ coef(slope_fit)
 #mod_coef <- cbind(mod_coef, as.matrix(coef(mod)))
 
 # Save model coefficients table
-write.csv(all_fits, "Data/CANO4_no_clim.csv")
+write.csv(all_fits, "Data/ABAM1_elev.csv")
+
+
+
+################################
+
+
+
+
+
+
+
+
 
 ##############################
 # Part 8. Predicting test data
 ##############################
 
 # Subset to a single species
-test_ss <- droplevels(test[test$species == "CANO", ])
+test_ss <- droplevels(test[test$species == "ABAM", ])
 
 # Change rare competitor species to OTHR
 test_ss$sps_comp[which(test_ss$sps_comp %in% comps == F)] <- "OTHR"
@@ -233,16 +264,23 @@ test_ss$OTHR_density <- apply(test_ss[, other_cols], 1, sum)
 test_ss$intra <- 0
 test_ss$intra[test_ss$sps_comp == test_ss$species] <- 1
 
-# Convert competitor species to factor
+# Convert competitor species and side to factor
 test_ss$sps_comp <- as.factor(test_ss$sps_comp)
+test_ss$side <- as.factor(test_ss$side)
 
 # Create matrix of factor variables
-dm_fac_test <- model.matrix(size_corr_growth ~ sps_comp + stand_id, test_ss,
+#dm_fac_test <- model.matrix(size_corr_growth ~ sps_comp + stand_id, test_ss,
+#                            contrasts.arg = list(sps_comp = contrasts(test_ss$sps_comp, contrasts = F),
+#                                                 stand_id = contrasts(test_ss$stand_id, contrasts = F)))
+#dm_fac_test <- model.matrix(size_corr_growth ~ sps_comp, test_ss,
+#                            contrasts.arg = list(sps_comp = contrasts(test_ss$sps_comp, contrasts = F)))
+dm_fac_test <- model.matrix(size_corr_growth ~ sps_comp + side, test_ss,
                        contrasts.arg = list(sps_comp = contrasts(test_ss$sps_comp, contrasts = F),
-                                            stand_id = contrasts(test_ss$stand_id, contrasts = F)))
+                                            side = contrasts(test_ss$side, contrasts = F)))
 
 # Combine factor predictors with continuous predictors (prox, size_comp_dbh, all_density, species-specific densities)
-dm_test <- cbind(dm_fac_test, as.matrix(test_ss[c(9, 12, density_cols, 35, 36)])) # including intra
+#dm_test <- cbind(dm_fac_test, as.matrix(test_ss[c(9, 12, density_cols, 35, 36)])) # including intra
+dm_test <- cbind(dm_fac_test, as.matrix(test_ss[c(9, 12, density_cols, 36:38)])) # including intra and elev
 
 # Add any columns to dm_test that are missing (but present in dm)
 missing_cols <- colnames(dm)[colnames(dm) %in% colnames(dm_test) == F]

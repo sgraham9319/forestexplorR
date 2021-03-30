@@ -6,8 +6,8 @@ library(dplyr)
 col_names <- c("focal_sps", "training_set",
                "sps_compABAM", "sps_compABLA", "sps_compCANO", "sps_compOTHR",
                "sps_compPICO", "sps_compPIMO", "sps_compPSME", "sps_compTABR",
-               "sps_compTHPL", "sps_compTSHE", "sps_compTSME",
-               "prox", "size_comp_dbh",
+               "sps_compTHPL", "sps_compTSHE", "sps_compTSME", "sideeast",
+               "sidewest", "elevation_m", "prox", "size_comp_dbh",
                "ABAM_density", "ABLA_density", "CANO_density", "OTHR_density",
                "PICO_density", "PIMO_density", "PSME_density", "TABR_density",
                "THPL_density", "TSHE_density", "TSME_density", "all_density",
@@ -26,7 +26,7 @@ for(i in focal_sps){
   for(j in train_set){
     
     # Load model output
-    mods <- read.csv(paste("Data/", i, j, "_no_clim.csv", sep = ""))
+    mods <- read.csv(paste("Data/", i, j, "_elev.csv", sep = ""))
     
     # Extract best model
     new_mod <- mods[which.min(mods$MSE), ]
@@ -44,4 +44,4 @@ for(i in focal_sps){
 best_mods <- best_mods[-1, 1:length(col_names)]
 
 # Write best models table to file
-write.csv(best_mods, file = "Data/RR_best_mod_coef.csv", row.names = F)
+write.csv(best_mods, file = "Data/RR_elev_mod_coef.csv", row.names = F)

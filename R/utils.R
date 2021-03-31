@@ -131,7 +131,7 @@ circ_area <- function(radius){
 density_calc <- function(data){
   
   # Create list of species
-  sps_list <- levels(data$species)
+  sps_list <- sort(unique(data$species))
   
   # Create output data frame
   output <- as.data.frame(matrix(nrow = ncol(data) - 1,
@@ -143,7 +143,7 @@ density_calc <- function(data){
   
   if(nrow(output) > 1){
     
-    # Add density includng all species to output
+    # Add density including all species to output
     output[, "all_density"] <- apply(data[, 2:ncol(data)], 2, sum, na.rm = T)
     
     # Loop through species adding species-specific densities to output
@@ -154,7 +154,7 @@ density_calc <- function(data){
     }
   } else {
     
-    # Add density includng all species to output
+    # Add density including all species to output
     output[, "all_density"] <- sum(data[, 2], na.rm = T)
     
     # Loop through species adding species-specific densities to output
@@ -240,9 +240,12 @@ density_all_stands <- function(all_stands, radius){
                                    stand = stand_ids[stand_num],
                                    radius = radius)
       
-      output <- rbind(output, new_stand)
+      output <- bind_rows(output, new_stand)
     }
   }
+  
+  # Change any NA to 0
+  output[, 4:ncol(output)][is.na(output[, 4:ncol(output)])] <- 0
   
   # Return output
   output

@@ -1,4 +1,4 @@
 library(testthat)
-library(TreeNeighborhood)
+library(ForestPlot)
 
-test_check("TreeNeighborhood")
+test_check("ForestPlot")

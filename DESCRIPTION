@@ -1,4 +1,4 @@
-Package: TreeNeighborhood
+Package: ForestPlot
 Type: Package
 Title: Tree growth as a function of its neighbors
 Version: 0.1.0

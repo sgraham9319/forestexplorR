@@ -367,10 +367,9 @@ graph_matrix <- function(mapping, stand, radius){
     # Create dist, species and size vectors not including NAs
     prox <- dist_mat[!is.na(dist_mat)]
     sps_comp <- sps_mat[!is.na(sps_mat)]
-    size_comp_abh <- size_mat_dens[!is.na(size_mat_dens)]
-    size_comp_dbh <- size_mat[!is.na(size_mat)]
+    size_comp <- size_mat[!is.na(size_mat)]
     size_cat_comp <- cat_mat[!is.na(cat_mat)]
-    comp_dat <- data.frame(prox, sps_comp, size_comp_abh, size_comp_dbh, size_cat_comp)
+    comp_dat <- data.frame(prox, sps_comp, size_comp, size_cat_comp)
     
     # Get vector of how many rows each focal tree should have
     repeats <- unname(apply(dist_mat, 2, non_na_len))
@@ -426,9 +425,13 @@ graph_mat_all <- function(all_stands, radius){
                                    stand = stand_ids[stand_num],
                                    radius = radius)
       
-      output <- rbind(output, new_stand)
+      output <- bind_rows(output, new_stand)
     }
   }
+  
+  # Replace NA densities with zero
+  dens_cols <- grep("density", names(output))
+  output[, dens_cols][is.na(output[, grep("density", names(output))])] <- 0
   
   # Return output
   output

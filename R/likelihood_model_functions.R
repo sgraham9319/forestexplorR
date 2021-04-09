@@ -1,111 +1,123 @@
-#####################################################
-# Functions for rearranging data for likelihood model
-#####################################################
-
-# Author: Stuart Graham
-# Created: 4/3/2020
-# Last edited: 4/3/2020
-
-# Functions list:
-#     neighborhoods - makes a separate row for every focal-competitor pair
-#                     in a given stand with given neighborhood radius
-#     neighborhoods_all - implements neighborhoods function over all stands in
-#                         a multiple-stand dataset with a provided neighborhood
-#                         radius
 
 
-#==============
-# neighborhoods
-#==============
+#====================================
+# Function for creating neighborhoods
+#====================================
 
-# Note that the TreeNeighborhood package already contains a similar function
-# but it returns abh (proportion of neighborhood area occupied by the tree)
-# rather than dbh. We want to use dbh for the likelihood model to be consistent
-# with Fortunel et al. 2016
+# Option to specify stands (as a single stand ID, vector of IDs, or simply the
+# default of all stands in the mapping data), neighborhood radius, and whether
+# tree densities (all trees and species-specific densities) should be included
 
-# Function for creating neighborhoods table with dbh values
-neighborhoods <- function(mapping, stand, radius) {
+neighborhoods <- function(mapping, stands = "all", radius, densities = F) {
+  
+  # Create vector of stand IDs
+  if(length(stands) == 1 & stands[1] == "all"){
+    stand_list <- unique(mapping$stand_id)
+  } else {
+    stand_list <- stands
+  }
   
   # Convert species column to factor
   mapping$species <- as.factor(mapping$species)
   
-  # Subset to focal stand and remove unneeded columns
-  one_stand <- mapping %>%
-    filter(stand_id == stand) %>%
-    select(tree_id, stand_id, species, dbh, x_coord, y_coord, size_cat)
-  
-  # Create distance matrix - element i,j is the distance (in meters) between trees in
-  # rows i and j in one_stand
-  dist_mat <- as.matrix(dist(one_stand[, c("x_coord", "y_coord")]))
-  # Create species matrix - each column is a replica of one_stand$species
-  sps_mat <- matrix(one_stand$species, nrow = nrow(one_stand), ncol = nrow(one_stand))
-  # Create size matrix - each column is a replica of one_stand$dbh
-  size_mat <- matrix(one_stand$dbh, nrow = nrow(one_stand), ncol = nrow(one_stand))
-  # Create size category matrix - each column is a replica of one_stand$size_cat
-  cat_mat <- matrix(one_stand$size_cat, nrow = nrow(one_stand), ncol = nrow(one_stand))
-  
-  # Find distances greater than radius or equal to zero in distance matrix - these
-  # elements represent pairs of trees that are not in each other's neighborhood or
-  # are the same tree paired with itself
-  non_comp <- which(dist_mat > radius | dist_mat == 0)
-  
-  # Convert values of these non-competing pairs to NA in all matrices
-  dist_mat[non_comp] <- NA
-  sps_mat[non_comp] <- NA
-  size_mat[non_comp] <- NA
-  cat_mat[non_comp] <- NA
-  
-  # Create dist, species, size and size category vectors not including NAs
-  prox <- dist_mat[!is.na(dist_mat)]
-  sps_comp <- sps_mat[!is.na(sps_mat)]
-  size_comp <- size_mat[!is.na(size_mat)]
-  size_cat_comp <- cat_mat[!is.na(cat_mat)]
-  comp_dat <- data.frame(prox, sps_comp, size_comp, size_cat_comp)
-  
-  # Get vector of how many rows (competitors) each focal tree should have
-  repeats <- unname(apply(dist_mat, 2, non_na_len))
-  
-  # Repeat rows of one_stand appropriate number of times
-  all_rows <- one_stand[rep(1:nrow(one_stand), repeats), ]
-  
-  # Bind competitor data to one_stand
-  output <- cbind(all_rows, comp_dat)
-}
-
-
-#==================
-# neighborhoods_all
-#==================
-
-# This function takes as input a table of mapping data for trees distributed
-# across multiple stands, implements the above neighborhoods function for 
-# each stand, and then binds results together in a single output table
-
-# Applying neighborhoods function to all stands
-neighborhoods_all <- function(all_stands, radius){
-  
-  # Identify unique stands in dataset
-  stand_ids <- unique(all_stands$stand_id)
-  
-  # Loop through stands
-  for(stand_num in 1:length(stand_ids)){
-    
-    # If first stand, make the output table
-    if(stand_num == 1){
-      
-      output <- neighborhoods(all_stands,
-                              stand = stand_ids[stand_num],
-                              radius = radius)
-    } else { 
-      
-      # If not first stand, append results to those from earlier stands
-      new_stand <- neighborhoods(all_stands,
-                                 stand = stand_ids[stand_num],
-                                 radius = radius)
-      
-      output <- rbind(output, new_stand)
+  # Check if requested stands appear in mapping data
+  for(i in stand_list){
+    if(i %in% mapping$stand_id == F){
+      print(paste("Warning: skipping stand ", i, " because not found in mapping data", sep = "'"))
     }
   }
+  
+  # Update stand list
+  stand_list <- stand_list[stand_list %in% mapping$stand_id]
+  
+  # Loop through stands creating neighborhoods for each
+  for(i in 1:length(stand_list)){
+    
+    # Subset to focal stand and calculate abh
+    one_stand <- mapping %>%
+      filter(stand_id == stand_list[i]) %>%
+      mutate(abh = circ_area(dbh / 2)) %>%
+      select(tree_id, stand_id, species, dbh, abh, size_cat, x_coord, y_coord)
+    
+    # Create distance matrix
+    dist_mat <- as.matrix(dist(one_stand[, c("x_coord", "y_coord")]))
+    
+    # Create competitor species matrix
+    sps_mat <- matrix(one_stand$species, nrow = nrow(one_stand), ncol = nrow(one_stand))
+    
+    # Create competitor dbh matrix
+    dbh_mat <- matrix(one_stand$dbh, nrow = nrow(one_stand), ncol = nrow(one_stand))
+    
+    # Create competitor abh matrix
+    abh_mat <- matrix(one_stand$abh, nrow = nrow(one_stand), ncol = nrow(one_stand))
+    
+    # Create competitor size category matrix
+    cat_mat <- matrix(one_stand$size_cat, nrow = nrow(one_stand), ncol = nrow(one_stand))
+    
+    # Find values in distance matrix greater than radius or equal to zero - these
+    # elements represent pairs of trees that are not in each others neighborhood or
+    # are the same tree paired with itself
+    non_comp <- which(dist_mat > radius | dist_mat == 0)
+    
+    # Convert values of these non-competing pairs to NA in all matrices
+    dist_mat[non_comp] <- NA
+    sps_mat[non_comp] <- NA
+    dbh_mat[non_comp] <- NA
+    abh_mat[non_comp] <- NA
+    cat_mat[non_comp] <- NA
+    
+    # Create distance, species, dbh, abh and size category vectors, excluding NAs
+    prox <- dist_mat[!is.na(dist_mat)]
+    sps_comp <- sps_mat[!is.na(sps_mat)]
+    dbh_comp <- dbh_mat[!is.na(dbh_mat)]
+    abh_comp <- abh_mat[!is.na(abh_mat)]
+    size_cat_comp <- cat_mat[!is.na(cat_mat)]
+    
+    # Combine vectors into competitor information data frame
+    comp_dat <- data.frame(prox, sps_comp, dbh_comp, abh_comp, size_cat_comp)
+    
+    # Get vector of how many rows (competitors) each focal tree should have
+    repeats <- unname(apply(dist_mat, 2, non_na_len))
+    
+    # Repeat rows of one_stand appropriate number of times
+    all_rows <- one_stand[rep(1:nrow(one_stand), repeats), ]
+    
+    # Bind competitor data to one_stand
+    one_stand_output <- cbind(all_rows, comp_dat)
+    
+    # Calculate densities if requested
+    if(densities){
+      
+      # Add species information to abh matrix
+      nbhds <-  cbind(one_stand$species, as.data.frame(abh_mat))
+      colnames(nbhds)[1] <- "species"
+      
+      # Calculate densities
+      dens <- density_calc(nbhds, radius)
+      
+      # Add tree_id column
+      dens <- cbind(one_stand$tree_id, dens)
+      colnames(dens)[1] <- "tree_id"
+      dens$tree_id <- as.character(dens$tree_id)
+      
+      # Join to basic neighborhoods data
+      one_stand_output <- left_join(one_stand_output, dens, by = "tree_id")
+    }
+    
+    # Add to cumulative output
+    if(i == 1){
+      output <- one_stand_output
+    } else {
+      output <- bind_rows(output, one_stand_output)
+    }
+  }
+  
+  # Replace NA densities with 0
+  dens_cols <- grep("density", names(output))
+  output[, dens_cols][is.na(output[, dens_cols])] <- 0
+  
+  # Reset row names
+  rownames(output) <- 1:nrow(output)
   
   # Return output
   output

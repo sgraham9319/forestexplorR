@@ -3,6 +3,7 @@ library(measurements)
 library(sf)
 library(mapview)
 library(plotly)
+library(tidyverse)
 
 # Load package
 devtools::load_all()

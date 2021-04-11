@@ -32,7 +32,7 @@ stand_locs_sf <- st_as_sf(stand_locs, coords = c("lon_dd", "lat_dd"), crs = 4326
 mapview(stand_locs_sf, zcol = "stand_id")
 
 # Create polygons for each stand using convex hull method
-stand_polygons <- polygons(stand_locs_sf)
+stand_polygons <- polygons(stand_locs_sf) # message is not an error
   
 # Plot polygons
 mapview(stand_polygons, zcol = "stand_id")
@@ -78,7 +78,7 @@ hist(mapping$ann_growth)
 hist(mapping$size_corr_growth)
 
 # Plot a stand with color representing sqrt(annual growth / initial size)
-utm_mapping(tree_x_y = mapping, stand = "TO04", color_var = "species")
+utm_mapping(tree_x_y = mapping, stand = "PP17", color_var = "species")
 
 #=====================================
 # Calculating density around each tree

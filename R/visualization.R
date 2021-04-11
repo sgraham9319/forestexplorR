@@ -91,9 +91,9 @@ utm_mapping <- function(tree_x_y, stand, color_var){
   focal_stand$dists <- sqrt((focal_stand$x_coord ^ 2) + (focal_stand$y_coord ^ 2))
   
   # Extract X and Y UTM coordinates of stand origin
-  origin_x <- stand_utm[stand_utm$stand == stand & 
+  origin_x <- stand_utm[stand_utm$stand_id == stand & 
                           stand_utm$corner_id == "origin", "x"][[1]]
-  origin_y <- stand_utm[stand_utm$stand == stand & 
+  origin_y <- stand_utm[stand_utm$stand_id == stand & 
                           stand_utm$corner_id == "origin", "y"][[1]]
   
   # Calculate UTM X and Y
@@ -105,6 +105,6 @@ utm_mapping <- function(tree_x_y, stand, color_var){
   
   # Plot result
   mapview(focal_stand_utm, zcol = color_var) + 
-    mapview(stand_polygons[["geometry"]][which(stand_polygons[["stand_id"]] == stand)])
+    mapview(stand_polygons$geometry[stand_polygons$stand_id == stand])
   
 }

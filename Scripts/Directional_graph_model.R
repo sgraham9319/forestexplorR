@@ -8,17 +8,17 @@ library(tidyr)
 #===========================
 
 # Load mapping data
-mapping <- read.csv("../Data/Mapping_2017.csv", stringsAsFactors = F)
+mapping <- read.csv("Data/Mapping_2017.csv", stringsAsFactors = F)
 
 # Create interaction matrix
-int_mat <- graph_mat_all(mapping, 10)
+int_mat <- graph_mat_all(mapping, radius = 10)
 
 # Remove trees whose neighborhood extends beyond stand edge
 int_mat <- int_mat %>%
   filter(x_coord >= 10 & x_coord <= 90 & y_coord >= 10 & y_coord <= 90)
 
 # Load growth data
-growth_data <- read.csv("../Data/Tree_growth_2017.csv", stringsAsFactors = F)
+growth_data <- read.csv("Data/Tree_growth_2017.csv", stringsAsFactors = F)
 
 # Remove test data (2017 measurements and stands TO04, AE10, and AV02)
 growth_data <- growth_data %>%
@@ -81,7 +81,8 @@ pred <- predict(mod, newx = dm, s = "lambda.1se")
 obs <- int_mat %>% select(tree_id, species, sps_comp, size_corr_growth)
 all_pred <- cbind(obs, pred)
 colnames(all_pred)[4:5] <- c("obs", "pred")
-
+plot(mod)
+coef(mod)
 #=====================
 # Cross-validate model
 #=====================

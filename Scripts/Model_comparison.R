@@ -1,7 +1,7 @@
 
 # Load mapping and growth data
-mapping <- read.csv("../Data/Mapping_2017.csv", stringsAsFactors = F)
-growth <- read.csv("../Data/Tree_growth_2017.csv", stringsAsFactors = F)
+mapping <- read.csv("Data/Mapping_2017.csv", stringsAsFactors = F)
+growth <- read.csv("Data/Tree_growth_2017.csv", stringsAsFactors = F)
 
 # Remove test data (2017 measurements and stands TO04, AE10, and AV02)
 growth <- growth %>%
@@ -30,7 +30,7 @@ growth_summ <- growth_summary(growth)
 
 # Calculate neighborhood density for all trees
 densities <- density_all_stands(mapping, radius = 10)
-
+dens2 <- graph_mat_all(mapping, 10)
 # Attach neighborhood information to growth
 no_int_mat <- left_join(growth_summ, densities)
 

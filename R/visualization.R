@@ -4,10 +4,11 @@
 
 stand_dms_to_dd <- function(data){
   
-  data <- stand_locs_raw %>%
+  data %>%
     
     # Convert to long format
-    gather("location_id", "deg_min_sec", 3:10) %>%
+    pivot_longer(cols = 3:10, names_to = "location_id",
+                 values_to = "deg_min_sec") %>%
     
     # Remove cardinal directions from location IDs
     mutate(corner_id = ifelse(
@@ -22,15 +23,12 @@ stand_dms_to_dd <- function(data){
         "lat_dd"),
       
       # Make deg_min_sec values negative for westings and southings
-      deg_min_sec = ifelse(
-        str_detect(deg_min_sec, "W") == TRUE,
-        paste("-", deg_min_sec, sep = ""),
-        deg_min_sec),
-      
-      deg_min_sec = ifelse(
-        str_detect(deg_min_sec, "S") == TRUE,
-        paste("-", deg_min_sec, sep = ""),
-        deg_min_sec),
+      deg_min_sec = case_when(
+        str_detect(deg_min_sec, "W") == TRUE ~
+          paste("-", deg_min_sec, sep = ""),
+        str_detect(deg_min_sec, "S") == TRUE ~
+          paste("-", deg_min_sec, sep = ""),
+        TRUE ~ deg_min_sec),
       
       # Remove unwanted symbols from deg_min_sec
       deg_min_sec = str_replace(deg_min_sec, '\"', ""),
@@ -46,7 +44,7 @@ stand_dms_to_dd <- function(data){
     select(stand_id, y_azim, corner_id, coord, dec_deg) %>%
     
     # Separate lats and longs
-    spread(coord, dec_deg)
+    pivot_wider(names_from = coord, values_from = dec_deg)
 }
 
 #===========================
@@ -93,9 +91,9 @@ utm_mapping <- function(tree_x_y, stand, color_var){
   focal_stand$dists <- sqrt((focal_stand$x_coord ^ 2) + (focal_stand$y_coord ^ 2))
   
   # Extract X and Y UTM coordinates of stand origin
-  origin_x <- stand_utm[stand_utm$stand == stand & 
+  origin_x <- stand_utm[stand_utm$stand_id == stand & 
                           stand_utm$corner_id == "origin", "x"][[1]]
-  origin_y <- stand_utm[stand_utm$stand == stand & 
+  origin_y <- stand_utm[stand_utm$stand_id == stand & 
                           stand_utm$corner_id == "origin", "y"][[1]]
   
   # Calculate UTM X and Y
@@ -107,6 +105,6 @@ utm_mapping <- function(tree_x_y, stand, color_var){
   
   # Plot result
   mapview(focal_stand_utm, zcol = color_var) + 
-    mapview(stand_polygons[["geometry"]][which(stand_polygons[["stand_id"]] == stand)])
+    mapview(stand_polygons$geometry[stand_polygons$stand_id == stand])
   
 }

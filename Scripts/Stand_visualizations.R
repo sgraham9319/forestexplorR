@@ -3,6 +3,7 @@ library(measurements)
 library(sf)
 library(mapview)
 library(plotly)
+library(tidyverse)
 
 # Load package
 devtools::load_all()
@@ -12,10 +13,10 @@ devtools::load_all()
 #=====================================
 
 # Load 2013 within-stand location data for individual trees
-mapping_raw <- read.csv("../Data/Mapping_2017.csv", stringsAsFactors = F)
+mapping_raw <- read.csv("Data/Mapping_2017.csv", stringsAsFactors = F)
 
 # Load location data for stands
-stand_locs_raw <- read.csv("../Data/Stand_locations.csv", stringsAsFactors = F)
+stand_locs_raw <- read.csv("Data/Stand_locations.csv", stringsAsFactors = F)
 
 # Remap individual trees with the western-most corner of each stand as
 # the origin
@@ -31,7 +32,7 @@ stand_locs_sf <- st_as_sf(stand_locs, coords = c("lon_dd", "lat_dd"), crs = 4326
 mapview(stand_locs_sf, zcol = "stand_id")
 
 # Create polygons for each stand using convex hull method
-stand_polygons <- polygons(stand_locs_sf)
+stand_polygons <- polygons(stand_locs_sf) # message is not an error
   
 # Plot polygons
 mapview(stand_polygons, zcol = "stand_id")
@@ -48,7 +49,7 @@ stand_utm$y <- as.vector(st_coordinates(stand_utm)[,2])
 #===============================================
 
 # Load growth data
-growth_data <- read.csv("../Data/Tree_growth_2017.csv", stringsAsFactors = F)
+growth_data <- read.csv("Data/Tree_growth_2017.csv", stringsAsFactors = F)
 
 # Remove rows without dbh measurement
 growth_data <- growth_data[!is.na(growth_data$dbh), ]
@@ -77,7 +78,7 @@ hist(mapping$ann_growth)
 hist(mapping$size_corr_growth)
 
 # Plot a stand with color representing sqrt(annual growth / initial size)
-utm_mapping(tree_x_y = mapping, stand = "AG05", color_var = "size_corr_growth")
+utm_mapping(tree_x_y = mapping, stand = "PP17", color_var = "species")
 
 #=====================================
 # Calculating density around each tree
@@ -97,6 +98,7 @@ result <- nbhd_density(mapping_data = mapping_raw, stand = "AB08", x = des_x,
 result <- density_specific(mapping_raw, "AB08", 10, "grid")
 
 # Create a contour plot of density for AB08
+result <- density_specific(mapping_raw, "AB08", 10, "grid")
 plot_ly(
   x = result$x_coord, 
   y = result$y_coord, 
@@ -104,6 +106,8 @@ plot_ly(
   type = "contour" 
 )
 
+result1 <- result
+result1[, 3:ncol(result1)] <- (result1[, 3:ncol(result1)] / 10000) * (10000 / circ_area(10))
 plot_ly(
   x = a[, "x_coord"], 
   y = a[, "y_coord"], 

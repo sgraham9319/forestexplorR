@@ -23,5 +23,8 @@ growth_summary <- function(data){
                               (dbh[n()] - dbh[1]) / (year[n()] - year[1]),
                               NA)
     ) %>% 
-    mutate(size_corr_growth = sqrt(annual_growth / begin_size))
+    mutate(size_corr_growth = case_when(
+      is.na(annual_growth) ~ NA,
+      annual_growth < 0 ~ NA,
+      TRUE ~ sqrt(annual_growth / begin_size)))
 }

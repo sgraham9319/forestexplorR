@@ -19,7 +19,9 @@ growth_summary <- function(data){
       begin_size = dbh[1],
       mean_size = mean(dbh),
       midpoint_size = (min(dbh) + max(dbh)) / 2, 
-      annual_growth = (dbh[n()] - dbh[1]) / (year[n()] - year[1])
+      annual_growth = if_else(year[n()] != year[1],
+                              (dbh[n()] - dbh[1]) / (year[n()] - year[1]),
+                              NA)
     ) %>% 
     mutate(size_corr_growth = sqrt(annual_growth / begin_size))
 }

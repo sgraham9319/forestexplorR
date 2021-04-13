@@ -8,7 +8,7 @@
 # of the measurement, and a column named "dbh" containing the dbh measurements.
 
 growth_summary <- function(data){
-  data %>% 
+  output <- data %>% 
     group_by(tree_id) %>% 
     arrange(year) %>%
     summarize(
@@ -18,13 +18,28 @@ growth_summary <- function(data){
       last_record = year[n()],
       begin_size = dbh[1],
       mean_size = mean(dbh),
-      midpoint_size = (min(dbh) + max(dbh)) / 2, 
-      annual_growth = if_else(year[n()] != year[1],
-                              (dbh[n()] - dbh[1]) / (year[n()] - year[1]),
-                              NA)
+      midpoint_size = (min(dbh) + max(dbh)) / 2,
+      final_size = dbh[n()]
     ) %>% 
-    mutate(size_corr_growth = case_when(
-      is.na(annual_growth) ~ NA,
-      annual_growth < 0 ~ NA,
-      TRUE ~ sqrt(annual_growth / begin_size)))
+    mutate(
+      annual_growth = if_else(
+        first_record == last_record,
+        NA_real_,
+        (final_size - begin_size) / (last_record - first_record)))
+  
+  # Calculate size corrected growth for trees where defined
+  output$size_corr_growth <- NA
+  valid_rows <- which(output$annual_growth >= 0)
+  output$size_corr_growth[valid_rows] <- 
+    sqrt(output$annual_growth[valid_rows] /
+           output$begin_size[valid_rows])
+  
+  # Give warning if some trees showed negative growth
+  neg_grow <- length(which(output$annual_growth < 0))
+  if(neg_grow > 0){
+    print(paste("Warning:", neg_grow, "trees exhibited negative annual growth"))
+  }
+  
+  return(output)
+  
 }

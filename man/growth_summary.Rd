@@ -6,6 +6,12 @@
 \usage{
 growth_summary(data)
 }
+\arguments{
+\item{data}{A dataframe containing repeated measurements of growth.}
+}
+\value{
+A dataframe containing growth rate measurements for each tree
+}
 \description{
 Function requires a data frame where separate measurements of the same tree
 appear in different rows. The data frame needs to have a column called "treeid"

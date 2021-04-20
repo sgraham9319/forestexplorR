@@ -4,6 +4,9 @@
 #' appear in different rows. The data frame needs to have a column called "treeid"
 #' that contains unique tree ID values, a column named "year" containing the year
 #' of the measurement, and a column named "dbh" containing the dbh measurements.
+#' 
+#' @param data A dataframe containing repeated measurements of growth.
+#' @return A dataframe containing growth rate measurements for each tree
 
 growth_summary <- function(data){
   output <- data %>% 

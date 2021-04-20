@@ -3,6 +3,13 @@
 #' Option to specify stands (as a single stand ID, vector of IDs, or simply the
 #' default of all stands in the mapping data), neighborhood radius, and whether
 #' tree densities (all trees and species-specific densities) should be included
+#'
+#' @param mapping Dataframe containing tree coordinates.
+#' @param stands Vector of names of stands for which neighborhoods are desired.
+#' @param radius Numeric vector describing neighborhood radius in meters.
+#' @param densities Boolean specifying whether densities should be calculated.
+#' @return Neighborhood information for all focal trees in \code{mapping}.
+
 
 neighborhoods <- function(mapping, stands = "all", radius, densities = F) {
   

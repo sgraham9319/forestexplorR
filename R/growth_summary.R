@@ -1,11 +1,9 @@
-#======================================================
-# Calculate annual growth over entire measurment period
-#======================================================
-
-# Function requires a data frame where separate measurements of the same tree
-# appear in different rows. The data frame needs to have a column called "treeid"
-# that contains unique tree ID values, a column named "year" containing the year
-# of the measurement, and a column named "dbh" containing the dbh measurements.
+#' Calculate annual growth
+#'
+#' Function requires a data frame where separate measurements of the same tree
+#' appear in different rows. The data frame needs to have a column called "treeid"
+#' that contains unique tree ID values, a column named "year" containing the year
+#' of the measurement, and a column named "dbh" containing the dbh measurements.
 
 growth_summary <- function(data){
   output <- data %>% 

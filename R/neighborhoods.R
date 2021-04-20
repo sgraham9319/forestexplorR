@@ -1,10 +1,8 @@
-#====================================
-# Function for creating neighborhoods
-#====================================
-
-# Option to specify stands (as a single stand ID, vector of IDs, or simply the
-# default of all stands in the mapping data), neighborhood radius, and whether
-# tree densities (all trees and species-specific densities) should be included
+#' Create neighborhoods
+#'
+#' Option to specify stands (as a single stand ID, vector of IDs, or simply the
+#' default of all stands in the mapping data), neighborhood radius, and whether
+#' tree densities (all trees and species-specific densities) should be included
 
 neighborhoods <- function(mapping, stands = "all", radius, densities = F) {
   

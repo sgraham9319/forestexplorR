@@ -4,7 +4,7 @@
 \alias{growth_model}
 \title{Model tree growth}
 \usage{
-growth_model(training, outcome_var, focal_sps)
+growth_model(training, outcome_var, focal_sps, rare_comps = "none")
 }
 \arguments{
 \item{training}{A dataframe containing a separate row for each focal x
@@ -18,6 +18,11 @@ variable, provided as a string.}
 
 \item{focal_sps}{Name of species for which growth should be modeled,
 provided as a string.}
+
+\item{rare_comps}{Minimum number of interactions a competitor species must
+appear in to remain separate from the "OTHR" category (see details). If not
+specified, no "OTHR" category will be created and all competitor species will
+remain separate.}
 }
 \value{
 A list containing four elements: \code{mod} is the fitted glmnet
@@ -38,4 +43,11 @@ using the glmnet package. Predictions, R-squared, and model coefficients
 returned are all based on the \code{"lambda.1se"} model but all models with
 different lambda values are included in the returned mod object - see glmnet 
 documentation for details.
+
+Rare competitor species can be grouped together as "OTHR" for modeling if
+desired. The optional argument \code{rare_comps} is a number indicating the
+minimum number of interactions a species must appear in to remain separate
+from the "OTHR" category. If species-specific densities are included in
+\code{training} those of rare competitors will be combined into a new 
+"OTHR_density" variable.
 }

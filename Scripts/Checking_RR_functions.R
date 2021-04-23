@@ -12,7 +12,7 @@ nbhds <- nbhds %>%
 
 
 test <- growth_model(training = nbhds, outcome_var = "size_corr_growth",
-                     focal_sps = "PSME")
-test$R_squared
+                     focal_sps = "PSME", rare_comps = 100)
+test$mod_coef
 
 # INTRA AS OPTION FOR FUNCTION???

@@ -11,6 +11,13 @@
 #' different lambda values are included in the returned mod object - see glmnet 
 #' documentation for details.
 #' 
+#' Rare competitor species can be grouped together as "OTHR" for modeling if
+#' desired. The optional argument \code{rare_comps} is a number indicating the
+#' minimum number of interactions a species must appear in to remain separate
+#' from the "OTHR" category. If species-specific densities are included in
+#' \code{training} those of rare competitors will be combined into a new 
+#' "OTHR_density" variable. 
+#' 
 #' @param training A dataframe containing a separate row for each focal x
 #' neighbor tree pair and a column for each variable to include in the
 #' model, including the outcome variable. Outcome variable must be numeric,
@@ -20,6 +27,10 @@
 #' variable, provided as a string.
 #' @param focal_sps Name of species for which growth should be modeled,
 #' provided as a string.
+#' @param rare_comps Minimum number of interactions a competitor species must
+#' appear in to remain separate from the "OTHR" category (see details). If not
+#' specified, no "OTHR" category will be created and all competitor species will
+#' remain separate.
 #' @return A list containing four elements: \code{mod} is the fitted glmnet
 #' object, \code{obs_pred} is a dataframe containing observed and predicted 
 #' growth, \code{R_squared} is the coefficient of determination, \code{mod_coef}
@@ -27,13 +38,40 @@
 #' coefficients. These elements can be called with e.g. \code{$R_squared}.
 #' 
 
-
-growth_model <- function(training, outcome_var, focal_sps){
+growth_model <- function(training, outcome_var, focal_sps, rare_comps = "none"){
   
-  # Extract focal species data and convert character variables to factors
+  # Extract focal species data
   sing_sp <- training %>%
     filter(species == focal_sps) %>%
-    select(-species) %>%
+    select(-species)
+  
+  # Remove any density columns containing only zeros
+  sing_sp <- sing_sp %>%
+    select(-names(
+      which(colSums(sing_sp[, grep("density", names(sing_sp))]) == 0)))
+  
+  # Handle rare competitors if requested
+  if(rare_comps != "none"){
+    
+    # Make list of rare competitor species
+    rare <- names(which(table(sing_sp$sps_comp) < rare_comps))
+    
+    # Change rare competitor species to OTHR
+    sing_sp <- sing_sp %>%
+      mutate(sps_comp = if_else(sps_comp %in% rare, "OTHR",
+                                as.character(sps_comp)))
+    
+    # Create OTHR density column
+    rare_dens_cols <- paste(rare, "density", sep = "_")
+    sing_sp <- sing_sp %>%
+      mutate(OTHR_density = apply(sing_sp %>%
+                                    select(all_of(rare_dens_cols)), 1, sum)) %>%
+      select(-all_of(rare_dens_cols))
+    
+  }
+  
+  # Convert character variables to factors
+  sing_sp <- sing_sp %>%
     mutate(across(where(is.character), as.factor))
   
   # Create model formula object

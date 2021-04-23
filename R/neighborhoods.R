@@ -119,6 +119,10 @@ neighborhoods <- function(mapping, stands = "all", radius, densities = F) {
   dens_cols <- grep("density", names(output))
   output[, dens_cols][is.na(output[, dens_cols])] <- 0
   
+  # Add column indicating whether competitor is conspecific
+  output <- output %>%
+    mutate(intra = if_else(sps_comp == species, 1, 0))
+  
   # Reset row names
   rownames(output) <- 1:nrow(output)
   

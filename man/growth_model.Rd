@@ -4,7 +4,13 @@
 \alias{growth_model}
 \title{Model tree growth}
 \usage{
-growth_model(training, outcome_var, focal_sps, rare_comps = "none")
+growth_model(
+  training,
+  outcome_var,
+  focal_sps,
+  iterations = 1,
+  rare_comps = "none"
+)
 }
 \arguments{
 \item{training}{A dataframe containing a separate row for each focal x
@@ -19,30 +25,51 @@ variable, provided as a string.}
 \item{focal_sps}{Name of species for which growth should be modeled,
 provided as a string.}
 
+\item{iterations}{Number of times the model should be fitted.}
+
 \item{rare_comps}{Minimum number of interactions a competitor species must
 appear in to remain separate from the "OTHR" category (see details). If not
 specified, no "OTHR" category will be created and all competitor species will
 remain separate.}
 }
 \value{
-A list containing four elements: \code{mod} is the fitted glmnet
-object, \code{obs_pred} is a dataframe containing observed and predicted 
-growth, \code{R_squared} is the coefficient of determination, \code{mod_coef}
-is a matrix containing the explanatory variables and their fitted
-coefficients. These elements can be called with e.g. \code{$R_squared}.
+A list containing four elements:
+\itemize{
+\item \code{mod} is a fitted glmnet model
+object - if \code{iterations > 1} this will be the model with the lowest
+cross-validated mean square error
+\item \code{obs_pred} is a dataframe containing
+observed and predicted growth - if \code{iterations > 1} this will 
+correspond to the best model
+\item \code{R_squared} is the coefficient of
+determination - if \code{iterations > 1} this will correspond to the best
+model
+\item \code{mod_coef} is a data frame containing the fitted coefficients, 
+cross-validated mean square error (\code{mse}), and coefficient of 
+determination for each fitted model with rows in ascending order of 
+\code{mse}.
+}
 }
 \description{
-Fits a regularized linear regression model of tree growth for a single
-species, returning the model object, growth predictions, the coefficient
-of determination, and the fitted model coefficients.
+Fits regularized linear regression models of tree growth for a single
+species, returning the model object, growth predictions, coefficient
+of determination, and fitted model coefficients.
 }
 \details{
-All variables other than the indicated outcome variable are included as
-explanatory variables in the model. Regularized regression model is fitted
+All variables in the user-provided training data other than species,
+tree_id, and the indicated outcome variable are included as explanatory
+variables in the model. Regularized regression model is fitted
 using the glmnet package. Predictions, R-squared, and model coefficients
 returned are all based on the \code{"lambda.1se"} model but all models with
 different lambda values are included in the returned mod object - see glmnet 
 documentation for details.
+
+As the glmnet model fitting process is stochastic, the fitted model can
+differ with each run. The \code{iterations} argument allows the user to
+specify how many times the model should be fitted. If the model is fitted
+more than once, the fitted coefficients for all models will be returned in
+but only the model object for the best model (lowest cross-validated mean
+square error) will be returned.
 
 Rare competitor species can be grouped together as "OTHR" for modeling if
 desired. The optional argument \code{rare_comps} is a number indicating the

@@ -42,8 +42,14 @@ growth_model <- function(training, outcome_var, focal_sps, rare_comps = "none"){
   
   # Extract focal species data
   sing_sp <- training %>%
+    arrange(tree_id) %>%
     filter(species == focal_sps) %>%
     select(-species)
+  
+  # Create vector of tree ids then remove this column
+  tree_ids <- sing_sp$tree_id
+  sing_sp <- sing_sp %>%
+    select(-tree_id)
   
   # Remove any density columns containing only zeros
   sing_sp <- sing_sp %>%
@@ -99,6 +105,8 @@ growth_model <- function(training, outcome_var, focal_sps, rare_comps = "none"){
   # Change columns of NaNs (no variation) to zeros
   dm[, which(is.nan(dm[1, ]))] <- 0
   
+  
+  
   # Fit glmnet model
   mod <- glmnet::cv.glmnet(x = dm, y = sing_sp$size_corr_growth,
                            family = "gaussian")
@@ -107,8 +115,14 @@ growth_model <- function(training, outcome_var, focal_sps, rare_comps = "none"){
   preds <- predict(mod, newx = dm, s = "lambda.1se")
   
   # Combine with observations
-  obs_pred <- cbind(sing_sp %>% select(size_corr_growth), preds)
-  names(obs_pred) <- c("observations", "predictions")
+  obs_pred <- cbind(tree_ids, sing_sp %>% select(size_corr_growth), preds)
+  names(obs_pred) <- c("tree_id", "observations", "predictions")
+  
+  # Get single prediction for each tree
+  obs_pred <- obs_pred %>%
+    group_by(tree_id) %>%
+    summarize(observations = observations[1],
+              predictions = mean(predictions))
   
   # Calculate coefficient of determination
   R_squared <- coef_det(obs_pred)

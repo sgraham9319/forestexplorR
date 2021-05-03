@@ -18,5 +18,5 @@ train <- train %>%
 # Run growth model function
 results <- growth_model(train, outcome_var = "size_corr_growth",
                         focal_sps = "PSME")
-
-iterations <- 10
+results <- growth_model(train, outcome_var = "size_corr_growth",
+                        focal_sps = "PSME", iterations = 5)

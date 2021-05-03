@@ -38,7 +38,8 @@
 #' coefficients. These elements can be called with e.g. \code{$R_squared}.
 #' 
 
-growth_model <- function(training, outcome_var, focal_sps, rare_comps = "none"){
+growth_model <- function(training, outcome_var, focal_sps, iterations = 1,
+                         rare_comps = "none"){
   
   # Extract focal species data
   sing_sp <- training %>%
@@ -106,33 +107,60 @@ growth_model <- function(training, outcome_var, focal_sps, rare_comps = "none"){
   dm[, which(is.nan(dm[1, ]))] <- 0
   
   
+  for(i in 1:iterations){
+    
+    # Fit glmnet model
+    mod <- glmnet::cv.glmnet(x = dm, y = sing_sp$size_corr_growth,
+                             family = "gaussian")
+    
+    # Calculate model predictions for training data
+    preds <- predict(mod, newx = dm, s = "lambda.1se")
+    
+    # Combine with observations
+    obs_pred <- cbind(tree_ids, sing_sp %>% select(size_corr_growth), preds)
+    names(obs_pred) <- c("tree_id", "observations", "predictions")
+    
+    # Get single prediction for each tree
+    obs_pred <- obs_pred %>%
+      group_by(tree_id) %>%
+      summarize(observations = observations[1],
+                predictions = mean(predictions))
+    
+    # Calculate coefficient of determination
+    R_squared <- coef_det(obs_pred)
+    
+    # Extract model coefficients
+    new_coef <- as.matrix(coef(mod, s = "lambda.1se"))
+    
+    # Add model mean square error and R squared to coefficients
+    mse <- mod$cvm[mod$lambda == mod$lambda.1se]
+    new_coef <- rbind(new_coef, mse, R_squared)
+    
+    # Add to model coefficients matrix
+    if(i == 1){
+      mod_coef <- new_coef
+    } else{
+      mod_coef <- cbind(mod_coef, new_coef)
+    }
+    
+    # Update best model output if new model is the best
+    if(i == 1 | mse < min(mod_coef["mse", ])){
+      best_mod <- mod
+      final_obs_pred <- obs_pred
+      best_R_squared <- R_squared
+    }
+  }
   
-  # Fit glmnet model
-  mod <- glmnet::cv.glmnet(x = dm, y = sing_sp$size_corr_growth,
-                           family = "gaussian")
-  
-  # Calculate model predictions for training data
-  preds <- predict(mod, newx = dm, s = "lambda.1se")
-  
-  # Combine with observations
-  obs_pred <- cbind(tree_ids, sing_sp %>% select(size_corr_growth), preds)
-  names(obs_pred) <- c("tree_id", "observations", "predictions")
-  
-  # Get single prediction for each tree
-  obs_pred <- obs_pred %>%
-    group_by(tree_id) %>%
-    summarize(observations = observations[1],
-              predictions = mean(predictions))
-  
-  # Calculate coefficient of determination
-  R_squared <- coef_det(obs_pred)
-  
-  # Extract model coefficients
-  mod_coef <- as.matrix(coef(mod, s = "lambda.1se"))
+  # Clean model coefficients table
+  mod_coef <- as.data.frame(t(mod_coef))
+  mod_coef <- mod_coef %>%
+    select(-2) %>%
+    arrange(mse)
+  rownames(mod_coef) <- 1:nrow(mod_coef)
   
   # Create output list
-  output <- list(mod = mod, obs_pred = obs_pred, R_squared = R_squared,
-                 mod_coef = mod_coef)
+  output <- list(mod = best_mod, obs_pred = final_obs_pred,
+                 R_squared = best_R_squared, mod_coef = mod_coef)
   
   # Return output
   output

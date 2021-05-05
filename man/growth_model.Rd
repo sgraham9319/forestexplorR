@@ -9,7 +9,8 @@ growth_model(
   outcome_var,
   focal_sps,
   iterations = 1,
-  rare_comps = "none"
+  rare_comps = "none",
+  test = NULL
 )
 }
 \arguments{
@@ -31,9 +32,13 @@ provided as a string.}
 appear in to remain separate from the "OTHR" category (see details). If not
 specified, no "OTHR" category will be created and all competitor species will
 remain separate.}
+
+\item{test}{An optional dataframe of test data that must be in exactly the
+same format as the training data i.e. all the same columns with the same
+names.}
 }
 \value{
-A list containing four elements:
+A list containing four or five elements:
 \itemize{
 \item \code{mod} is a fitted glmnet model
 object - if \code{iterations > 1} this will be the model with the lowest
@@ -44,6 +49,9 @@ correspond to the best model
 \item \code{R_squared} is the coefficient of
 determination - if \code{iterations > 1} this will correspond to the best
 model
+\item \code{test_R_squared} is the coefficient of determination of the best
+model on the test data (this element will not appear if no test data are
+provided)
 \item \code{mod_coef} is a data frame containing the fitted coefficients, 
 cross-validated mean square error (\code{mse}), and coefficient of 
 determination for each fitted model with rows in ascending order of 
@@ -52,8 +60,9 @@ determination for each fitted model with rows in ascending order of
 }
 \description{
 Fits regularized linear regression models of tree growth for a single
-species, returning the model object, growth predictions, coefficient
-of determination, and fitted model coefficients.
+species, returning the model object, its growth predictions, its coefficient
+of determination when applied to the training set (and optionally a provided
+test set), and the fitted model coefficients.
 }
 \details{
 All variables in the user-provided training data other than species,

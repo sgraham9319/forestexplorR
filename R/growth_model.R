@@ -1,8 +1,9 @@
 #' Model tree growth
 #' 
 #' Fits regularized linear regression models of tree growth for a single
-#' species, returning the model object, growth predictions, coefficient
-#' of determination, and fitted model coefficients.
+#' species, returning the model object, its growth predictions, its coefficient
+#' of determination when applied to the training set (and optionally a provided
+#' test set), and the fitted model coefficients.
 #' 
 #' All variables in the user-provided training data other than species,
 #' tree_id, and the indicated outcome variable are included as explanatory
@@ -40,7 +41,10 @@
 #' appear in to remain separate from the "OTHR" category (see details). If not
 #' specified, no "OTHR" category will be created and all competitor species will
 #' remain separate.
-#' @return A list containing four elements:
+#' @param test An optional dataframe of test data that must be in exactly the
+#' same format as the training data i.e. all the same columns with the same
+#' names.
+#' @return A list containing four or five elements:
 #' \itemize{
 #' \item \code{mod} is a fitted glmnet model
 #' object - if \code{iterations > 1} this will be the model with the lowest
@@ -51,6 +55,9 @@
 #' \item \code{R_squared} is the coefficient of
 #' determination - if \code{iterations > 1} this will correspond to the best
 #' model
+#' \item \code{test_R_squared} is the coefficient of determination of the best
+#' model on the test data (this element will not appear if no test data are
+#' provided)
 #' \item \code{mod_coef} is a data frame containing the fitted coefficients, 
 #' cross-validated mean square error (\code{mse}), and coefficient of 
 #' determination for each fitted model with rows in ascending order of 

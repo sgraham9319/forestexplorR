@@ -155,18 +155,22 @@ growth_model <- function(training, outcome_var, focal_sps, iterations = 1,
     mse <- mod$cvm[mod$lambda == mod$lambda.1se]
     new_coef <- rbind(new_coef, mse, R_squared)
     
+    # Update best model output if new model is the best
+    if(i == 1){
+      best_mod <- mod
+      final_obs_pred <- obs_pred
+      best_R_squared <- R_squared
+    } else if(mse < min(mod_coef["mse", ])){
+      best_mod <- mod
+      final_obs_pred <- obs_pred
+      best_R_squared <- R_squared
+    }
+    
     # Add to model coefficients matrix
     if(i == 1){
       mod_coef <- new_coef
     } else{
       mod_coef <- cbind(mod_coef, new_coef)
-    }
-    
-    # Update best model output if new model is the best
-    if(i == 1 | mse < min(mod_coef["mse", ])){
-      best_mod <- mod
-      final_obs_pred <- obs_pred
-      best_R_squared <- R_squared
     }
   }
   

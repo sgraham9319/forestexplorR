@@ -58,9 +58,9 @@
 #' }
 
 growth_model <- function(training, outcome_var, focal_sps, iterations = 1,
-                         rare_comps = "none"){
+                         rare_comps = "none", test = NULL){
   
-  # Extract focal species data
+    # Extract focal species data
   sing_sp <- training %>%
     arrange(tree_id) %>%
     filter(species == focal_sps) %>%
@@ -181,9 +181,89 @@ growth_model <- function(training, outcome_var, focal_sps, iterations = 1,
     arrange(mse)
   rownames(mod_coef) <- 1:nrow(mod_coef)
   
+  # Evaluate fit to test data if requested
+  if(!is.null(test)){
+    
+    # Subset test to focal species
+    ss_test <- test %>%
+      arrange(tree_id) %>%
+      filter(species == focal_sps) %>%
+      select(-species)
+    
+    # Create vector of tree ids then remove this column
+    test_ids <- ss_test$tree_id
+    ss_test <- ss_test %>%
+      select(-tree_id)
+    
+    # Handle rare competitors if requested
+    if(rare_comps != "none"){
+      
+      # Change rare competitor species to OTHR
+      ss_test <- ss_test %>%
+        mutate(sps_comp = if_else(sps_comp %in% rare, "OTHR",
+                                  as.character(sps_comp)))
+      
+      # Create OTHR density column
+      ss_test <- ss_test %>%
+        mutate(OTHR_density = apply(ss_test %>% select(all_of(rare_dens_cols)),
+                                    1, sum)) %>%
+        select(-all_of(rare_dens_cols))
+      
+    }
+    
+    # Convert character variables to factors
+    ss_test <- ss_test %>%
+      mutate(across(where(is.character), as.factor))
+    
+    # Find factor column names
+    fctr_cols <- names(ss_test)[sapply(ss_test, is.factor)]
+    
+    # Create list of factor columns
+    fctr_list <- list()
+    for(i in 1:length(fctr_cols)){
+      fctr_list[[i]] <- ss_test[, fctr_cols[i]]
+      names(fctr_list)[i] <- fctr_cols[i]
+    }
+    
+    # Create design matrix
+    dm_test <- model.matrix(mod_form, ss_test,
+                            contrasts.arg = lapply(fctr_list, contrasts,
+                                                   contrasts = F))
+    
+    # Standardize variables except for first column (intercept)
+    dm_test[, 2:ncol(dm_test)] <- apply(dm_test[, 2:ncol(dm_test)], 2, z_trans)
+    
+    # Change columns of NaNs (no variation) to zeros
+    dm_test[, which(is.nan(dm_test[1, ]))] <- 0
+    
+    # Calculate model predictions for test data
+    test_preds <- predict(best_mod, newx = dm_test, s = "lambda.1se")
+    
+    # Combine with observations
+    test_obs_pred <- cbind(test_ids, ss_test %>% select(size_corr_growth),
+                           test_preds)
+    names(test_obs_pred) <- c("tree_id", "observations", "predictions")
+    
+    # Get single prediction for each tree
+    test_obs_pred <- test_obs_pred %>%
+      group_by(tree_id) %>%
+      summarize(observations = observations[1],
+                predictions = mean(predictions))
+    
+    # Calculate coefficient of determination
+    test_R_squared <- coef_det(test_obs_pred)
+    
+  }
+  
   # Create output list
-  output <- list(mod = best_mod, obs_pred = final_obs_pred,
-                 R_squared = best_R_squared, mod_coef = mod_coef)
+  if(is.null(test)){
+    output <- list(mod = best_mod, obs_pred = final_obs_pred,
+                   R_squared = best_R_squared, mod_coef = mod_coef)
+  } else {
+    output <- list(mod = best_mod, obs_pred = final_obs_pred,
+                   R_squared = best_R_squared, 
+                   test_R_squared = test_R_squared, mod_coef = mod_coef)
+  }
   
   # Return output
   output

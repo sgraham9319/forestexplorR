@@ -237,6 +237,18 @@ growth_model <- function(training, outcome_var, focal_sps, iterations = 1,
                             contrasts.arg = lapply(fctr_list, contrasts,
                                                    contrasts = F))
     
+    # Find any columns in dm missing from dm_test
+    missing_cols <- setdiff(colnames(dm), colnames(dm_test))
+    
+    # Add these columns to dm_test
+    for(column in missing_cols){
+      dm_test <- cbind(dm_test, rep(0, times = nrow(dm_test)))
+      colnames(dm_test)[ncol(dm_test)] <- column
+    }
+    
+    # Reorder dm_test columns to match order of dm
+    dm_test <- dm_test[, match(colnames(dm), colnames(dm_test))]
+    
     # Standardize variables except for first column (intercept)
     dm_test[, 2:ncol(dm_test)] <- apply(dm_test[, 2:ncol(dm_test)], 2, z_trans)
     

@@ -15,26 +15,6 @@ if(getRversion() >= "2.15.1")
 
 non_na_len <- function(x){length(na.omit(x))}
 
-#==================================================================
-# Calculate annual growth between each pair of consecutive censuses
-#==================================================================
-
-detailed_growth <- function(data){
-  data %>%
-    filter(!is.na(year) & !is.na(dbh)) %>%
-    group_by(tree_id) %>% 
-    arrange(tree_id, year) %>%
-    rename(start_dbh = dbh,
-           start_year = year) %>%
-    mutate(year_diff = c(diff(start_year), NA),
-           dbh_diff = c(diff(start_dbh), NA),
-           end_year = start_year + year_diff,
-           end_dbh = start_dbh + dbh_diff,
-           annual_growth = dbh_diff / year_diff) %>%
-    select(-year_diff, -dbh_diff) %>%
-    filter(!is.na(end_year))
-}
-
 #==============================================
 # Calculate annual growth over a defined period
 #==============================================

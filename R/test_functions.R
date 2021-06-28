@@ -30,13 +30,13 @@ growth_summ_expt <- function(){
   first_record <- rep(2000, times = 3)
   last_record <- rep(2010, times = 3)
   begin_size <- rep(1, times = 3)
+  final_size <- c(3, 11, 21)
   mean_size <- c(2, 6, 11)
   midpoint_size <- c(2, 6, 11)
-  final_size <- c(3, 11, 21)
   annual_growth <- c(0.2, 1, 2)
   size_corr_growth <- sqrt(c(0.2, 1, 2))
   dat <- data.frame(tree_id, stand_id, species, first_record, last_record,
-                    begin_size, mean_size, midpoint_size, final_size,
+                    begin_size, final_size, mean_size, midpoint_size,
                     annual_growth, size_corr_growth)
   dat
 }

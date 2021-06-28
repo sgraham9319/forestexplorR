@@ -52,8 +52,17 @@ det_growth_test <- function(data){
 
 # Expected output
 det_growth_expt <- function(){
-  fake_growth() %>%
-    mutate(annual_growth = c(0.2, 0.2, NA, 1, 1, NA, 2, 2, NA))
+  tree_id <- rep(c("tree1", "tree2", "tree3"), each = 2)
+  stand_id <- rep("A", times = 6)
+  species <- rep("TSHE", times = 6)
+  start_year <- rep(c(2000, 2005), times = 3)
+  start_dbh <- c(1, 2, 1, 6, 1, 11)
+  end_year <- rep(c(2005, 2010), times = 3)
+  end_dbh <- c(2, 3, 6, 11, 11, 21)
+  annual_growth <- rep(c(0.2, 1, 2), each = 2)
+  dat <- data.frame(tree_id, stand_id, species, start_year, start_dbh,
+                    end_year, end_dbh, annual_growth)
+  dat
 }
 
 #=============================

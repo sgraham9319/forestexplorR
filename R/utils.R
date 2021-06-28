@@ -20,13 +20,19 @@ non_na_len <- function(x){length(na.omit(x))}
 #==================================================================
 
 detailed_growth <- function(data){
-  data %>% 
+  data %>%
+    filter(!is.na(year) & !is.na(dbh)) %>%
     group_by(tree_id) %>% 
     arrange(tree_id, year) %>%
-    mutate(year_diff = c(diff(year), NA),
-           dbh_diff = c(diff(dbh), NA),
+    rename(start_dbh = dbh,
+           start_year = year) %>%
+    mutate(year_diff = c(diff(start_year), NA),
+           dbh_diff = c(diff(start_dbh), NA),
+           end_year = start_year + year_diff,
+           end_dbh = start_dbh + dbh_diff,
            annual_growth = dbh_diff / year_diff) %>%
-    select(-year_diff, -dbh_diff)
+    select(-year_diff, -dbh_diff) %>%
+    filter(!is.na(end_year))
 }
 
 #==============================================

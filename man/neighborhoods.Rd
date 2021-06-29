@@ -4,22 +4,19 @@
 \alias{neighborhoods}
 \title{Create neighborhoods}
 \usage{
-neighborhoods(mapping, stands = "all", radius, densities = F)
+neighborhoods(mapping, stands = "all", radius)
 }
 \arguments{
-\item{mapping}{Dataframe containing tree coordinates.}
+\item{mapping}{Data frame containing tree coordinates.}
 
 \item{stands}{Vector of names of stands for which neighborhoods are desired.}
 
 \item{radius}{Numeric vector describing neighborhood radius in meters.}
-
-\item{densities}{Boolean specifying whether densities should be calculated.}
 }
 \value{
 Neighborhood information for all focal trees in \code{mapping}.
 }
 \description{
-Option to specify stands (as a single stand ID, vector of IDs, or simply the
-default of all stands in the mapping data), neighborhood radius, and whether
-tree densities (all trees and species-specific densities) should be included
+Takes a data frame containing mapping information of trees in one or more
+stands and returns a data frame with a row for each focal-neighbor pair
 }

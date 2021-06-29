@@ -4,11 +4,11 @@
 #===========================
 
 fake_growth <- function(){
-  tree_id <- rep(c("tree1", "tree2", "tree3"), each = 3)
-  stand_id <- rep("A", times = 9)
-  species <- rep("TSHE", times = 9)
-  year <- rep(c(2000, 2005, 2010), times = 3)
-  dbh <- c(1, 2, 3, 1, 6, 11, 1, 11, 21)
+  tree_id <- c(rep(c("tree1", "tree2", "tree3"), each = 3), "tree4")
+  stand_id <- rep("A", times = 10)
+  species <- rep("TSHE", times = 10)
+  year <- c(rep(c(2000, 2005, 2010), times = 3), 2010)
+  dbh <- c(3, 2, 1, 1, 6, 11, 1, 11, 21, 15)
   dat <- data.frame(tree_id, stand_id, species, year, dbh)
   dat
 }
@@ -24,19 +24,19 @@ growth_summ_test <- function(data){
 
 # Expected output
 growth_summ_expt <- function(){
-  tree_id <- c("tree1", "tree2", "tree3")
-  stand_id <- rep("A", times = 3)
-  species <- rep("TSHE", times = 3)
-  first_record <- rep(2000, times = 3)
-  last_record <- rep(2010, times = 3)
-  begin_size <- rep(1, times = 3)
-  mean_size <- c(2, 6, 11)
-  midpoint_size <- c(2, 6, 11)
-  final_size <- c(3, 11, 21)
-  annual_growth <- c(0.2, 1, 2)
-  size_corr_growth <- sqrt(c(0.2, 1, 2))
+  tree_id <- c("tree1", "tree2", "tree3", "tree4")
+  stand_id <- rep("A", times = 4)
+  species <- rep("TSHE", times = 4)
+  first_record <- c(rep(2000, times = 3), 2010)
+  last_record <- rep(2010, times = 4)
+  begin_size <- c(3, 1, 1, 15)
+  final_size <- c(1, 11, 21, 15)
+  mean_size <- c(2, 6, 11, 15)
+  midpoint_size <- c(2, 6, 11, 15)
+  annual_growth <- c(-0.2, 1, 2, NA)
+  size_corr_growth <- c(NA, sqrt(c(1, 2)), NA)
   dat <- data.frame(tree_id, stand_id, species, first_record, last_record,
-                    begin_size, mean_size, midpoint_size, final_size,
+                    begin_size, final_size, mean_size, midpoint_size,
                     annual_growth, size_corr_growth)
   dat
 }
@@ -52,8 +52,17 @@ det_growth_test <- function(data){
 
 # Expected output
 det_growth_expt <- function(){
-  fake_growth() %>%
-    mutate(annual_growth = c(0.2, 0.2, NA, 1, 1, NA, 2, 2, NA))
+  tree_id <- rep(c("tree1", "tree2", "tree3"), each = 2)
+  stand_id <- rep("A", times = 6)
+  species <- rep("TSHE", times = 6)
+  start_year <- rep(c(2000, 2005), times = 3)
+  start_dbh <- c(3, 2, 1, 6, 1, 11)
+  end_year <- rep(c(2005, 2010), times = 3)
+  end_dbh <- c(2, 1, 6, 11, 11, 21)
+  annual_growth <- rep(c(-0.2, 1, 2), each = 2)
+  dat <- data.frame(tree_id, stand_id, species, start_year, start_dbh,
+                    end_year, end_dbh, annual_growth)
+  dat
 }
 
 #=============================

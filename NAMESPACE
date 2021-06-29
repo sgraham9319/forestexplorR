@@ -1,5 +1,8 @@
 import(dplyr)
+import(tidyr)
 import(stringr)
 export(neighborhoods)
+export(neighborhood_summary)
 export(growth_summary)
 export(growth_model)
+export(detailed_growth)

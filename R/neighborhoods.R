@@ -6,9 +6,13 @@
 #' @param mapping Data frame containing tree coordinates.
 #' @param stands Vector of names of stands for which neighborhoods are desired.
 #' @param radius Numeric vector describing neighborhood radius in meters.
-#' @return Neighborhood information for all focal trees in \code{mapping}.
+#' @param coords Data frame containing coordinates for which neighborhoods are
+#' desired. Data frame should contain three columns in the following order -
+#' location ids, x-coordinates, y-coordinates. Column names are unimportant.
+#' @return Neighborhood information for all focal trees in \code{mapping} or,
+#' if \code{coords} is provided, for all locations defined by coordinates.
 
-neighborhoods <- function(mapping, stands = "all", radius) {
+neighborhoods <- function(mapping, stands = "all", radius, coords = NULL) {
   
   # Create vector of stand IDs
   if(length(stands) == 1 & stands[1] == "all"){
@@ -40,24 +44,36 @@ neighborhoods <- function(mapping, stands = "all", radius) {
       mutate(abh = circ_area(dbh / 2)) %>%
       select(tree_id, stand_id, species, dbh, abh, x_coord, y_coord)
     
+    # If coordinates provided, add them to one_stand
+    if(!is.null(coords)){
+      names(coords) <- c("tree_id", "x_coord", "y_coord")
+      one_stand <- one_stand %>%
+        bind_rows(coords)
+      one_stand$stand_id <- rep(stand_list[i], times = nrow(one_stand))
+    }
+    
     # Create distance matrix
     dist_mat <- as.matrix(dist(one_stand[, c("x_coord", "y_coord")]))
     
     # Create competitor species matrix
-    sps_mat <- matrix(one_stand$species, nrow = nrow(one_stand), ncol = nrow(one_stand))
+    sps_mat <- matrix(one_stand$species, nrow = nrow(one_stand),
+                      ncol = nrow(one_stand))
     
     # Create competitor dbh matrix
-    dbh_mat <- matrix(one_stand$dbh, nrow = nrow(one_stand), ncol = nrow(one_stand))
+    dbh_mat <- matrix(one_stand$dbh, nrow = nrow(one_stand),
+                      ncol = nrow(one_stand))
     
     # Create competitor abh matrix
-    abh_mat <- matrix(one_stand$abh, nrow = nrow(one_stand), ncol = nrow(one_stand))
+    abh_mat <- matrix(one_stand$abh, nrow = nrow(one_stand),
+                      ncol = nrow(one_stand))
     
     # Create competitor tree_id matrix
-    id_mat <- matrix(one_stand$tree_id, nrow = nrow(one_stand), ncol = nrow(one_stand))
+    id_mat <- matrix(one_stand$tree_id, nrow = nrow(one_stand),
+                     ncol = nrow(one_stand))
     
-    # Find values in distance matrix greater than radius or equal to zero - these
-    # elements represent pairs of trees that are not in each others neighborhood or
-    # are the same tree paired with itself
+    # Find values in distance matrix greater than radius or equal to zero -
+    # these elements represent pairs of trees that are not in each others
+    # neighborhood or are the same tree paired with itself
     non_comp <- which(dist_mat > radius | dist_mat == 0)
     
     # Convert values of these non-competing pairs to NA in all matrices
@@ -67,7 +83,17 @@ neighborhoods <- function(mapping, stands = "all", radius) {
     abh_mat[non_comp] <- NA
     id_mat[non_comp] <- NA
     
-    # Create distance, species, dbh, abh and size category vectors, excluding NAs
+    # If coordinates provided, remove focal tree neighborhoods from matrices
+    if(!is.null(coords)){
+      coord_rows <- (nrow(dist_mat) - (nrow(coords) - 1)):nrow(dist_mat)
+      dist_mat <- dist_mat[-coord_rows, coord_rows]
+      sps_mat <- sps_mat[-coord_rows, coord_rows]
+      dbh_mat <- dbh_mat[-coord_rows, coord_rows]
+      abh_mat <- abh_mat[-coord_rows, coord_rows]
+      id_mat <- id_mat[-coord_rows, coord_rows]
+    }
+    
+    # Create distance, species, dbh, abh and id vectors, excluding NAs
     prox <- dist_mat[!is.na(dist_mat)]
     sps_comp <- sps_mat[!is.na(sps_mat)]
     dbh_comp <- dbh_mat[!is.na(dbh_mat)]
@@ -81,7 +107,12 @@ neighborhoods <- function(mapping, stands = "all", radius) {
     repeats <- unname(apply(dist_mat, 2, non_na_len))
     
     # Repeat rows of one_stand appropriate number of times
-    all_rows <- one_stand[rep(1:nrow(one_stand), repeats), ]
+    if(is.null(coords)){
+      all_rows <- one_stand[rep(1:nrow(one_stand), repeats), ]
+    } else {
+      all_rows <- one_stand[rep(coord_rows[1]:nrow(one_stand), repeats),
+                            c("tree_id", "stand_id", "x_coord", "y_coord")]
+    }
     
     # Bind competitor data to one_stand
     one_stand_output <- cbind(all_rows, comp_dat)
@@ -97,6 +128,12 @@ neighborhoods <- function(mapping, stands = "all", radius) {
   # Reset row names
   rownames(output) <- 1:nrow(output)
   
+  # Change column names if coordinates provided
+  if(!is.null(coords)){
+    names(output)[1] <- "loc_id"
+  }
+  
   # Return output
   output
+  
 }

@@ -1,4 +1,22 @@
-
+#' Create site x species matrix
+#' 
+#' Takes in a neighborhoods object output by the \code{neighborhoods} function
+#' and returns a site x species matrix where each site is a neighborhood. The 
+#' user can specify whether the values in the matrix represent abundance or
+#' presence/absence.
+#' 
+#' @param neighbors A neighborhoods object output by the \code{neighborhoods}
+#' function
+#' @param id_column Name of column in \code{neighbors} containing site names as
+#' a string
+#' @param abundance Boolean specifying whether an abundance or presence/absence
+#' site x species matrix is desired (default is presence/absence)
+#' @return A site x species matrix where each row represents a distinct site or
+#' neighborhood and each column represents a tree species. Row names are the 
+#' site names. If \code{abundance = F} presence is indicated by 1 and absence 
+#' by 0. If \code{abundance = T} values represent the number of trees of that
+#' species in the neighborhood (excluding the focal if neighborhoods are
+#' centered on a focal tree).
 
 site_by_species <- function(neighbors, id_column, abundance = F){
   

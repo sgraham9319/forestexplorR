@@ -4,7 +4,7 @@
 \alias{neighborhoods}
 \title{Create neighborhoods}
 \usage{
-neighborhoods(mapping, stands = "all", radius)
+neighborhoods(mapping, stands = "all", radius, coords = NULL)
 }
 \arguments{
 \item{mapping}{Data frame containing tree coordinates.}
@@ -12,9 +12,14 @@ neighborhoods(mapping, stands = "all", radius)
 \item{stands}{Vector of names of stands for which neighborhoods are desired.}
 
 \item{radius}{Numeric vector describing neighborhood radius in meters.}
+
+\item{coords}{Data frame containing coordinates for which neighborhoods are
+desired. Data frame should contain three columns in the following order -
+location ids, x-coordinates, y-coordinates. Column names are unimportant.}
 }
 \value{
-Neighborhood information for all focal trees in \code{mapping}.
+Neighborhood information for all focal trees in \code{mapping} or,
+if \code{coords} is provided, for all locations defined by coordinates.
 }
 \description{
 Takes a data frame containing mapping information of trees in one or more

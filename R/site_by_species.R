@@ -6,11 +6,11 @@
 #' presence/absence.
 #' 
 #' @param neighbors A neighborhoods object output by the \code{neighborhoods}
-#' function
+#' function.
 #' @param id_column Name of column in \code{neighbors} containing site names as
-#' a string
+#' a string.
 #' @param abundance Boolean specifying whether an abundance or presence/absence
-#' site x species matrix is desired (default is presence/absence)
+#' site x species matrix is desired (default is presence/absence).
 #' @return A site x species matrix where each row represents a distinct site or
 #' neighborhood and each column represents a tree species. Row names are the 
 #' site names. If \code{abundance = F} presence is indicated by 1 and absence 
@@ -20,7 +20,7 @@
 
 site_by_species <- function(neighbors, id_column, abundance = F){
   
-  # Create ID column
+  # Create unique ID for each row
   neighbors$id <- 1:nrow(neighbors)
   
   # Convert neighbors to wide format

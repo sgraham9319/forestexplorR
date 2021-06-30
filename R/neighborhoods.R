@@ -1,7 +1,15 @@
 #' Create neighborhoods
 #'
 #' Takes a data frame containing mapping information of trees in one or more
-#' stands and returns a data frame with a row for each focal-neighbor pair
+#' stands and returns neighborhood information for all trees or a set of 
+#' user-provided coordinates.
+#' 
+#' This function returns a neighborhoods object, which is a data frame where
+#' each focal tree or user-provided set of coordinates appears on multiple 
+#' lines with each line containing information on one of the trees in its
+#' neighborhood. The neighborhoods object can be passed into a number of other
+#' functions in this package, including \code{neighborhood_summary} and 
+#' \code{site_by_species}.
 #'
 #' @param mapping Data frame containing tree coordinates.
 #' @param stands Vector of names of stands for which neighborhoods are desired.

@@ -25,3 +25,14 @@ if \code{coords} is provided, for all locations defined by coordinates.
 Takes a data frame containing mapping information of trees in one or more
 stands and returns a data frame with a row for each focal-neighbor pair
 }
+\examples{
+# Create neighborhoods for trees in mapping
+neighborhoods(mapping, stands = c("AB08", "PP17"), radius = 10)
+
+# Create neighborhoods for user-provided coordinates
+locations <- data.frame(
+loc_id = paste("A", 1:81, sep = ""),
+x_coord = rep(seq(10, 90, 10), times = 9),
+y_coord = rep(seq(10, 90, 10), each = 9))
+neighborhoods(mapping, stands = "AB08", radius = 10, coords = locations)
+}

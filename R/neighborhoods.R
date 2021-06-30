@@ -11,6 +11,16 @@
 #' location ids, x-coordinates, y-coordinates. Column names are unimportant.
 #' @return Neighborhood information for all focal trees in \code{mapping} or,
 #' if \code{coords} is provided, for all locations defined by coordinates.
+#' @examples
+#' # Create neighborhoods for trees in mapping
+#' neighborhoods(mapping, stands = c("AB08", "PP17"), radius = 10)
+#' 
+#' # Create neighborhoods for user-provided coordinates
+#' locations <- data.frame(
+#' loc_id = paste("A", 1:81, sep = ""),
+#' x_coord = rep(seq(10, 90, 10), times = 9),
+#' y_coord = rep(seq(10, 90, 10), each = 9))
+#' neighborhoods(mapping, stands = "AB08", radius = 10, coords = locations)
 
 neighborhoods <- function(mapping, stands = "all", radius, coords = NULL) {
   

@@ -46,6 +46,9 @@ site_by_species <- function(neighbors, id_column, abundance = F){
   output <- wide_nbhds[, 3:ncol(wide_nbhds)]
   row.names(output) <- wide_nbhds[, 1]
   
+  # Reorder rows to match input data frame
+  output <- output[match(unique(neighbors[, id_column]), row.names(output)), ]
+  
   # Return output
   return(output)
   

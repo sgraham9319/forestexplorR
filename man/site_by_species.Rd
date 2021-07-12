@@ -8,13 +8,13 @@ site_by_species(neighbors, id_column, abundance = F)
 }
 \arguments{
 \item{neighbors}{A neighborhoods object output by the \code{neighborhoods}
-function}
+function.}
 
 \item{id_column}{Name of column in \code{neighbors} containing site names as
-a string}
+a string.}
 
 \item{abundance}{Boolean specifying whether an abundance or presence/absence
-site x species matrix is desired (default is presence/absence)}
+site x species matrix is desired (default is presence/absence).}
 }
 \value{
 A site x species matrix where each row represents a distinct site or

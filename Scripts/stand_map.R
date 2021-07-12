@@ -1,3 +1,5 @@
+devtools::load_all()
+library(dplyr)
 
 # Extract mapping data for one stand to practice on
 one_stand <- mapping %>%

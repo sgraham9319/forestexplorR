@@ -35,3 +35,7 @@ max_x <- 100
 max_y <- 100
 test <- mapping_check(map_old, 100, 100)
 
+messy_mapping <- read.csv("Data/messy_mapping.csv")
+messy_mapping <- messy_mapping %>%
+  select(-c(plot, tree_status))
+usethis::use_data(messy_mapping, overwrite = T)

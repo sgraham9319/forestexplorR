@@ -33,6 +33,13 @@ lead to errors when applying other functions in this package. Outputs a
 table of the trees with data issues and a table summarizing the number of
 trees in the mapping dataset that have data issues.
 }
+\details{
+The data issues checked for are: presence of required columns, duplicated
+tree ids, missing x or y coordinates, x or y coordinates outside the
+expected range, missing stand id or species information. This function does
+not check for misspelled stand ids or species, which should be checked 
+independently.
+}
 \examples{
 map_check_test <- mapping_check(messy_mapping, 100, 100)
 }

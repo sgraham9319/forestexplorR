@@ -5,6 +5,12 @@
 #' table of the trees with data issues and a table summarizing the number of
 #' trees in the mapping dataset that have data issues.
 #' 
+#' The data issues checked for are: presence of required columns, duplicated
+#' tree ids, missing x or y coordinates, x or y coordinates outside the
+#' expected range, missing stand id or species information. This function does
+#' not check for misspelled stand ids or species, which should be checked 
+#' independently.
+#' 
 #' @param map_data Data frame containing tree mapping data. Should contain the
 #' columns \code{tree_id}, \code{stand_id}, \code{species}, \code{x_coord},
 #' and \code{y_coord}. Any additional columns will be ignored by this function.

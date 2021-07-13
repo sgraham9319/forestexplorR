@@ -1,7 +1,11 @@
+# This script creates the messy_mapping and messy_tree datasets that are used
+# for testing and demonstrating the data checking functions
 
-# Check mapping data first
+#-------------------------------
+# Create some messy mapping data
+#-------------------------------
 
-# Create some messy data
+# Load old mapping data
 map_old <- read.csv("Data/Mapping_2017.csv", stringsAsFactors = F)
 
 # Repeat some rows
@@ -24,12 +28,18 @@ map_old[sample(1:nrow(map_old), 10), "stand_id"] <- NA
 # Give some trees an NA for species
 map_old[sample(1:nrow(map_old), 10), "species"] <- NA
 
+# Remove unneeded columns
+map_old <- map_old %>%
+  select(-c(plot, tree_status))
+
 # Write messy mapping to file
-write.csv(map_old, "Data/messy_mapping.csv", row.names = F)
+#write.csv(map_old, "Data/messy_mapping.csv", row.names = F)
 
+# Rename dataset
+messy_mapping <- map_old
 
-
-# Check tree data
+# Add dataset to package
+#usethis::use_data(messy_mapping)
 
 #----------------------------
 # Create some messy tree data
@@ -73,32 +83,5 @@ messy_tree[sample(1:nrow(messy_tree), 10), "species"] <- NA
 # Give some tree records an NA for year
 messy_tree[sample(1:nrow(messy_tree), 10), "year"] <- NA
 
-usethis::use_data(messy_tree)
-
-
-
-
-
-# Are required columns present? tree_id, stand_id, species, year, dbh
-
-# Tree ids that refer to multiple trees? i.e. duplicate ids
-
-# Trees without mapping data
-
-# Missing dbh data
-
-# Missing stand_id
-
-# Missing species
-
-# Missing year
-
-# Negative growth? No, check in growth calculation function only (add this to
-# documention of tree checking function)
-
-
-# Find trees that have any missing data and highlight them for investigation
-# No need to make the call on whether the missing data makes those trees 
-# totally unusable
-
-
+# Add dataset to package
+#usethis::use_data(messy_tree)

@@ -1,0 +1,50 @@
+---
+title: "ForestPlot"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{ForestPlot}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+The ForestPlot R package is designed to facilitate the cleaning, analysis and
+visualization of mapped forest plot data.
+
+In this vignette we: (1) describe the intended use cases of ForestPlot, (2)
+explain how datasets need to be formatted to be compatible with ForestPlot
+functions, and (3) use the built-in datasets to demonstrate each included
+function.
+
+## Intended uses of ForestPlot
+
+In mapped forest plots, the precise locations of individual trees are recorded.
+This means that for any location within the plot, we can describe the local tree
+community in a spatially explicit way by identifying the size, proximity and 
+species identity of nearby trees. These descriptions are termed neighborhoods
+and can be used as covariates in models of forest processes such as tree
+growth/mortality or nutrient cycling. The main goal of ForestPlot is to provide
+functions that can efficiently quantify and explore these neighborhoods. 
+
+Specific questions ForestPlot could be used to answer:
+
+* How are growth/survival rates of trees influenced by neighboring trees?
+* What is the relationship between soil microbial community composition and
+tree neighborhood?
+* Where in this mapped stand is tree density the lowest?
+
+## Data formatting requirements
+
+
+
+
+
+```{r setup}
+library(ForestPlot)
+```

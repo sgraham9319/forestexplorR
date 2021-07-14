@@ -9,6 +9,22 @@ if(getRversion() >= "2.15.1")
                            "corner_id", "coord", "dec_deg", "spread", "stand_locs_raw", 
                            "stand_utm", "st_as_sf", "mapview", "stand_polygons"))
 
+#==============================
+# Calculate circle segment area
+#==============================
+
+seg_area <- function(r, s){
+  r ^ 2 * acos(1 - (s / r)) - (r - s) * (sqrt(r ^ 2 - (r - s) ^ 2))
+}
+
+#==============================
+# Calculate circle chord length
+#==============================
+
+chord_len <- function(r, s){
+  2 * (sqrt(2 * s * r - s ^ 2))
+}
+
 #==================================
 # Get variable length excluding NAs
 #==================================

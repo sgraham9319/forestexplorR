@@ -4,11 +4,14 @@
 \alias{neighborhood_summary}
 \title{Summarize neighborhoods}
 \usage{
-neighborhood_summary(neighbors, radius, densities = "raw")
+neighborhood_summary(neighbors, id_column, radius, densities = "raw")
 }
 \arguments{
 \item{neighbors}{Data frame of neighborhoods outputted by
 \code{neighborhoods} function.}
+
+\item{id_column}{Name of column in \code{neighbors} containing site names as
+a string.}
 
 \item{radius}{Numeric vector describing neighborhood radius in meters.}
 

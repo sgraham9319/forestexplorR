@@ -1,0 +1,90 @@
+---
+title: "ForestPlot"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{ForestPlot}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+The ForestPlot R package is designed to facilitate the cleaning, analysis and
+visualization of mapped forest plot data.
+
+In this vignette we: (1) describe the intended use cases of ForestPlot, (2)
+explain how datasets need to be formatted to be compatible with ForestPlot
+functions, and (3) use the built-in datasets to demonstrate each included
+function.
+
+
+```{r setup}
+library(ForestPlot)
+```
+
+## Intended uses of ForestPlot
+
+In mapped forest plots, the precise locations of individual trees are recorded.
+This means that for any location within the plot, we can describe the local tree
+community in a spatially explicit way by identifying the size, proximity and 
+species identity of nearby trees. These descriptions are termed neighborhoods
+and can be used as covariates in models of forest processes such as tree
+growth/mortality or nutrient cycling. The main goal of ForestPlot is to provide
+functions that can efficiently quantify and explore these neighborhoods. 
+
+Specific questions ForestPlot could be used to answer:
+
+* How are growth/survival rates of trees influenced by neighboring trees?
+* What is the relationship between soil microbial community composition and
+tree neighborhood?
+* Where in this mapped stand is tree density the lowest?
+
+## Data formatting requirements
+
+rectangular plots only
+
+separation between mapping and tree
+
+structure of mapping and tree
+
+column names of mapping and tree
+
+
+
+## Data checking
+
+Missing or inaccurate data is a common occurrence in mapping and tree census
+datasets because of the challenging field conditions under which the data are
+collected. Some trees must therefore be excluded from certain analyses. To help
+with the data checking process, this package contains two functions,
+`mapping_check` and `tree_check`, that flag cases of missing data in mapping and
+tree census datasets respectively. As the seriousness of missing data will vary
+among analytical approaches, these functions do not remove any observations.
+Instead they flag observations that should be investigated further before
+starting analysis.
+
+### `mapping_check` - check tree mapping datasets
+
+To see how the `mapping_check` function works, let's explore the built-in
+dataset `messy_mapping` that contains examples of common data errors. For
+instance, we see that there are 10 tree ids that have more than one mapping
+record:
+
+```{r}
+#messy_mapping %>%
+#  group_by(tree_id) %>%
+#  summarize(count = n()) %>%
+#  filter(count > 1)
+```
+
+```{r}
+neighborhoods
+#data("messy_mapping", package = "ForestPlot")
+#head(messy_mapping)
+```
+

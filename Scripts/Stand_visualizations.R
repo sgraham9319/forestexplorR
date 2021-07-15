@@ -25,6 +25,9 @@ mapping <- mapping_raw
 # Convert stand corner locations to decimal degrees
 stand_locs <- stand_dms_to_dd(stand_locs_raw)
 
+# Save to .csv
+#write.csv(stand_locs, "Data/plot_locations.csv", row.names = F)
+
 # Create spatial object of stand locations
 stand_locs_sf <- st_as_sf(stand_locs, coords = c("lon_dd", "lat_dd"), crs = 4326)
 

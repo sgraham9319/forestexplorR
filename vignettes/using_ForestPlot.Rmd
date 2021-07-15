@@ -22,6 +22,11 @@ explain how datasets need to be formatted to be compatible with ForestPlot
 functions, and (3) use the built-in datasets to demonstrate each included
 function.
 
+
+```{r setup}
+library(ForestPlot)
+```
+
 ## Intended uses of ForestPlot
 
 In mapped forest plots, the precise locations of individual trees are recorded.
@@ -41,10 +46,45 @@ tree neighborhood?
 
 ## Data formatting requirements
 
+rectangular plots only
+
+separation between mapping and tree
+
+structure of mapping and tree
+
+column names of mapping and tree
 
 
 
+## Data checking
 
-```{r setup}
-library(ForestPlot)
+Missing or inaccurate data is a common occurrence in mapping and tree census
+datasets because of the challenging field conditions under which the data are
+collected. Some trees must therefore be excluded from certain analyses. To help
+with the data checking process, this package contains two functions,
+`mapping_check` and `tree_check`, that flag cases of missing data in mapping and
+tree census datasets respectively. As the seriousness of missing data will vary
+among analytical approaches, these functions do not remove any observations.
+Instead they flag observations that should be investigated further before
+starting analysis.
+
+### `mapping_check` - check tree mapping datasets
+
+To see how the `mapping_check` function works, let's explore the built-in
+dataset `messy_mapping` that contains examples of common data errors. For
+instance, we see that there are 10 tree ids that have more than one mapping
+record:
+
+```{r}
+#messy_mapping %>%
+#  group_by(tree_id) %>%
+#  summarize(count = n()) %>%
+#  filter(count > 1)
 ```
+
+```{r}
+neighborhoods
+#data("messy_mapping", package = "ForestPlot")
+#head(messy_mapping)
+```
+

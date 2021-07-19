@@ -43,14 +43,14 @@ detailed_growth <- function(data){
     filter(!is.na(year) & !is.na(dbh)) %>%
     group_by(tree_id) %>% 
     arrange(tree_id, year) %>%
-    rename(start_dbh = dbh,
+    rename(begin_size = dbh,
            start_year = year) %>%
     mutate(year_diff = c(diff(start_year), NA),
-           dbh_diff = c(diff(start_dbh), NA),
+           size_diff = c(diff(begin_size), NA),
            end_year = start_year + year_diff,
-           end_dbh = start_dbh + dbh_diff,
-           annual_growth = dbh_diff / year_diff) %>%
-    select(-year_diff, -dbh_diff) %>%
+           end_size = begin_size + size_diff,
+           annual_growth = size_diff / year_diff) %>%
+    select(-year_diff, -size_diff) %>%
     filter(!is.na(end_year))
   
   # Calculate size corrected growth for trees where defined
@@ -58,7 +58,7 @@ detailed_growth <- function(data){
   valid_rows <- which(output$annual_growth >= 0)
   output$size_corr_growth[valid_rows] <- 
     sqrt(output$annual_growth[valid_rows] /
-           output$start_dbh[valid_rows])
+           output$begin_size[valid_rows])
   
   # Give warning if some trees showed negative growth
   neg_grow <- length(which(output$annual_growth < 0))

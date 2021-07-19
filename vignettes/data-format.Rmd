@@ -1,0 +1,143 @@
+---
+title: "Data formatting"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Data formatting}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+options(tibble.print_min = 4, tibble.print_max = 4)
+library(dplyr)
+```
+
+```{r setup}
+library(ForestPlot)
+```
+
+This vignette describes how mapped forest plot datasets should be formatted to
+ensure full compatibility with ForestPlot and introduces some data checking
+functions to assist with the formatting process.
+
+## Data file types
+
+The ForestPlot package expects raw mapped forest plot data to consist of at 
+least two distinct files:
+
+1. Mapping data - coordinate locations of individual trees within plots
+
+2. Tree census data - measurements of individual trees taken during repeated
+censuses of the plots
+
+### Mapping data
+
+The mapping dataset should be a data frame where each row represents a unique
+tree and contains its identifying and location information. The built-in
+dataset `mapping` is a cleaned and correctly formatted example:
+
+```{r}
+head(mapping)
+```
+
+To ensure full compatibility with ForestPlot functions, all columns shown in
+`mapping` should be present in the mapping dataset with columns named exactly
+as shown. Additional columns can also be included without disrupting function
+performance and column order is not important. For details on what each column
+represents, use `?mapping`. If only a few functions from ForestPlot will be 
+applied, some columns in `mapping` may not be required (e.g. the column `tag` is
+only required for `stand_map()`) so please read the individual function 
+documentation before spending time generating any missing columns.
+
+### Tree census data
+
+The tree census dataset should be a data frame where each row represents the 
+measurement data for a single tree during a specific census of the plot. This
+means each tree will appear on *x* rows where *x* is the number of censuses in 
+which that tree was measured. The built-in dataset `tree` is a cleaned and
+correctly formatted example:
+
+```{r}
+head(tree)
+```
+
+To ensure full compatibility with ForestPlot functions, all columns shown in
+`tree` except for `tag` should be present in the tree census dataset with
+columns named exactly as shown. Additional columns can also be included without disrupting function performance and column order is not important. For details
+on what each column represents, use `?tree`.
+
+## Data checking
+
+To obtain accurate and useful neighborhood descriptions it is important that
+the mapping and tree census datasets are cleaned of any unusual or missing data.
+The ForestPlot package contains functions to assist with the cleaning process
+but these functions only highlight cases of missing data rather than 
+automatically removing the associated observations. This is because not all
+cases of missing data prevent all types of analysis and some missing data can
+be inferred from data collection records (e.g. missing year of measurement in
+tree census data).
+
+### `mapping_check()`: Check mapping datasets
+
+The built-in dataset `messy_mapping` contains examples of common data errors in
+mapping datasets. For instance, there are 10 tree ids that are connected to more
+than one mapping record:
+
+```{r}
+messy_mapping %>%
+  group_by(tree_id) %>%
+  summarize(count = n()) %>%
+  filter(count > 1)
+```
+
+The `mapping_check()` function checks a mapping dataset for a variety of common
+errors and returns a list containing two elements. The first element 
+(`$problem_trees`) is a data frame containing the rows of the input mapping
+dataset that contain issues, with an additional final column describing the
+issue. The arguments "max_x" and "max_y" must be provided so the function can
+check for x and y coordinates beyond the plot boundary.
+
+```{r}
+map_issues <- mapping_check(messy_mapping, max_x = 100, max_y = 100)
+head(map_issues$problem_trees)
+```
+
+The second element (`$issue_summary`) is a data frame summarizing the number and percentage of trees in the mapping dataset that have one or more problems and
+each specific type of problem.
+
+```{r}
+head(map_issues$issue_summary)
+```
+
+### `tree_check()`: Check tree census datasets
+
+The built-in dataset `messy_tree` contains examples of common data errors in
+tree census datasets. For instance, there are 10 tree measurement records that
+have no dbh information:
+
+```{r}
+messy_tree %>%
+  filter(is.na(dbh))
+```
+
+The `tree_check()` function checks a tree census dataset for a variety of common
+errors. A mapping dataset needs to be supplied to the function so that trees in
+the tree census data that have no associated mapping can be identified. 
+`tree_check()` returns a list containing two elements. The first element 
+(`$problem_trees`) is a data frame containing the tree ids that were flagged as
+having a data issue and summarizes the issue.
+
+```{r}
+tree_issues <- tree_check(tree_data = messy_tree, map_data = mapping)
+head(tree_issues$problem_trees)
+```
+
+The second element (`$issue_summary`) is a data frame summarizing the number and percentage of trees in the tree census dataset that have one or more problems
+and each specific type of problem. Note that a tree id will be flagged if just
+one of its measurement records contains an issue, so many flagged trees are
+likely to be usable for most analyses. 
+
+```{r}
+head(tree_issues$issue_summary)
+```

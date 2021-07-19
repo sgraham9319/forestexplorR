@@ -53,6 +53,19 @@ detailed_growth <- function(data){
     select(-year_diff, -dbh_diff) %>%
     filter(!is.na(end_year))
   
+  # Calculate size corrected growth for trees where defined
+  output$size_corr_growth <- NA
+  valid_rows <- which(output$annual_growth >= 0)
+  output$size_corr_growth[valid_rows] <- 
+    sqrt(output$annual_growth[valid_rows] /
+           output$start_dbh[valid_rows])
+  
+  # Give warning if some trees showed negative growth
+  neg_grow <- length(which(output$annual_growth < 0))
+  if(neg_grow > 0){
+    print(paste("Warning:", neg_grow, "cases of negative annual growth"))
+  }
+  
   return(output)
   
 }

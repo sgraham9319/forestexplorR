@@ -5,27 +5,27 @@
 #' of determination when applied to the training set (and optionally a provided
 #' test set), and the fitted model coefficients.
 #' 
-#' All variables in the user-provided training data other than species,
-#' tree_id, and the indicated outcome variable are included as explanatory
-#' variables in the model. Regularized regression model is fitted
-#' using the glmnet package. Predictions, R-squared, and model coefficients
-#' returned are all based on the \code{"lambda.1se"} model but all models with
-#' different lambda values are included in the returned mod object - see glmnet 
-#' documentation for details.
+#' All variables in the user-provided training data other than tree_id and the
+#' indicated outcome variable are included as explanatory variables in the
+#' model. Regularized regression model is fitted using the glmnet package.
+#' Predictions, R-squared, and model coefficients returned are all based on the
+#' \code{"lambda.1se"} model but all models with different lambda values are
+#' included in the returned mod object - see glmnet documentation for details.
 #' 
 #' As the glmnet model fitting process is stochastic, the fitted model can
 #' differ with each run. The \code{iterations} argument allows the user to
 #' specify how many times the model should be fitted. If the model is fitted
-#' more than once, the fitted coefficients for all models will be returned in
+#' more than once, the fitted coefficients for all models will be returned
 #' but only the model object for the best model (lowest cross-validated mean
 #' square error) will be returned.
 #' 
 #' Rare competitor species can be grouped together as "OTHR" for modeling if
 #' desired. The optional argument \code{rare_comps} is a number indicating the
 #' minimum number of interactions a species must appear in to remain separate
-#' from the "OTHR" category. If species-specific densities are included in
-#' \code{training} those of rare competitors will be combined into a new 
-#' "OTHR_density" variable.
+#' from the "OTHR" category. If handling of rare competitor species is requested
+#' and species-specific densities are included in \code{training}, the densities
+#' of rare species can be summed together under "OTHR_density" using the
+#' optional argument \code{density_suffix}.
 #' 
 #' @param training A dataframe containing a separate row for each focal x
 #' neighbor tree pair and a column for each variable to include in the
@@ -34,13 +34,15 @@
 #' will be converted to factors before fitting the model.
 #' @param outcome_var Name of column in \code{training} containing the outcome
 #' variable, provided as a string.
-#' @param focal_sps Name of species for which growth should be modeled,
-#' provided as a string.
 #' @param iterations Number of times the model should be fitted.
 #' @param rare_comps Minimum number of interactions a competitor species must
 #' appear in to remain separate from the "OTHR" category (see details). If not
 #' specified, no "OTHR" category will be created and all competitor species will
 #' remain separate.
+#' @param density_suffix Suffix of columns containing species-specific densities
+#' e.g. if density columns are of the form \code{speciesA_dens}, this argument
+#' should have the value \code{"_dens"}. This optional argument is only used
+#' if the argument \code{rare_comps} is specified.
 #' @param test An optional dataframe of test data that must be in exactly the
 #' same format as the training data i.e. all the same columns with the same
 #' names.
@@ -64,24 +66,18 @@
 #' \code{mse}.
 #' }
 
-growth_model <- function(training, outcome_var, focal_sps, iterations = 1,
-                         rare_comps = "none", test = NULL){
+growth_model <- function(training, outcome_var, iterations = 1,
+                         rare_comps = "none", density_suffix = "none",
+                         test = NULL){
   
-    # Extract focal species data
+  # Order training by tree id
   sing_sp <- training %>%
-    arrange(tree_id) %>%
-    filter(species == focal_sps) %>%
-    select(-species)
+    arrange(tree_id)
   
   # Create vector of tree ids then remove this column
   tree_ids <- sing_sp$tree_id
   sing_sp <- sing_sp %>%
     select(-tree_id)
-  
-  # Remove any density columns containing only zeros
-  sing_sp <- sing_sp %>%
-    select(-names(
-      which(colSums(sing_sp[, grep("density", names(sing_sp))]) == 0)))
   
   # Handle rare competitors if requested
   if(rare_comps != "none"){
@@ -89,18 +85,21 @@ growth_model <- function(training, outcome_var, focal_sps, iterations = 1,
     # Make list of rare competitor species
     rare <- names(which(table(sing_sp$sps_comp) < rare_comps))
     
-    # Change rare competitor species to OTHR
+    # Change rare competitor species to "RARE"
     sing_sp <- sing_sp %>%
-      mutate(sps_comp = if_else(sps_comp %in% rare, "OTHR",
+      mutate(sps_comp = if_else(sps_comp %in% rare, "RARE",
                                 as.character(sps_comp)))
     
-    # Create OTHR density column
-    rare_dens_cols <- paste(rare, "density", sep = "_")
-    sing_sp <- sing_sp %>%
-      mutate(OTHR_density = apply(sing_sp %>%
-                                    select(all_of(rare_dens_cols)), 1, sum)) %>%
-      select(-all_of(rare_dens_cols))
-    
+    if(density_suffix != "none"){
+      
+      # Create rare density column
+      rare_dens_cols <- paste(rare, density_suffix, sep = "")
+      sing_sp <- sing_sp %>%
+        mutate(RARE_density = apply(sing_sp %>%
+                                      select(all_of(rare_dens_cols)), 1, sum)) %>%
+        select(-all_of(rare_dens_cols))
+       
+    }
   }
   
   # Convert character variables to factors
@@ -136,14 +135,14 @@ growth_model <- function(training, outcome_var, focal_sps, iterations = 1,
   for(i in 1:iterations){
     
     # Fit glmnet model
-    mod <- glmnet::cv.glmnet(x = dm, y = sing_sp$size_corr_growth,
+    mod <- glmnet::cv.glmnet(x = dm, y = sing_sp[, outcome_var],
                              family = "gaussian")
     
     # Calculate model predictions for training data
     preds <- predict(mod, newx = dm, s = "lambda.1se")
     
     # Combine with observations
-    obs_pred <- cbind(tree_ids, sing_sp %>% select(size_corr_growth), preds)
+    obs_pred <- cbind(tree_ids, sing_sp %>% select(all_of(outcome_var)), preds)
     names(obs_pred) <- c("tree_id", "observations", "predictions")
     
     # Get single prediction for each tree
@@ -191,11 +190,9 @@ growth_model <- function(training, outcome_var, focal_sps, iterations = 1,
   # Evaluate fit to test data if requested
   if(!is.null(test)){
     
-    # Subset test to focal species
+    # Order test by tree id
     ss_test <- test %>%
-      arrange(tree_id) %>%
-      filter(species == focal_sps) %>%
-      select(-species)
+      arrange(tree_id)
     
     # Create vector of tree ids then remove this column
     test_ids <- ss_test$tree_id
@@ -205,17 +202,19 @@ growth_model <- function(training, outcome_var, focal_sps, iterations = 1,
     # Handle rare competitors if requested
     if(rare_comps != "none"){
       
-      # Change rare competitor species to OTHR
+      # Change rare competitor species to "RARE"
       ss_test <- ss_test %>%
-        mutate(sps_comp = if_else(sps_comp %in% rare, "OTHR",
+        mutate(sps_comp = if_else(sps_comp %in% rare, "RARE",
                                   as.character(sps_comp)))
       
-      # Create OTHR density column
-      ss_test <- ss_test %>%
-        mutate(OTHR_density = apply(ss_test %>% select(all_of(rare_dens_cols)),
-                                    1, sum)) %>%
-        select(-all_of(rare_dens_cols))
-      
+      if(density_suffix != "none"){
+        
+        # Create OTHR density column
+        ss_test <- ss_test %>%
+          mutate(RARE_density = apply(ss_test %>% select(all_of(rare_dens_cols)),
+                                      1, sum)) %>%
+          select(-all_of(rare_dens_cols))
+      }
     }
     
     # Convert character variables to factors
@@ -259,7 +258,7 @@ growth_model <- function(training, outcome_var, focal_sps, iterations = 1,
     test_preds <- predict(best_mod, newx = dm_test, s = "lambda.1se")
     
     # Combine with observations
-    test_obs_pred <- cbind(test_ids, ss_test %>% select(size_corr_growth),
+    test_obs_pred <- cbind(test_ids, ss_test %>% select(all_of(outcome_var)),
                            test_preds)
     names(test_obs_pred) <- c("tree_id", "observations", "predictions")
     

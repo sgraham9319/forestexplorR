@@ -1,28 +1,42 @@
 # ForestPlot
 
 The ForestPlot R package is designed to facilitate the cleaning, analysis and
-visualization of mapped forest plot data.
+visualization of rectangular mapped forest plot data.
+
+When a rectangular mapped forest plot is constructed, the size, species identity
+and location of each tree meeting a specified minimum size threshold is 
+recorded. Plots are typically re-censused periodically to document mortality,
+re-measure tagged trees, and record trees that have reached the minimum size
+threshold since the previous census. Together, these data allow us to
+quantitatively describe the local neighborhood of any tree or specified location
+in the plot. These neighborhood descriptions can then be used as informative
+covariates of forest processes, such as tree growth, tree mortality, and 
+spatial variation in soil microbial communities.
+
+Massaging these invaluable datasets into a format conducive to exploration and
+analysis is no small feat. First, we need to extract data on all the trees
+growing in each of several thousand focal trees' neighborhoods. Then we may
+want to calculate the annual growth rate of each tree using its repeated size
+measurements. We may also want to generate gps locations for individual trees
+in order to connect them with spatially explicit data sources such as 
+topographical data. Typically, each research group working with mapped forest
+plot data must complete these arduous coding tasks independently. ForestPlot
+attempts to negate this time-consuming process by providing flexible functions
+that can perform each of these tasks on any mapped forest plot dataset.
 
 ## Installation
 
 ```
+# Install devtools package if not already installed
 install.packages("devtools")
+
+# Use devtools to install ForestPlot
 devtools::install_github("sgraham9319/ForestPlot")
 ```
 
-## Potential uses of ForestPlot
+## Updates
 
-In mapped forest plots, the precise locations of individual trees are recorded.
-This means that for any location within the plot, we can describe the local tree
-community in a spatially explicit way by identifying the size, proximity and 
-species identity of nearby trees. These descriptions are termed neighborhoods
-and can be used as covariates in models of forest processes such as tree
-growth/mortality or nutrient cycling. The main goal of ForestPlot is to provide
-functions that can efficiently quantify and explore these neighborhoods. 
-
-Specific questions ForestPlot could be used to answer:
-
-* How are growth/survival rates of trees influenced by neighboring trees?
-* What is the relationship between soil microbial community composition and
-tree neighborhood?
-* Where in this mapped stand is tree density the lowest?
+The functions of ForestPlot handle only the most common analytical tasks
+associated with mapped forest plot data. If you encounter a task that is not
+covered by ForestPlot, please feel free to build that functionality and submit
+a pull request, or contact us if you're not sure where to start.

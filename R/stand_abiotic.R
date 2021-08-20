@@ -22,4 +22,3 @@
 #' Permanent Sample Plot Network
 #' (\url{http://pnwpsp.forestry.oregonstate.edu/data})
 "stand_abiotic"
-#' 

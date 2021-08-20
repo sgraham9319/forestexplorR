@@ -5,7 +5,10 @@ visualization of mapped forest plot data.
 
 ## Installation
 
-
+```
+install.packages("devtools")
+devtools::install_github("sgraham9319/ForestPlot")
+```
 
 ## Potential uses of ForestPlot
 

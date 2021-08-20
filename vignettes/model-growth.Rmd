@@ -86,8 +86,9 @@ The code below adds abiotic data to `nbhds` from the built-in dataset
 `stand_abiotic`.
 
 ```{r}
+abio <- stand_abiotic
 nbhds <- nbhds %>%
-  left_join(stand_abiotic, by = "stand_id")
+  left_join(abio, by = "stand_id")
 ```
 
 Finally, we can drop some of the columns from `nbhds` that we don't need for

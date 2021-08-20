@@ -3,7 +3,7 @@ Type: Package
 Title: Tree growth as a function of its neighbors
 Version: 0.1.0
 Authors@R: c(
-    person("Stuart", "Graham", "sgraham3@uw.edu", role = c("aut", "cre")
+    person("Stuart", "Graham", , "sgraham3@uw.edu", role = c("aut", "cre")
     ),
     person("Ariel", "Rokem", role = "aut"
     )

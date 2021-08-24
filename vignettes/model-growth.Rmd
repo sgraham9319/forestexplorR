@@ -1,0 +1,201 @@
+---
+title: "Modeling tree growth"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Modeling tree growth}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+options(tibble.print_min = 4, tibble.print_max = 4)
+library(dplyr)
+library(glmnet)
+```
+
+```{r setup}
+library(ForestPlot)
+```
+
+This vignette demonstrates how the neighborhood description and growth
+calculation functions of ForestPlot can be used to setup a neighborhood model
+of tree growth.
+
+## Formating data for a growth model
+
+To build a neighborhood model of tree growth, we first need to describe tree
+neighborhoods. The ForestPlot functions `neighborhoods()` and
+`neighborhood_summary()` make this very simple.
+
+```{r}
+# Construct neighborhoods for all trees in all stands
+nbhds <- neighborhoods(mapping, radius = 10)
+
+# Describe neighborhoods using angular species-specific densities
+nbhd_summ <- neighborhood_summary(nbhds, id_column = "tree_id", radius = 10,
+                                  densities = "angular")
+
+# Combine neighborhoods with their summaries
+nbhds <- nbhds %>%
+  left_join(nbhd_summ, by = "tree_id")
+```
+
+We have now summarized the neighborhoods of all trees, but our summaries are 
+inaccurate for trees whose neighborhood overlaps a stand boundary i.e. we did
+not sample their entire neighborhood. Rather than estimating the missing
+portions of these trees' neighborhoods, we will exclude them from the model.
+
+```{r}
+# Define neighborhood radius
+nb_rad <- 10
+
+# Remove trees whose neighborhood overlaps a stand boundary
+nbhds <- nbhds %>%
+  filter(x_coord >= nb_rad & x_coord <= 100 - nb_rad &
+           y_coord >= nb_rad & y_coord <= 100 - nb_rad)
+```
+
+Next we calculate annual growth for our trees. We will also remove any trees
+that were only measured once (because we cannot calculate a growth rate for
+them) or had a nonsensical negative growth rate.
+
+```{r}
+# Calculate annual growth for all trees
+growth <- growth_summary(tree)
+
+# Remove trees that were only measured once and/or had negative growth
+growth <- growth %>%
+  filter(growth$first_record != growth$last_record &
+           annual_growth >= 0)
+```
+
+Now we can add the growth rates to the neighborhoods data. For our model, we
+will use `size_corr_growth` because this is the closest to being normally
+distributed. When combining we use `inner_join()` because not all trees in
+`nbhds` have growth data e.g. trees measured only one time.
+
+```{r}
+nbhds <- nbhds %>%
+  inner_join(growth %>% select(tree_id, size_corr_growth),
+             by = "tree_id")
+```
+
+We can also include additional covariates in our model such as abiotic data.
+The code below adds abiotic data to `nbhds` from the built-in dataset 
+`stand_abiotic`.
+
+```{r}
+nbhds <- nbhds %>%
+  left_join(stand_abiotic, by = "stand_id")
+```
+
+Finally, we can drop some of the columns from `nbhds` that we don't need for
+our model.
+
+```{r}
+nbhds <- nbhds %>%
+  select(-c(stand_id, dbh, abh, x_coord, y_coord, id_comp, abh_comp))
+```
+
+Now we have a dataset containing all the variables we will use for this
+modeling demonstration.
+
+## `growth_model()`: Create a neighborhood tree growth model
+
+When modeling tree growth, it is common practice to create a separate model
+for each focal tree species because the drivers of growth are likely to differ
+among species. The code below isolates a single tree species and then removes
+the species variable because it is no longer useful.
+
+```{r}
+one_species <- nbhds %>%
+  filter(species == "ABAM") %>%
+  select(-species)
+```
+
+The `growth_model()` function also offers test set validation, so next we will
+divide our dataset into a training and test set.
+
+```{r}
+# Create vector of tree ids
+all_tree_ids <- unique(one_species$tree_id)
+
+# Assign 80% of trees to training
+training_trees <- sample(all_tree_ids, length(all_tree_ids) * 0.8)
+
+# Define training and test
+training <- one_species %>%
+  filter(tree_id %in% training_trees)
+test <- setdiff(one_species, training)
+```
+
+Now we can call the `growth_model()` function, which fits a linear regularized
+regression model of tree growth. In the most basic use case, this function
+requires only a training set and the name of the dependent variable, which 
+should be a column in the training set. We set the seed because the model fitting process is stochastic.
+
+```{r}
+set.seed(1000)
+basic_growth_mod <- growth_model(training, outcome_var = "size_corr_growth")
+```
+
+The output of the above code is a list containing 4 elements. The first element
+`mod` is the model object. The second element `obs_pred` is a data frame of
+observed and model predicted growth for each tree. The third element is the
+R^2 value of the model. The fourth element is the estimated coefficients.
+
+```{r}
+# R^2 value
+basic_growth_mod$R_squared
+
+# Observations and model predictions
+basic_growth_mod$obs_pred
+```
+
+The evaluate the robustness of the stochastic model fitting process there is an
+optional argument (`iterations`) that specifies how many times the model should
+be fit. When this argument is specified, the model object, r-squared value and
+table of observations and predictions refer to the model that had the lowest
+mean square error. However, the `mod_coef` element will contain the fitted
+coefficients for all fitted models.
+
+```{r}
+set.seed(1000)
+iter_growth_mod <- growth_model(training, outcome_var = "size_corr_growth",
+                                iterations = 10)
+iter_growth_mod$R_squared
+```
+
+The `growth_model()` function can also handle rare competitor tree species. The
+optional argument `rare_comps` specifies the minimum number of interactions a
+competitor species must be a part of to be considered a common competitor. Any
+species with fewer interactions will be grouped together under the new species
+identity of `"RARE"`. If species-specific densities are included as covariates
+in the training data, a `"RARE_density"` variable can also be created by
+indicating the suffix attached to density variables under the argument 
+`density_suffix`.
+
+```{r}
+set.seed(1000)
+rare_growth_mod <- growth_model(training, outcome_var = "size_corr_growth",
+                                rare_comps = 100, density_suffix = "_angle_sum")
+
+# Check for RARE in coefficients
+names(rare_growth_mod$mod_coef)
+```
+
+Finally, the `growth_model()` function can evaluate the ability of the fitted
+model to predict the growth of trees in a test set i.e. trees not used in the
+model fitting process. To do this, a test set must be provided under the 
+optional argument `test`. Predictive ability is quantified with an R^2 value
+that constitutes a new element in the output list.
+
+```{r}
+set.seed(1000)
+test_growth_mod <- growth_model(training, outcome_var = "size_corr_growth",
+                                test = test)
+
+# Ability to predict test data
+test_growth_mod$test_R_squared
+```

@@ -1,0 +1,36 @@
+reference:
+- title: "Data formatting"
+- contents:
+  - mapping_check
+  - tree_check
+- title: "Describing neighborhoods"
+- contents:
+  - neighborhoods
+  - neighborhood_summary
+  - site_by_species
+  - tree_utm
+- title: "Calculating growth rates"
+- contents:
+  - growth_summary
+  - detailed_growth
+- title: "Visualizing mapped plots"
+- contents:
+  - size_dist
+  - contour_plot
+  - stand_map
+- title: "Modeling"
+- contents:
+  - growth_model
+- title: "Built-in datasets"
+- contents:
+  - mapping
+  - tree
+  - stand_locations
+  - messy_mapping
+  - messy_tree
+  - stand_abiotic
+authors:
+  Stuart Graham:
+    href: https://github.com/sgraham9319
+  Ariel Rokem:
+    href: https://github.com/arokem

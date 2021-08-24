@@ -62,6 +62,5 @@ for each tree using `growth_summary()`.
 ```{r}
 bt_census_growth <- detailed_growth(tree)
 bt_census_growth %>%
-  select(tree_id, stand_id, species, begin_size, annual_growth,
-         size_corr_growth)
+  select(tree_id, stand_id, species, start_year, end_year, annual_growth)
 ```

@@ -1,0 +1,172 @@
+---
+title: "Describing neighborhoods"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Describing neighborhoods}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+options(tibble.print_min = 4, tibble.print_max = 4)
+library(dplyr)
+library(sf)
+```
+
+```{r setup}
+library(ForestPlot)
+```
+
+This vignette describes a series of functions in the ForestPlot package that 
+provide quantitative descriptions of local neighborhoods in mapped forest plots.
+The neighborhood of a specific location in a mapped plot is the collection of
+trees growing within a specified distance of that location. 
+
+Of these functions, `neighborhoods()` constructs the list of all trees in each
+neighborhood. `neighborhood_summary()` takes the output of `neighborhoods()` as
+input and calculates tree species richness and species-specific densities for
+each neighborhood. `site_by_species()` also takes the output of
+`neighborhoods()` as input but creates a site-by-species matrix, where each site
+is a different neighborhood, that can be used to calculate diversity metrics.
+`tree_utm()` takes a mapping object as input and calculates UTM coordinates for
+each tree, thereby allowing trees to be linked to fine-scale spatial data such
+as topography.
+
+## `neighborhoods()`: Construct neighborhoods
+
+The `neighborhoods()` function uses a mapping dataset to determine, for each
+tree, all the trees that are within a certain distance (`radius`). The argument
+`stand` can be used to indicate that neighborhoods should be constructed only
+for the trees of one or more of the plots included in `mapping`. If `stand` is
+not specified, neighborhoods will be constructed for all trees in `mapping`.
+
+The output is a data frame where each row contains information on a focal tree
+and one other tree growing in the focal tree's neighborhood. Therefore, the
+information for each focal tree will appear on *x* lines, where *x* is the
+number of trees in that focal tree's neighborhood. This structure is shown
+below by isolating a single focal tree in the output of applying 
+`neighborhoods()` to the built-in `mapping` dataset:
+
+```{r}
+nbhds <- neighborhoods(mapping, stand = "AB08", radius = 10)
+nbhds %>%
+  filter(tree_id == "AB08000100022")
+```
+
+The `neighborhoods()` function can also be used to construct neighborhoods for
+specific coordinates within the mapped plot instead of constructing a
+neighborhood centered on each tree in the dataset. This is achieved by
+providing a data frame of coordinates under the optional argument `coords` (see
+`neighborhoods()` documentation for details on how this data frame should be
+structured).
+
+```{r}
+# Create a data frame of coordinates
+locations <- data.frame(
+  loc_id = paste("A", 1:81, sep = ""),
+  x_coord = rep(seq(10, 90, 10), times = 9),
+  y_coord = rep(seq(10, 90, 10), each = 9))
+
+# Construct neighborhood for each coordinate
+coord_nbhds <- neighborhoods(mapping, stands = "AB08", radius = 10,
+                             coords = locations)
+head(coord_nbhds)
+```
+
+## `neighborhood_summary()`: Summarize neighborhoods
+
+The `neighborhood_summary()` function takes output of the `neighborhoods()`
+function and calculates species richness, overall tree density, and densities of
+each tree species for each neighborhood. The `densities` argument is used to
+specify how densities should be calculated.
+
+### `neighborhood_summary(densities = "raw")`
+
+Overall tree density and species-specific densities will be presented in units
+of $m^{2}ha^{-1}$, with the area occupied by each tree calculated as the area
+of the trunk at breast height i.e.
+$$\pi(\frac{dbh}{2})^{2}$$
+```{r}
+nbhd_summ <- neighborhood_summary(nbhds, id_column = "tree_id", radius = 10,
+                                  densities = "raw")
+nbhd_summ %>%
+  select(tree_id, sps_richness, ABAM_density, TSHE_density, all_density)
+```
+
+### `neighborhood_summary(densities = "proportional")`
+
+Overall tree density is presented in units of $m^{2}ha^{-1}$ but species-specific densities represent the proportion of overall tree density that each species
+accounts for.
+
+```{r}
+nbhd_summ <- neighborhood_summary(nbhds, id_column = "tree_id", radius = 10,
+                                  densities = "proportional")
+nbhd_summ %>%
+  select(tree_id, sps_richness, ABAM_density, TSHE_density, all_density)
+```
+
+### `neighborhood_summary(densities = "angular")`
+
+Overall tree density and species-specific densities calculated as the sum of 
+angles occupied by trees, where the angle occupied by a single tree is:
+$$arctan(\frac{dbh}{proximity})$$ In the above, `dbh` is the dbh of the neighbor
+tree and `proximity` is the distance from the neighborhood center to the
+neighbor tree.
+
+```{r}
+nbhd_summ <- neighborhood_summary(nbhds, id_column = "tree_id", radius = 10,
+                                  densities = "angular")
+nbhd_summ %>%
+  select(tree_id, sps_richness, ABAM_angle_sum, TSHE_angle_sum, all_angle_sum)
+```
+
+## `site_by_species()`: Create site-by-species matrices
+
+The `site_by_species()` function takes output of the `neighborhoods()` function
+and creates a site-by-species matrix where each site is a neighborhood. The
+resulting matrix can be used as input for functions in other packages (e.g.
+picante, vegan) that calculate various diversity metrics from site-by-species
+matrices.
+
+The default is to present presence/absence data in the matrix:
+
+```{r}
+ss_mat <- site_by_species(nbhds, id_column = "tree_id")
+head(ss_mat)
+```
+
+But if `abundance = T` is specified, matrix element values will represent the
+number of trees of the associated species in the neighborhood:
+
+```{r}
+ss_mat_abund <- site_by_species(nbhds, id_column = "tree_id", abundance = T)
+head(ss_mat_abund)
+```
+
+## `tree_utm()`: Calculate tree UTM coordinates
+
+The `tree_utm()` function takes a mapping object as input and calculates UTM
+coordinates for each tree. The output spatial object can be used to extract
+further data for each tree from data sources with very high spatial resolution
+e.g. topography.
+
+The required arguments for `tree_utm()` are: geographic coordinates of the plots
+(`stand_locs`), the ESPG code of the coordinate reference system of `stand_locs`
+(`original_crs`), and the ESPG code of the UTM zone in which the plots exist
+(`utm_crs`).
+
+The built-in `stand_locations` dataset shows the expected structure of 
+`stand_locs` - see `?stand_locations` for details:
+
+```{r}
+head(stand_locations)
+```
+
+The output of `tree_utm()` looks like the following:
+
+```{r}
+mapping_utm <- tree_utm(mapping, stand_locations, 4326, 32610)
+head(mapping_utm)
+```
+

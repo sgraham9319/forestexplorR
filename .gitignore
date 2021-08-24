@@ -42,3 +42,4 @@ Data/*.csv
 .DS_Store
 .Rproj.user
 inst/doc
+docs

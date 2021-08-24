@@ -2,13 +2,19 @@ Package: ForestPlot
 Type: Package
 Title: Tree growth as a function of its neighbors
 Version: 0.1.0
-Author: Stuart Graham
+Authors@R: c(
+    person("Stuart", "Graham", , "sgraham3@uw.edu", role = c("aut", "cre")
+    ),
+    person("Ariel", "Rokem", role = "aut"
+    )
+  )
 Maintainer: Stuart Graham <sgraham3@uw.edu>
 Description: This package analyzes tree growth measurements, and their dependence
     on the tree neighborhood: what other trees are growing nearby.
 Imports:
     stringr, tidyverse, glmnet, sf, plotly
 License: MIT + file LICENSE
+URL: https://github.com/sgraham9319/ForestPlot
 Encoding: UTF-8
 LazyData: true
 Suggests:

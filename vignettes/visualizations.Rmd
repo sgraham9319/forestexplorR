@@ -1,0 +1,127 @@
+---
+title: "Visualizing mapped plots"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Visualizing mapped plots}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.align = "center")
+options(tibble.print_min = 4, tibble.print_max = 4)
+library(dplyr)
+library(ggplot2)
+library(plotly)
+```
+
+```{r setup}
+library(ForestPlot)
+```
+
+This vignette describes the ways in which mapped forest plot data can be 
+visualized using the ForestPlot package.
+
+The `size_dist()` function can be used to produce and compare size-class
+distribution figures. `contour_plot()` uses measurements of any quantitative
+variable associated with coordinates to fit a contour map of that variable over
+a mapped plot `stand_map()` produces a map of all trees in a mapped plot that
+can be used to navigate in the field.
+
+## `size_dist()`: Explore size-class distributions
+
+The `size_dist()` function uses a tree census dataset to produce a size-class
+distribution of a specified stand. The most recent measurement of each tree in
+the census dataset is used to assign it to a size class. Below is an example
+of applying `size_dist()` to a single stand in the built-in `tree` dataset:
+
+```{r}
+size_dist(size_data = tree, stands = "AB08")
+```
+
+The default width of size-classes in the resulting plot is 10 dbh units, but
+can be changed:
+
+```{r}
+size_dist(size_data = tree, stands = "AB08", bin_size = 5)
+```
+ 
+It is also possible to produce size-class distributions for multiple plots in
+order to compare them. To ensure clarity of individual distributions it is 
+recommended that fewer than 10 plots be compared at once.
+
+```{r}
+size_dist(size_data = tree, stands = c("AM16", "AO03", "AR07"))
+```
+
+## `contour_plot()`: Interpolate contours across plots
+
+We often measure variables at known coordinates within mapped forest plots. If 
+measurements are taken at enough locations, it may be desirable to interpolate
+the measured variable across the entire plot. This is the aim of the
+`contour_plot()` function.
+
+With mapped forest plot data it is also possible to derive measurements at 
+coordinate locations by calculating features of neighborhoods centered at those
+coordinates. As an example, here we will calculate tree density across a 
+coordinate grid and create a contour plot of tree density.
+
+First we create a grid of coordinate locations:
+
+```{r}
+locations <- data.frame(
+  loc_id = paste("A", 1:441, sep = ""),
+  x_coord = rep(seq(0, 100, 5), times = 21),
+  y_coord = rep(seq(0, 100, 5), each = 21))
+```
+
+Then we calculate tree density at each of these locations using ForestPlot
+functions:
+
+```{r}
+nbhds <- neighborhoods(mapping, "AB08", 10, coords = locations)
+nbhd_summ <- neighborhood_summary(nbhds, "loc_id", 10, "angular")
+```
+
+Next we join the coordinate locations with the calculated densities:
+
+```{r}
+grid_data <- locations %>%
+  left_join(nbhd_summ %>%
+              select(loc_id, all_angle_sum),
+            by = "loc_id") %>%
+  select(-loc_id)
+```
+
+Now we can make the contour plot:
+
+```{r}
+contour_plot(grid_data, "all_angle_sum", rad = 10, max_x = 100, max_y = 100)
+```
+
+In the above plot, density appears to decrease toward the plot edges. This is
+because the locations close to the plot boundary did not have their entire
+neighborhood sampled. `contour_plot()` offers a method of estimating the missing
+regions of neighborhoods that overlap the plot boundary, specified by the 
+`edge_handling` argument:
+
+```{r}
+contour_plot(grid_data, "all_angle_sum", edge_handling = "multiply",
+             rad = 10, max_x = 100, max_y = 100)
+```
+
+## `stand_map()`: Create maps of forest plots
+
+The `stand_map()` function creates a map of a forest plot with each tree
+represented by a point sized relative to its `dbh` and labeled with its `tag`
+number. The x and y coordinate limits must also be provided and can be used
+to create a map of only a portion of the plot:
+
+```{r, fig.height = 6, fig.width = 6}
+# Isolate mapping data for one stand
+one_stand <- mapping %>%
+  filter(stand_id == "AB08")
+
+# Create stand map
+stand_map(one_stand, c(50, 100), c(50, 100))
+```

@@ -1,0 +1,11 @@
+pandoc: 2.7.3
+pkgdown: 1.6.1
+pkgdown_sha: ~
+articles:
+  data-format: data-format.html
+  describe-nbhds: describe-nbhds.html
+  growth-calc: growth-calc.html
+  model-growth: model-growth.html
+  visualizations: visualizations.html
+last_built: 2021-08-20T22:16Z
+

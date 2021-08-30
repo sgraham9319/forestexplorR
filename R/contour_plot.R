@@ -49,6 +49,9 @@
 #' # Create contour plot
 #' contour_plot(grid_data, "all_angle_sum", edge_handling = "multiply",
 #'   rad = 10, max_x = 100, max_y = 100)
+#' @export
+#' @importFrom magrittr %>%
+#' @import dplyr
 
 contour_plot <- function(grid_vals, value, edge_handling = "none", rad = NULL,
                          max_x = NULL, max_y = NULL){

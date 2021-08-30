@@ -27,6 +27,9 @@
 #' containing spatial information.
 #' @examples
 #' mapping_utm <- tree_utm(mapping, stand_locations, 4326, 32610)
+#' @export
+#' @importFrom magrittr %>%
+#' @import dplyr
 
 tree_utm <- function(tree_x_y, stand_locs, original_crs, utm_crs){
   

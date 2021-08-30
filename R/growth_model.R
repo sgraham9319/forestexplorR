@@ -65,6 +65,9 @@
 #' determination for each fitted model with rows in ascending order of 
 #' \code{mse}.
 #' }
+#' @export
+#' @importFrom magrittr %>%
+#' @import dplyr
 
 growth_model <- function(training, outcome_var, iterations = 1,
                          rare_comps = "none", density_suffix = "none",

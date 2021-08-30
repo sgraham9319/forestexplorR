@@ -17,6 +17,9 @@
 #' by 0. If \code{abundance = T} values represent the number of trees of that
 #' species in the neighborhood (excluding the focal if neighborhoods are
 #' centered on a focal tree).
+#' @export
+#' @importFrom magrittr %>%
+#' @import dplyr
 
 site_by_species <- function(neighbors, id_column, abundance = F){
   

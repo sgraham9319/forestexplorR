@@ -29,6 +29,9 @@
 #' x_coord = rep(seq(10, 90, 10), times = 9),
 #' y_coord = rep(seq(10, 90, 10), each = 9))
 #' neighborhoods(mapping, stands = "AB08", radius = 10, coords = locations)
+#' @export
+#' @importFrom magrittr %>%
+#' @import dplyr
 
 neighborhoods <- function(mapping, stands = "all", radius, coords = NULL) {
   

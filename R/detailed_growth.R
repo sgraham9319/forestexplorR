@@ -24,6 +24,9 @@
 #' }
 #' @examples
 #' detailed_growth(tree)
+#' @export
+#' @importFrom magrittr %>%
+#' @import dplyr
 
 detailed_growth <- function(data){
   

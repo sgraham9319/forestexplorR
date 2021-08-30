@@ -15,6 +15,9 @@
 #' tree density), angular (angular size of trees).
 #' @return Data frame containing a summary for each neighborhood in
 #' \code{neighbors}.
+#' @export
+#' @importFrom magrittr %>%
+#' @import dplyr
 
 neighborhood_summary <- function(neighbors, id_column, radius,
                                  densities = "raw"){

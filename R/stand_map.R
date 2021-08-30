@@ -22,6 +22,9 @@
 #' 
 #' # Create stand map
 #' stand_map(one_stand, c(50, 100), c(50, 100))
+#' @export
+#' @importFrom magrittr %>%
+#' @import dplyr
 
 stand_map <- function(map_data, x_limit, y_limit){
   

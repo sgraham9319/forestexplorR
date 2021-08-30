@@ -28,6 +28,9 @@
 #' }
 #' @examples
 #' map_check_test <- mapping_check(messy_mapping, 100, 100)
+#' @export
+#' @importFrom magrittr %>%
+#' @import dplyr
 
 mapping_check <- function(map_data, max_x, max_y){
   

@@ -38,6 +38,9 @@
 #' }
 #' @examples
 #' tree_check_test <- tree_check(messy_tree, mapping)
+#' @export
+#' @importFrom magrittr %>%
+#' @import dplyr
 
 tree_check <- function(tree_data, map_data){
   

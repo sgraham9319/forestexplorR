@@ -25,6 +25,9 @@
 #' 
 #' # Multiple stands
 #' size_dist(size_data = tree, stands = c("AM16", "AO03", "AR07"))
+#' @export
+#' @importFrom magrittr %>%
+#' @import dplyr
 
 size_dist <- function(size_data, stands, bin_size = 10){
   

@@ -32,6 +32,9 @@
 #' }
 #' @examples
 #' growth_summary(tree)
+#' @export
+#' @importFrom magrittr %>%
+#' @import dplyr
 
 growth_summary <- function(data){
   

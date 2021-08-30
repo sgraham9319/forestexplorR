@@ -42,8 +42,8 @@ tree_utm <- function(tree_x_y, stand_locs, original_crs, utm_crs){
   }
   
   # Split UTM coordinates into x and y columns 
-  stand_utm$x <- as.vector(st_coordinates(stand_utm)[,1])
-  stand_utm$y <- as.vector(st_coordinates(stand_utm)[,2])
+  stand_utm$x <- as.vector(sf::st_coordinates(stand_utm)[,1])
+  stand_utm$y <- as.vector(sf::st_coordinates(stand_utm)[,2])
   
   # Create vector of stands
   stands <- unique(mapping$stand_id)

@@ -57,10 +57,10 @@ contour_plot <- function(grid_vals, value, edge_handling = "none", rad = NULL,
   if(edge_handling == "none"){
     
     # Create contour plot
-    plot_ly(x = grid_vals$x_coord,
-            y = grid_vals$y_coord,
-            z = grid_vals[, value],
-            type = "contour")
+    plotly::plot_ly(x = grid_vals$x_coord,
+                    y = grid_vals$y_coord,
+                    z = grid_vals[, value],
+                    type = "contour")
     
   } else if(edge_handling == "multiply"){
     
@@ -91,11 +91,11 @@ contour_plot <- function(grid_vals, value, edge_handling = "none", rad = NULL,
         mutate(adj_value = get(value) / prop_measured)
       
       # Create plot
-      plot_ly(plot_data,
-              x = plot_data$x_coord,
-              y = plot_data$y_coord,
-              z = plot_data$adj_value,
-              type = "contour")
+      plotly::plot_ly(plot_data,
+                      x = plot_data$x_coord,
+                      y = plot_data$y_coord,
+                      z = plot_data$adj_value,
+                      type = "contour")
     }
   }
 }

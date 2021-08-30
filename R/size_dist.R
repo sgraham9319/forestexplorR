@@ -43,17 +43,20 @@ size_dist <- function(size_data, stands, bin_size = 10){
   
   # Make plot
   if(length(stands) > 1){
-    ggplot(data = size_data, aes(dbh)) +
-      geom_histogram(aes(fill=stand_id),
-                     breaks = seq(0, max(size_data$dbh) + bin_size, bin_size)) +
-      labs(y = "# trees", x = "Diameter at breast height (cm)") +
-      theme_classic() +
-      facet_grid(rows = vars(size_data$stand_id)) +
-      theme(legend.position = "none")
+    ggplot2::ggplot(data = size_data, aes(dbh)) +
+      ggplot2::geom_histogram(aes(fill=stand_id),
+                              breaks = seq(0, max(size_data$dbh) +
+                                             bin_size, bin_size)) +
+      ggplot2::labs(y = "# trees", x = "Diameter at breast height (cm)") +
+      ggplot2::theme_classic() +
+      ggplot2::facet_grid(rows = vars(size_data$stand_id)) +
+      ggplot2::theme(legend.position = "none")
   } else {
-    ggplot(data = size_data, aes(dbh)) +
-      geom_histogram(breaks = seq(0, max(size_data$dbh) + bin_size, bin_size)) +
-      labs(title = stands, y = "# trees", x = "Diameter at breast height (cm)") +
-      theme_classic()
+    ggplot2::ggplot(data = size_data, aes(dbh)) +
+      ggplot2::geom_histogram(breaks = seq(0, max(size_data$dbh) +
+                                             bin_size, bin_size)) +
+      ggplot2::labs(title = stands, y = "# trees",
+                    x = "Diameter at breast height (cm)") +
+      ggplot2::theme_classic()
   }
 }

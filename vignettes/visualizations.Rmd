@@ -15,7 +15,6 @@ options(tibble.print_min = 4, tibble.print_max = 4)
 ```{r setup}
 library(ForestPlot)
 library(dplyr)
-library(ggplot2)
 ```
 
 This vignette describes the ways in which mapped forest plot data can be 

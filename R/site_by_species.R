@@ -28,9 +28,9 @@ site_by_species <- function(neighbors, id_column, abundance = F){
   
   # Convert neighbors to wide format
   wide_nbhds <- neighbors %>%
-    pivot_wider(id_cols = c(id, all_of(id_column)),
-                names_from = sps_comp, names_sort = T,
-                values_from = abh_comp, values_fill = 0) %>%
+    tidyr::pivot_wider(id_cols = c(id, all_of(id_column)),
+                       names_from = sps_comp, names_sort = T,
+                       values_from = abh_comp, values_fill = 0) %>%
     select(-id)
   
   # Calculate quantities of each species

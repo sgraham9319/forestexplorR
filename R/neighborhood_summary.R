@@ -38,9 +38,9 @@ neighborhood_summary <- function(neighbors, id_column, radius,
   if(densities == "angular"){
     dens <- dens %>%
       mutate(sum_angle = atan(dbh_comp / (prox * 100))) %>%
-      pivot_wider(id_cols = id,
-                  names_from = sps_comp, names_sort = T,
-                  values_from = sum_angle, values_fill = 0) %>%
+      tidyr::pivot_wider(id_cols = id,
+                         names_from = sps_comp, names_sort = T,
+                         values_from = sum_angle, values_fill = 0) %>%
       left_join(neighbors %>% select(id, id_column), by = "id") %>%
       select(-id) %>%
       group_by(get(id_column)) %>%
@@ -48,9 +48,9 @@ neighborhood_summary <- function(neighbors, id_column, radius,
       summarize(across(.fn = sum))
   } else{
     dens <- dens %>%
-      pivot_wider(id_cols = id,
-                  names_from = sps_comp, names_sort = T,
-                  values_from = abh_comp, values_fill = 0) %>%
+      tidyr::pivot_wider(id_cols = id,
+                         names_from = sps_comp, names_sort = T,
+                         values_from = abh_comp, values_fill = 0) %>%
       left_join(neighbors %>% select(id, id_column), by = "id") %>%
       select(-id) %>%
       group_by(get(id_column)) %>%

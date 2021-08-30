@@ -38,12 +38,13 @@ stand_map <- function(map_data, x_limit, y_limit){
   
   # Create plot
   ggplot2::ggplot(plot_data) +
-    ggplot2::geom_point(aes(x = x_coord, y = y_coord, size = dbh),
+    ggplot2::geom_point(ggplot2::aes(x = x_coord, y = y_coord, size = dbh),
                         shape = 21, fill = "red", show.legend = F) + 
     ggplot2::scale_size_area(max_size = 5) +
-    ggplot2::geom_text(aes(x = x_coord, y = y_coord, label = tag),
+    ggplot2::geom_text(ggplot2::aes(x = x_coord, y = y_coord, label = tag),
                        size = 3, vjust = -1,
-                       position = position_jitter(width = 0.5, height = 0.2)) +
+                       position = ggplot2::position_jitter(width = 0.5,
+                                                           height = 0.2)) +
     ggplot2::labs(x = "X coordinate", y = "Y coordinate") +
     ggplot2::theme_bw()
 }

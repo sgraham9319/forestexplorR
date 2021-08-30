@@ -10,11 +10,11 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 options(tibble.print_min = 4, tibble.print_max = 4)
-library(dplyr)
 ```
 
 ```{r setup}
 library(ForestPlot)
+library(dplyr)
 ```
 
 The ForestPlot package contains two functions for calculating annual growth

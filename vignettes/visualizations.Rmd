@@ -10,13 +10,12 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.align = "center")
 options(tibble.print_min = 4, tibble.print_max = 4)
-library(dplyr)
-library(ggplot2)
-library(plotly)
 ```
 
 ```{r setup}
 library(ForestPlot)
+library(dplyr)
+library(ggplot2)
 ```
 
 This vignette describes the ways in which mapped forest plot data can be 

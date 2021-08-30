@@ -10,12 +10,11 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 options(tibble.print_min = 4, tibble.print_max = 4)
-library(dplyr)
-library(sf)
 ```
 
 ```{r setup}
 library(ForestPlot)
+library(dplyr)
 ```
 
 This vignette describes a series of functions in the ForestPlot package that 

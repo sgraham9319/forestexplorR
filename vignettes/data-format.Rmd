@@ -12,7 +12,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 options(tibble.print_min = 4, tibble.print_max = 4)
 ```
 
-```{r setup}
+```{r setup, warning=FALSE, message=FALSE}
 library(ForestPlot)
 library(dplyr)
 ```

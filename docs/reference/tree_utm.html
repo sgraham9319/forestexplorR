@@ -186,12 +186,12 @@ containing spatial information.</p>
     <p>Location data for stands (argument <code>stand_locs</code>) must be provided in
 either decimal degrees or UTM format. If your data are in another format 
 such as degrees/minutes/seconds, please convert them to one of the accepted
-formats. The <code><a href='https://rdrr.io/pkg/measurements/man/conv_unit.html'>measurements::conv_unit</a></code> function is particularly
+formats. The <code>measurements::conv_unit</code> function is particularly
 useful for achieving this.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='va'>mapping_utm</span> <span class='op'>&lt;-</span> <span class='fu'>tree_utm</span><span class='op'>(</span><span class='va'>mapping</span>, <span class='va'>stand_locations</span>, <span class='fl'>4326</span>, <span class='fl'>32610</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in st_coordinates(stand_utm): could not find function "st_coordinates"</span></div></pre>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

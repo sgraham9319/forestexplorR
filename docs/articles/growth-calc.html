@@ -88,7 +88,7 @@
 
       
 
-      </header><script src="growth-calc_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+      </header><script src="growth-calc_files/header-attrs-2.10/header-attrs.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Calculating growth rates</h1>
@@ -102,7 +102,8 @@
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sgraham9319/ForestPlot">ForestPlot</a></span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://sgraham9319.github.io/ForestPlot/">ForestPlot</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></code></pre></div>
 <p>The ForestPlot package contains two functions for calculating annual growth rates of trees in a tree census dataset. <code><a href="../reference/growth_summary.html">growth_summary()</a></code> uses the earliest and most recent measurements of each tree to calculate average annual growth over the entire period. <code><a href="../reference/detailed_growth.html">detailed_growth()</a></code> calculates average annual growth between each pair of consecutive measurements of each tree, thereby detecting any changes in growth rate of a single tree over time.</p>
 <div id="growth_summary-calculate-overall-growth-rates" class="section level2">
 <h2 class="hasAnchor">
@@ -113,7 +114,7 @@
 <code class="sourceCode R"><span class="va">growth</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/growth_summary.html">growth_summary</a></span><span class="op">(</span><span class="va">tree</span><span class="op">)</span>
 <span class="co">#&gt; [1] "Warning: 139 trees exhibited negative annual growth"</span>
 <span class="va">growth</span> <span class="op">%&gt;%</span>
-  <span class="fu">select</span><span class="op">(</span><span class="va">tree_id</span>, <span class="va">stand_id</span>, <span class="va">species</span>, <span class="va">begin_size</span>, <span class="va">annual_growth</span>,
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">tree_id</span>, <span class="va">stand_id</span>, <span class="va">species</span>, <span class="va">begin_size</span>, <span class="va">annual_growth</span>,
          <span class="va">size_corr_growth</span><span class="op">)</span>
 <span class="co">#&gt; # A tibble: 9,155 x 6</span>
 <span class="co">#&gt;   tree_id       stand_id species begin_size annual_growth size_corr_growth</span>
@@ -132,7 +133,7 @@
 <code class="sourceCode R"><span class="va">bt_census_growth</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/detailed_growth.html">detailed_growth</a></span><span class="op">(</span><span class="va">tree</span><span class="op">)</span>
 <span class="co">#&gt; [1] "Warning: 2913 cases of negative annual growth"</span>
 <span class="va">bt_census_growth</span> <span class="op">%&gt;%</span>
-  <span class="fu">select</span><span class="op">(</span><span class="va">tree_id</span>, <span class="va">stand_id</span>, <span class="va">species</span>, <span class="va">start_year</span>, <span class="va">end_year</span>, <span class="va">annual_growth</span><span class="op">)</span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">tree_id</span>, <span class="va">stand_id</span>, <span class="va">species</span>, <span class="va">start_year</span>, <span class="va">end_year</span>, <span class="va">annual_growth</span><span class="op">)</span>
 <span class="co">#&gt; # A tibble: 50,959 x 6</span>
 <span class="co">#&gt; # Groups:   tree_id [8,721]</span>
 <span class="co">#&gt;   tree_id       stand_id species start_year end_year annual_growth</span>

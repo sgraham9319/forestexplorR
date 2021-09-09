@@ -4,12 +4,15 @@
 \alias{stand_map}
 \title{Create a stand map.}
 \usage{
-stand_map(map_data, x_limit, y_limit)
+stand_map(map_data, dbh_data, x_limit, y_limit)
 }
 \arguments{
 \item{map_data}{Data frame of tree coordinates. Must include the columns:
-\code{x_coord}, \code{y_coord}, \code{dbh}, and \code{tag} (tag numbers will
-be used to label trees on stand map).}
+\code{tree_id}, \code{x_coord}, \code{y_coord}, and \code{tag} (tag numbers
+will be used to label trees on stand map).}
+
+\item{dbh_data}{Data frame of tree measurement data. Must include the
+columns: \code{tree_id}, \code{dbh}, and \code{year}}
 
 \item{x_limit}{Numeric vector of length two indicating the x coordinate
 range to be included.}
@@ -22,7 +25,10 @@ Stand map will be plotted in the plotting window.
 }
 \description{
 Creates a map of the forest stand where each tree is a point, sized relative
-to its diameter at breast height (dbh) and labeled with its tag number.
+to its most recent diameter at breast height (dbh) measurement and labeled
+with its tag number. Trees for which dbh data is missing from \code{dbh_data}
+will be plotted in blue instead of the standard red and assigned a size
+equal to mean dbh in the plot.
 }
 \details{
 The x and y limits of the stand map can be specified because if a large
@@ -30,10 +36,12 @@ stand (>50m in width or length) is mapped all at once the labels probably
 will not be readable.
 }
 \examples{
-# Isolate mapping data for one stand
-one_stand <- mapping \%>\%
+# Isolate mapping and tree data for one stand
+one_stand_map <- mapping \%>\%
+  filter(stand_id == "AB08")
+one_stand_tree <- tree \%>\%
   filter(stand_id == "AB08")
 
-# Create stand map
-stand_map(one_stand, c(50, 100), c(50, 100))
+# Create map of one quarter of the stand 
+stand_map(one_stand_map, one_stand_tree, c(50, 100), c(50, 100))
 }

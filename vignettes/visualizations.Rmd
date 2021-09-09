@@ -116,10 +116,12 @@ number. The x and y coordinate limits must also be provided and can be used
 to create a map of only a portion of the plot:
 
 ```{r, fig.height = 6, fig.width = 6}
-# Isolate mapping data for one stand
-one_stand <- mapping %>%
+# Isolate mapping and tree data for one stand
+one_stand_map <- mapping %>%
+  filter(stand_id == "AB08")
+one_stand_tree <- tree %>%
   filter(stand_id == "AB08")
 
 # Create stand map
-stand_map(one_stand, c(50, 100), c(50, 100))
+stand_map(one_stand_map, one_stand_tree, c(50, 100), c(50, 100))
 ```

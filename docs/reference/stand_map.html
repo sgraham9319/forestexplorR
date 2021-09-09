@@ -41,7 +41,10 @@
 
 <meta property="og:title" content="Create a stand map. — stand_map" />
 <meta property="og:description" content="Creates a map of the forest stand where each tree is a point, sized relative
-to its diameter at breast height (dbh) and labeled with its tag number." />
+to its most recent diameter at breast height (dbh) measurement and labeled
+with its tag number. Trees for which dbh data is missing from dbh_data
+will be plotted in blue instead of the standard red and assigned a size
+equal to mean dbh in the plot." />
 
 
 
@@ -140,10 +143,13 @@ to its diameter at breast height (dbh) and labeled with its tag number." />
 
     <div class="ref-description">
     <p>Creates a map of the forest stand where each tree is a point, sized relative
-to its diameter at breast height (dbh) and labeled with its tag number.</p>
+to its most recent diameter at breast height (dbh) measurement and labeled
+with its tag number. Trees for which dbh data is missing from <code>dbh_data</code>
+will be plotted in blue instead of the standard red and assigned a size
+equal to mean dbh in the plot.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>stand_map</span><span class='op'>(</span><span class='va'>map_data</span>, <span class='va'>x_limit</span>, <span class='va'>y_limit</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>stand_map</span><span class='op'>(</span><span class='va'>map_data</span>, <span class='va'>dbh_data</span>, <span class='va'>x_limit</span>, <span class='va'>y_limit</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -151,8 +157,13 @@ to its diameter at breast height (dbh) and labeled with its tag number.</p>
     <tr>
       <th>map_data</th>
       <td><p>Data frame of tree coordinates. Must include the columns:
-<code>x_coord</code>, <code>y_coord</code>, <code>dbh</code>, and <code>tag</code> (tag numbers will
-be used to label trees on stand map).</p></td>
+<code>tree_id</code>, <code>x_coord</code>, <code>y_coord</code>, and <code>tag</code> (tag numbers
+will be used to label trees on stand map).</p></td>
+    </tr>
+    <tr>
+      <th>dbh_data</th>
+      <td><p>Data frame of tree measurement data. Must include the
+columns: <code>tree_id</code>, <code>dbh</code>, and <code>year</code></p></td>
     </tr>
     <tr>
       <th>x_limit</th>
@@ -176,13 +187,15 @@ stand (&gt;50m in width or length) is mapped all at once the labels probably
 will not be readable.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'># Isolate mapping data for one stand</span>
-<span class='va'>one_stand</span> <span class='op'>&lt;-</span> <span class='va'>mapping</span> <span class='op'>%&gt;%</span>
+    <pre class="examples"><div class='input'><span class='co'># Isolate mapping and tree data for one stand</span>
+<span class='va'>one_stand_map</span> <span class='op'>&lt;-</span> <span class='va'>mapping</span> <span class='op'>%&gt;%</span>
   <span class='fu'><a href='https://rdrr.io/r/stats/filter.html'>filter</a></span><span class='op'>(</span><span class='va'>stand_id</span> <span class='op'>==</span> <span class='st'>"AB08"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in mapping %&gt;% filter(stand_id == "AB08"): could not find function "%&gt;%"</span></div><div class='input'>
-<span class='co'># Create stand map</span>
-<span class='fu'>stand_map</span><span class='op'>(</span><span class='va'>one_stand</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>50</span>, <span class='fl'>100</span><span class='op'>)</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>50</span>, <span class='fl'>100</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in filter(., x_coord &gt;= x_limit[1] &amp; x_coord &lt;= x_limit[2] &amp; y_coord &gt;=     y_limit[1] &amp; y_coord &lt;= y_limit[2]): object 'one_stand' not found</span></div></pre>
+</div><div class='output co'>#&gt; <span class='error'>Error in mapping %&gt;% filter(stand_id == "AB08"): could not find function "%&gt;%"</span></div><div class='input'><span class='va'>one_stand_tree</span> <span class='op'>&lt;-</span> <span class='va'>tree</span> <span class='op'>%&gt;%</span>
+  <span class='fu'><a href='https://rdrr.io/r/stats/filter.html'>filter</a></span><span class='op'>(</span><span class='va'>stand_id</span> <span class='op'>==</span> <span class='st'>"AB08"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error in tree %&gt;% filter(stand_id == "AB08"): could not find function "%&gt;%"</span></div><div class='input'>
+<span class='co'># Create map of one quarter of the stand </span>
+<span class='fu'>stand_map</span><span class='op'>(</span><span class='va'>one_stand_map</span>, <span class='va'>one_stand_tree</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>50</span>, <span class='fl'>100</span><span class='op'>)</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>50</span>, <span class='fl'>100</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error in stand_map(one_stand_map, one_stand_tree, c(50, 100), c(50, 100)): unused argument (c(50, 100))</span></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

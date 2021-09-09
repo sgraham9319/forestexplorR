@@ -126,12 +126,12 @@
 <span class="co">#&gt; 4 AB08000100003     AB08 4003    TSHE 2012 20.0   14.94   91.91</span>
 <span class="co">#&gt; 5 AB08000100004     AB08 4004    TSHE 2012 53.7   22.09   99.06</span>
 <span class="co">#&gt; 6 AB08000100005     AB08 4005    TSHE 2012 24.4   12.16   91.48</span></code></pre></div>
-<p>To ensure full compatibility with ForestPlot functions, all columns shown in <code>mapping</code> should be present in the mapping dataset with columns named exactly as shown. Additional columns can also be included without disrupting function performance and column order is not important. For details on what each column represents, use <code><a href="../reference/mapping.html">?mapping</a></code>. If only a few functions from ForestPlot will be applied, some columns in <code>mapping</code> may not be required (e.g. the column <code>tag</code> is only required for <code><a href="../reference/stand_map.html">stand_map()</a></code>) so please read the individual function documentation before spending time generating any missing columns.</p>
+<p>To ensure full compatibility with ForestPlot functions, the mapping dataset should contain the columns: <code>tree_id</code>, <code>stand_id</code>, <code>tag</code>, <code>species</code>, <code>x_coord</code>, and <code>y_coord</code>. Additional columns can also be included without disrupting function performance and column order is not important. For details on what each required column represents, use <code><a href="../reference/mapping.html">?mapping</a></code>. If only a few functions from ForestPlot will be applied, some columns in <code>mapping</code> may not be required (e.g. the column <code>tag</code> is only required for <code><a href="../reference/stand_map.html">stand_map()</a></code>) so please read individual function documentation before spending time generating any missing columns.</p>
 </div>
 <div id="tree-census-data" class="section level3">
 <h3 class="hasAnchor">
 <a href="#tree-census-data" class="anchor"></a>Tree census data</h3>
-<p>The tree census dataset should be a data frame where each row represents the measurement data for a single tree during a specific census of the plot. This means each tree will appear on <em>x</em> rows where <em>x</em> is the number of censuses in which that tree was measured. The built-in dataset <code>tree</code> is a cleaned and correctly formatted example:</p>
+<p>The tree census dataset should be a data frame where each row represents the measurement data for a single tree during a specific census of the plot. This means each tree will appear on <em>x</em> rows where <em>x</em> is the number of censuses in which that tree was measured. The required columns are: <code>tree_id</code>, <code>stand_id</code>, <code>species</code>, <code>year</code> and <code>dbh</code>. For details on what each required column represents, use <code><a href="../reference/tree.html">?tree</a></code>. The built-in dataset <code>tree</code> is a cleaned and correctly formatted example:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">tree</span><span class="op">)</span>
 <span class="co">#&gt;         tree_id stand_id  tag species year  dbh</span>
@@ -141,7 +141,7 @@
 <span class="co">#&gt; 4 AB08000100022     AB08   19    TSHE 2017 15.3</span>
 <span class="co">#&gt; 5 AB08000100001     AB08 4001    TSHE 1978 48.2</span>
 <span class="co">#&gt; 6 AB08000100001     AB08 4001    TSHE 1984 48.2</span></code></pre></div>
-<p>To ensure full compatibility with ForestPlot functions, all columns shown in <code>tree</code> except for <code>tag</code> should be present in the tree census dataset with columns named exactly as shown. Additional columns can also be included without disrupting function performance and column order is not important. For details on what each column represents, use <code><a href="../reference/tree.html">?tree</a></code>.</p>
+<p>Additional unrequired columns can also be included in the tree census dataset without disrupting function performance (e.g. <code>tag</code> in <code>tree</code>) and column order is not important.</p>
 </div>
 </div>
 <div id="data-checking" class="section level2">

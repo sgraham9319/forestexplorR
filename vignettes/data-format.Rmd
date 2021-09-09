@@ -41,31 +41,33 @@ dataset `mapping` is a cleaned and correctly formatted example:
 head(mapping)
 ```
 
-To ensure full compatibility with ForestPlot functions, all columns shown in
-`mapping` should be present in the mapping dataset with columns named exactly
-as shown. Additional columns can also be included without disrupting function
-performance and column order is not important. For details on what each column
-represents, use `?mapping`. If only a few functions from ForestPlot will be 
-applied, some columns in `mapping` may not be required (e.g. the column `tag` is
-only required for `stand_map()`) so please read the individual function 
-documentation before spending time generating any missing columns.
+To ensure full compatibility with ForestPlot functions, the mapping dataset
+should contain the columns: `tree_id`, `stand_id`, `tag`, `species`, `x_coord`,
+and `y_coord`. Additional columns can also be included without disrupting
+function performance and column order is not important. For details on what each
+required column represents, use `?mapping`. If only a few functions from
+ForestPlot will be  applied, some columns in `mapping` may not be required (e.g.
+the column `tag` is only required for `stand_map()`) so please read
+individual function documentation before spending time generating any missing
+columns.
 
 ### Tree census data
 
 The tree census dataset should be a data frame where each row represents the 
 measurement data for a single tree during a specific census of the plot. This
 means each tree will appear on *x* rows where *x* is the number of censuses in 
-which that tree was measured. The built-in dataset `tree` is a cleaned and
+which that tree was measured. The required columns are: `tree_id`, `stand_id`,
+`species`, `year` and `dbh`. For details on what each required column
+represents, use `?tree`. The built-in dataset `tree` is a cleaned and
 correctly formatted example:
 
 ```{r}
 head(tree)
 ```
 
-To ensure full compatibility with ForestPlot functions, all columns shown in
-`tree` except for `tag` should be present in the tree census dataset with
-columns named exactly as shown. Additional columns can also be included without disrupting function performance and column order is not important. For details
-on what each column represents, use `?tree`.
+Additional unrequired columns can also be included in the tree census dataset
+without disrupting function performance (e.g. `tag` in `tree`) and column order
+is not important.
 
 ## Data checking
 
@@ -103,7 +105,8 @@ map_issues <- mapping_check(messy_mapping, max_x = 100, max_y = 100)
 head(map_issues$problem_trees)
 ```
 
-The second element (`$issue_summary`) is a data frame summarizing the number and percentage of trees in the mapping dataset that have one or more problems and
+The second element (`$issue_summary`) is a data frame summarizing the number and
+percentage of trees in the mapping dataset that have one or more problems and
 each specific type of problem.
 
 ```{r}
@@ -133,7 +136,8 @@ tree_issues <- tree_check(tree_data = messy_tree, map_data = mapping)
 head(tree_issues$problem_trees)
 ```
 
-The second element (`$issue_summary`) is a data frame summarizing the number and percentage of trees in the tree census dataset that have one or more problems
+The second element (`$issue_summary`) is a data frame summarizing the number and
+percentage of trees in the tree census dataset that have one or more problems
 and each specific type of problem. Note that a tree id will be flagged if just
 one of its measurement records contains an issue, so many flagged trees are
 likely to be usable for most analyses. 

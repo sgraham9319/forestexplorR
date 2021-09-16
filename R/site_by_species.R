@@ -17,6 +17,12 @@
 #' by 0. If \code{abundance = T} values represent the number of trees of that
 #' species in the neighborhood (excluding the focal if neighborhoods are
 #' centered on a focal tree).
+#' @examples
+#' # Create a neighborhoods object
+#' nbhds <- neighborhoods(mapping, stands = "AB08", radius = 10)
+#' 
+#' # Create abundance-weighted site-by-species matrix
+#' s_by_sp <- site_by_species(nbhds, id_column = "tree_id", abundance = T)
 #' @export
 #' @importFrom magrittr %>%
 #' @import dplyr

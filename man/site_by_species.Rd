@@ -30,3 +30,10 @@ and returns a site x species matrix where each site is a neighborhood. The
 user can specify whether the values in the matrix represent abundance or
 presence/absence.
 }
+\examples{
+# Create a neighborhoods object
+nbhds <- neighborhoods(mapping, stands = "AB08", radius = 10)
+
+# Create abundance-weighted site-by-species matrix
+s_by_sp <- site_by_species(nbhds, id_column = "tree_id", abundance = T)
+}

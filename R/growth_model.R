@@ -65,6 +65,8 @@
 #' determination for each fitted model with rows in ascending order of 
 #' \code{mse}.
 #' }
+#' @examples
+#' # See vignette "Modeling tree growth"
 #' @export
 #' @importFrom magrittr %>%
 #' @import dplyr

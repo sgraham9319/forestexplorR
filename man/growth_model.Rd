@@ -89,3 +89,6 @@ and species-specific densities are included in \code{training}, the densities
 of rare species can be summed together under "OTHR_density" using the
 optional argument \code{density_suffix}.
 }
+\examples{
+# See vignette "Modeling tree growth"
+}

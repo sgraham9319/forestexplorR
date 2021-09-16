@@ -29,7 +29,7 @@
 #' @param max_y Maximum possible y coordinate of forest plot.
 #' @return A contour plot will appear in the plotting window.
 #' @examples
-#' library(dplyr)
+#' library(dplyr, warn.conflicts = F)
 #' # Create coordinate grid
 #' locations <- data.frame(
 #'   loc_id = paste("A", 1:441, sep = ""),
@@ -37,7 +37,8 @@
 #'   y_coord = rep(seq(0, 100, 5), each = 21))
 #'   
 #' # Calculate density for each point
-#' nbhds <- neighborhoods(mapping, "AB08", 10, coords = locations)
+#' nbhds <- neighborhoods(mapping, stands = "AB08", radius = 10,
+#'                        coords = locations)
 #' nbhd_summ <- neighborhood_summary(nbhds, "loc_id", 10, "angular")
 #' 
 #' # Format data for contour_plot

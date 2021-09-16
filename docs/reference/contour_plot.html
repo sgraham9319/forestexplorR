@@ -204,7 +204,13 @@ to estimate a complete neighborhood. This is achieved by specifying
 <code>edge_handling = "multiply"</code> - see Examples.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'># Create coordinate grid</span>
+    <pre class="examples"><div class='input'><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://dplyr.tidyverse.org'>dplyr</a></span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='message'></span>
+#&gt; <span class='message'>Attaching package: 'dplyr'</span></div><div class='output co'>#&gt; <span class='message'>The following objects are masked from 'package:stats':</span>
+#&gt; <span class='message'></span>
+#&gt; <span class='message'>    filter, lag</span></div><div class='output co'>#&gt; <span class='message'>The following objects are masked from 'package:base':</span>
+#&gt; <span class='message'></span>
+#&gt; <span class='message'>    intersect, setdiff, setequal, union</span></div><div class='input'><span class='co'># Create coordinate grid</span>
 <span class='va'>locations</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span>
   loc_id <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='st'>"A"</span>, <span class='fl'>1</span><span class='op'>:</span><span class='fl'>441</span>, sep <span class='op'>=</span> <span class='st'>""</span><span class='op'>)</span>,
   x_coord <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>100</span>, <span class='fl'>5</span><span class='op'>)</span>, times <span class='op'>=</span> <span class='fl'>21</span><span class='op'>)</span>,
@@ -212,15 +218,15 @@ to estimate a complete neighborhood. This is achieved by specifying
   
 <span class='co'># Calculate density for each point</span>
 <span class='va'>nbhds</span> <span class='op'>&lt;-</span> <span class='fu'><a href='neighborhoods.html'>neighborhoods</a></span><span class='op'>(</span><span class='va'>mapping</span>, <span class='st'>"AB08"</span>, <span class='fl'>10</span>, coords <span class='op'>=</span> <span class='va'>locations</span><span class='op'>)</span>
-<span class='va'>nbhd_summ</span> <span class='op'>&lt;-</span> <span class='fu'><a href='neighborhood_summary.html'>neighborhood_summary</a></span><span class='op'>(</span><span class='va'>nbhds</span>, <span class='st'>"loc_id"</span>, <span class='fl'>10</span>, <span class='st'>"angular"</span><span class='op'>)</span>
-
+</div><div class='output co'>#&gt; [1] "Warning: skipping stand '10' because not found in\n                  mapping data"</div><div class='output co'>#&gt; <span class='error'>Error in which(dist_mat &gt; radius | dist_mat == 0): argument "radius" is missing, with no default</span></div><div class='input'><span class='va'>nbhd_summ</span> <span class='op'>&lt;-</span> <span class='fu'><a href='neighborhood_summary.html'>neighborhood_summary</a></span><span class='op'>(</span><span class='va'>nbhds</span>, <span class='st'>"loc_id"</span>, <span class='fl'>10</span>, <span class='st'>"angular"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error in nrow(neighbors): object 'nbhds' not found</span></div><div class='input'>
 <span class='co'># Format data for contour_plot</span>
 <span class='va'>grid_data</span> <span class='op'>&lt;-</span> <span class='va'>locations</span> <span class='op'>%&gt;%</span>
-  <span class='fu'>left_join</span><span class='op'>(</span><span class='va'>nbhd_summ</span> <span class='op'>%&gt;%</span>
-    <span class='fu'>select</span><span class='op'>(</span><span class='va'>loc_id</span>, <span class='va'>all_angle_sum</span><span class='op'>)</span>,
+  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate-joins.html'>left_join</a></span><span class='op'>(</span><span class='va'>nbhd_summ</span> <span class='op'>%&gt;%</span>
+    <span class='fu'><a href='https://dplyr.tidyverse.org/reference/select.html'>select</a></span><span class='op'>(</span><span class='va'>loc_id</span>, <span class='va'>all_angle_sum</span><span class='op'>)</span>,
     by <span class='op'>=</span> <span class='st'>"loc_id"</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
-  <span class='fu'>select</span><span class='op'>(</span><span class='op'>-</span><span class='va'>loc_id</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in locations %&gt;% left_join(nbhd_summ %&gt;% select(loc_id, all_angle_sum),     by = "loc_id") %&gt;% select(-loc_id): could not find function "%&gt;%"</span></div><div class='input'>
+  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/select.html'>select</a></span><span class='op'>(</span><span class='op'>-</span><span class='va'>loc_id</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error in select(., loc_id, all_angle_sum): object 'nbhd_summ' not found</span></div><div class='input'>
 <span class='co'># Create contour plot</span>
 <span class='fu'>contour_plot</span><span class='op'>(</span><span class='va'>grid_data</span>, <span class='st'>"all_angle_sum"</span>, edge_handling <span class='op'>=</span> <span class='st'>"multiply"</span>,
   rad <span class='op'>=</span> <span class='fl'>10</span>, max_x <span class='op'>=</span> <span class='fl'>100</span>, max_y <span class='op'>=</span> <span class='fl'>100</span><span class='op'>)</span>

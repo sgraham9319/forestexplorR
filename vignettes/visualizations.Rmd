@@ -77,7 +77,8 @@ Then we calculate tree density at each of these locations using ForestPlot
 functions:
 
 ```{r}
-nbhds <- neighborhoods(mapping, "AB08", 10, coords = locations)
+nbhds <- neighborhoods(mapping, stands = "AB08", radius = 10,
+                       coords = locations)
 nbhd_summ <- neighborhood_summary(nbhds, "loc_id", 10, "angular")
 ```
 

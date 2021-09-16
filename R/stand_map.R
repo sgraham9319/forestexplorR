@@ -20,7 +20,8 @@
 #' @param y_limit Numeric vector of length two indicating the y coordinate
 #' range to be included.
 #' @return Stand map will be plotted in the plotting window.
-#' @examples 
+#' @examples
+#' library(dplyr)
 #' # Isolate mapping and tree data for one stand
 #' one_stand_map <- mapping %>%
 #'   filter(stand_id == "AB08")

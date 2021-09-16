@@ -36,6 +36,7 @@ stand (>50m in width or length) is mapped all at once the labels probably
 will not be readable.
 }
 \examples{
+library(dplyr)
 # Isolate mapping and tree data for one stand
 one_stand_map <- mapping \%>\%
   filter(stand_id == "AB08")

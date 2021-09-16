@@ -7,21 +7,32 @@
 #' This function returns a neighborhoods object, which is a data frame where
 #' each focal tree or user-provided set of coordinates appears on multiple 
 #' lines with each line containing information on one of the trees in its
-#' neighborhood. The neighborhoods object can be passed into a number of other
-#' functions in this package, including \code{neighborhood_summary} and 
+#' neighborhood. An important piece of information on the neighboring trees is
+#' their size (dbh). If the provided \code{mapping} dataset contains a dbh
+#' column, and the \code{tree} argument is empty, the sizes of neighbors will be
+#' taken from \code{mapping}. However, dbh data in mapping datasets usually
+#' refers to the size at first measurement, which may not be ideal when
+#' quantifying neighborhoods. If a tree census dataset is provided under the
+#' optional argument \code{tree}, the most recent dbh measurement of each tree
+#' in this dataset will be used for the sizes of neighbors.
+#' 
+#' The output neighborhoods object can be passed into a number of other
+#' functions in ForestPlot, including \code{neighborhood_summary} and 
 #' \code{site_by_species}.
-#'
+#' 
 #' @param mapping Data frame containing tree coordinates.
 #' @param stands Vector of names of stands for which neighborhoods are desired.
 #' @param radius Numeric vector describing neighborhood radius in meters.
 #' @param coords Data frame containing coordinates for which neighborhoods are
 #' desired. Data frame should contain three columns in the following order -
 #' location ids, x-coordinates, y-coordinates. Column names are unimportant.
+#' @param tree Tree census data frame containing dbh measurements for each
+#' tree id in \code{mapping}.
 #' @return Neighborhood information for all focal trees in \code{mapping} or,
 #' if \code{coords} is provided, for all locations defined by coordinates.
 #' @examples
 #' # Create neighborhoods for trees in mapping
-#' neighborhoods(mapping, stands = c("AB08", "PP17"), radius = 10)
+#' neighborhoods(mapping, stands = c("AB08", "PP17"), radius = 10, tree = tree)
 #' 
 #' # Create neighborhoods for user-provided coordinates
 #' locations <- data.frame(

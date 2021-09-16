@@ -33,7 +33,32 @@
 #' @importFrom magrittr %>%
 #' @import dplyr
 
-neighborhoods <- function(mapping, stands = "all", radius, coords = NULL) {
+neighborhoods <- function(mapping, stands = "all", radius, coords = NULL,
+                          tree = NULL) {
+  
+  # Return error message if no dbh data provided
+  if("dbh" %in% names(mapping) == F & "dbh" %in% names(tree) == F){
+    stop("No dbh data provided: a column of dbh data must be provided in
+    mapping or tree", call. = F)
+  }
+  
+  # Specify the dbh data to use
+  if("dbh" %in% names(tree)){
+    
+    # If dbh in mapping and tree, remove from mapping
+    if("dbh" %in% names(mapping)){
+      mapping <- mapping %>%
+        select(-dbh)
+    }
+    
+    # Bring most recent dbh from tree into mapping
+    mapping <- mapping %>%
+      left_join(tree %>% 
+                  group_by(tree_id) %>%
+                  arrange(year) %>%
+                  summarize(dbh = dbh[n()]),
+                by = "tree_id")
+  }
   
   # Create vector of stand IDs
   if(length(stands) == 1 & stands[1] == "all"){

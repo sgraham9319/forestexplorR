@@ -46,20 +46,23 @@ functions in ForestPlot, including \code{neighborhood_summary} and
 }
 \examples{
 # Create neighborhoods for trees in mapping
-neighborhoods(mapping, stands = c("AB08", "PP17"), radius = 10)
+nbhds <- neighborhoods(mapping, stands = c("AB08", "PP17"), radius = 10)
 
 # Create neighborhoods for trees in mapping using more up-to-date dbh data
+library(dplyr)
 tree_dbhs <- tree \%>\%
   filter(stand_id == "AB08") \%>\%
   group_by(tree_id) \%>\%
   arrange(year) \%>\%
   summarize(dbh = dbh[n()])
-neighborhoods(mapping, dbh_data = tree_dbhs, stands = "AB08", radius = 10)
+nbhds <- neighborhoods(mapping, dbh_data = tree_dbhs, stands = "AB08",
+                       radius = 10)
 
 # Create neighborhoods for user-provided coordinates
 locations <- data.frame(
 loc_id = paste("A", 1:81, sep = ""),
 x_coord = rep(seq(10, 90, 10), times = 9),
 y_coord = rep(seq(10, 90, 10), each = 9))
-neighborhoods(mapping, stands = "AB08", radius = 10, coords = locations)
+nbhds <- neighborhoods(mapping, stands = "AB08", radius = 10,
+                       coords = locations)
 }

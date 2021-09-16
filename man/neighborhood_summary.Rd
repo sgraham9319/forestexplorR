@@ -29,3 +29,11 @@ neighborhood in the provided data frame. Densities can be provided as
 area covered in the neighborhood, area covered per hectare, or the sum of
 horizontal angles.
 }
+\examples{
+# Create a neighborhoods object
+nbhds <- neighborhoods(mapping, stands = "AB08", radius = 10)
+
+# Summarize neighborhoods using angular densities
+nbhd_summ <- neighborhood_summary(nbhds, id_column = "tree_id", radius = 10,
+                                  densities = "angular")
+}

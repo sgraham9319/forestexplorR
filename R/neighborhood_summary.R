@@ -15,6 +15,13 @@
 #' tree density), angular (angular size of trees).
 #' @return Data frame containing a summary for each neighborhood in
 #' \code{neighbors}.
+#' @examples
+#' # Create a neighborhoods object
+#' nbhds <- neighborhoods(mapping, stands = "AB08", radius = 10)
+#' 
+#' # Summarize neighborhoods using angular densities
+#' nbhd_summ <- neighborhood_summary(nbhds, id_column = "tree_id", radius = 10,
+#'                                   densities = "angular")
 #' @export
 #' @importFrom magrittr %>%
 #' @import dplyr

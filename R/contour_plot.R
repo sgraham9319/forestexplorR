@@ -29,6 +29,7 @@
 #' @param max_y Maximum possible y coordinate of forest plot.
 #' @return A contour plot will appear in the plotting window.
 #' @examples
+#' library(dplyr)
 #' # Create coordinate grid
 #' locations <- data.frame(
 #'   loc_id = paste("A", 1:441, sep = ""),

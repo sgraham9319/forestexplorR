@@ -53,6 +53,7 @@ to estimate a complete neighborhood. This is achieved by specifying
 \code{edge_handling = "multiply"} - see Examples.
 }
 \examples{
+library(dplyr)
 # Create coordinate grid
 locations <- data.frame(
   loc_id = paste("A", 1:441, sep = ""),

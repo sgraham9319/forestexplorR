@@ -26,6 +26,13 @@ that can perform each of these tasks on any mapped forest plot dataset.
 
 ## Installation
 
+If installing on a Mac, you will need to have libgit2 installed on your 
+machine. This can be installed using homebrew with:
+```
+brew install libgit2
+```
+
+ForestPlot can then be installed with the following:
 ```
 # Install devtools package if not already installed
 install.packages("devtools")

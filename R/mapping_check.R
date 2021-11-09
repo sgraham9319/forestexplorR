@@ -12,9 +12,8 @@
 #' independently.
 #' 
 #' @param map_data Data frame containing tree mapping data. Should contain the
-#' columns \code{tree_id}, \code{stand_id}, \code{tag}, \code{species},
-#' \code{x_coord}, and \code{y_coord}. Any additional columns will be ignored by
-#' this function.
+#' columns \code{tree_id}, \code{stand_id}, \code{species}, \code{x_coord}, and
+#' \code{y_coord}. Any additional columns will be ignored by this function.
 #' @param max_x Maximum expected x coordinate (i.e. should be 100 if the stands
 #' are 100 x 100 m).
 #' @param max_y Maximum expected y coordinate.
@@ -36,10 +35,10 @@
 mapping_check <- function(map_data, max_x, max_y){
   
   # Check required columns are present
-  if(sum(c("tree_id", "stand_id", "tag", "species", "x_coord", "y_coord") %in%
-         names(map_data)) != 6){
+  if(sum(c("tree_id", "stand_id", "species", "x_coord", "y_coord") %in%
+         names(map_data)) != 5){
     print("Warning: one or more of the required columns are missing")
-    print("Required columns: tree_id, stand_id, tag, species, x_coord, y_coord")
+    print("Required columns: tree_id, stand_id, species, x_coord, y_coord")
   } else {
     
     # Identify trees with missing or nonsensical data
@@ -57,9 +56,6 @@ mapping_check <- function(map_data, max_x, max_y){
       map_data %>%
         filter(is.na(stand_id)) %>%
         mutate(issue = "missing stand_id"),
-      map_data %>%
-        filter(is.na(tag)) %>%
-        mutate(issue = "missing tag"),
       map_data %>%
         filter(is.na(species)) %>%
         mutate(issue = "missing species"))

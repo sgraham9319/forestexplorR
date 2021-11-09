@@ -8,9 +8,8 @@ mapping_check(map_data, max_x, max_y)
 }
 \arguments{
 \item{map_data}{Data frame containing tree mapping data. Should contain the
-columns \code{tree_id}, \code{stand_id}, \code{tag}, \code{species},
-\code{x_coord}, and \code{y_coord}. Any additional columns will be ignored by
-this function.}
+columns \code{tree_id}, \code{stand_id}, \code{species}, \code{x_coord}, and
+\code{y_coord}. Any additional columns will be ignored by this function.}
 
 \item{max_x}{Maximum expected x coordinate (i.e. should be 100 if the stands
 are 100 x 100 m).}

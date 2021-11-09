@@ -99,6 +99,13 @@ tree_check <- function(tree_data, map_data){
     # Combine into single output table
     issue_output <- bind_rows(unique_issue_trees, issue_summary)
     
+    # Print summary message
+    if(nrow(problem_ids) == 0){
+      print("No potential formatting problems detected")
+    } else {
+      print("Potential formatting problems detected: please review output and correct errors or remove problem trees if necessary before continuing analysis")
+    }
+    
     # Return both output tables as a list
     return(list(problem_trees = problem_ids, issue_summary = issue_output))
   }

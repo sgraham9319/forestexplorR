@@ -77,9 +77,9 @@ mapping_check <- function(map_data, max_x, max_y){
     
     # Print summary message
     if(nrow(problem_trees) == 0){
-      print("No potential formating problems detected")
+      print("No potential formatting problems detected")
     } else {
-      print("Potential formating problems detected: please review output and correct errors or remove problem trees if necessary before continuing analysis")
+      print("Potential formatting problems detected: please review output and correct errors or remove problem trees if necessary before continuing analysis")
     }
     
     # Return both output tables as a list

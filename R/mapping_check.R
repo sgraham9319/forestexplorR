@@ -75,6 +75,13 @@ mapping_check <- function(map_data, max_x, max_y){
     # Combine into single output table
     issue_output <- bind_rows(unique_issue_trees, issue_summary)
     
+    # Print summary message
+    if(nrow(problem_trees) == 0){
+      print("No potential formating problems detected")
+    } else {
+      print("Potential formating problems detected: please review output and correct errors or remove problem trees if necessary before continuing analysis")
+    }
+    
     # Return both output tables as a list
     return(list(problem_trees = problem_trees, issue_summary = issue_output))
     

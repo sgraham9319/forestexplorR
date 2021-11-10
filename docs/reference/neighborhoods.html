@@ -190,8 +190,11 @@ could be outdated), the argument <code>dbh_data</code> must be specified.</p>
 <p>This function returns a neighborhoods object, which is a data frame where
 each focal tree or user-provided set of coordinates appears on multiple 
 lines with each line containing information on one of the trees in its
-neighborhood. The neighborhoods object can be passed into a number of other
-functions in ForestPlot, including <code>neighborhood_summary</code> and 
+neighborhood. Specifically, each line contains the ID number
+(<code>id_comp</code>), species identity (<code>sps_comp</code>), size (<code>dbh_comp</code> 
+and <code>abh_comp</code>), and distance from the neighborhood center (<code>prox</code>)
+of the neighbor tree. The neighborhoods object can be passed into a number
+of other functions in ForestPlot, including <code>neighborhood_summary</code> and 
 <code>site_by_species</code>.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>

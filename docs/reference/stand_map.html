@@ -41,10 +41,11 @@
 
 <meta property="og:title" content="Create a stand map. — stand_map" />
 <meta property="og:description" content="Creates a map of the forest stand where each tree is a point, sized relative
-to its most recent diameter at breast height (dbh) measurement and labeled
-with its tag number. Trees for which dbh data is missing from dbh_data
-will be plotted in blue instead of the standard red and assigned a size
-equal to mean dbh in the plot." />
+to its most recent diameter at breast height (dbh) measurement. Trees for
+which dbh data is missing from dbh_data will be plotted in blue
+instead of the standard red and assigned a size equal to mean dbh in the
+plot. Points can optinally be labeled using a column included in
+map_data, such as tag numbers of the trees." />
 
 
 
@@ -143,13 +144,14 @@ equal to mean dbh in the plot." />
 
     <div class="ref-description">
     <p>Creates a map of the forest stand where each tree is a point, sized relative
-to its most recent diameter at breast height (dbh) measurement and labeled
-with its tag number. Trees for which dbh data is missing from <code>dbh_data</code>
-will be plotted in blue instead of the standard red and assigned a size
-equal to mean dbh in the plot.</p>
+to its most recent diameter at breast height (dbh) measurement. Trees for
+which dbh data is missing from <code>dbh_data</code> will be plotted in blue
+instead of the standard red and assigned a size equal to mean dbh in the
+plot. Points can optinally be labeled using a column included in
+<code>map_data</code>, such as tag numbers of the trees.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>stand_map</span><span class='op'>(</span><span class='va'>map_data</span>, <span class='va'>dbh_data</span>, <span class='va'>x_limit</span>, <span class='va'>y_limit</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>stand_map</span><span class='op'>(</span><span class='va'>map_data</span>, <span class='va'>dbh_data</span>, <span class='va'>x_limit</span>, <span class='va'>y_limit</span>, labels <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -157,13 +159,14 @@ equal to mean dbh in the plot.</p>
     <tr>
       <th>map_data</th>
       <td><p>Data frame of tree coordinates. Must include the columns:
-<code>tree_id</code>, <code>x_coord</code>, <code>y_coord</code>, and <code>tag</code> (tag numbers
-will be used to label trees on stand map).</p></td>
+<code>tree_id</code>, <code>x_coord</code>, and <code>y_coord</code>. If points (trees) are to
+be labeled in the plot, <code>map_data</code> must also contain a column containing
+the labels (e.g. tag numbers).</p></td>
     </tr>
     <tr>
       <th>dbh_data</th>
       <td><p>Data frame of tree measurement data. Must include the
-columns: <code>tree_id</code>, <code>dbh</code>, and <code>year</code></p></td>
+columns: <code>tree_id</code>, <code>dbh</code>, and <code>year</code>.</p></td>
     </tr>
     <tr>
       <th>x_limit</th>
@@ -174,6 +177,12 @@ range to be included.</p></td>
       <th>y_limit</th>
       <td><p>Numeric vector of length two indicating the y coordinate
 range to be included.</p></td>
+    </tr>
+    <tr>
+      <th>labels</th>
+      <td><p>Name of column in <code>map_data</code> containing labels for trees
+in the stem map, provided as a string. If <code>labels</code> argument is not 
+provided, trees will not be labeled in the stem map.</p></td>
     </tr>
     </table>
 
@@ -194,9 +203,10 @@ will not be readable.</p>
 <span class='va'>one_stand_tree</span> <span class='op'>&lt;-</span> <span class='va'>tree</span> <span class='op'>%&gt;%</span>
   <span class='fu'><a href='https://dplyr.tidyverse.org/reference/filter.html'>filter</a></span><span class='op'>(</span><span class='va'>stand_id</span> <span class='op'>==</span> <span class='st'>"AB08"</span><span class='op'>)</span>
 
-<span class='co'># Create map of one quarter of the stand </span>
-<span class='fu'>stand_map</span><span class='op'>(</span><span class='va'>one_stand_map</span>, <span class='va'>one_stand_tree</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>50</span>, <span class='fl'>100</span><span class='op'>)</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>50</span>, <span class='fl'>100</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='img'><img src='stand_map-1.png' alt='' width='700' height='433' /></div></pre>
+<span class='co'># Create map of one quarter of the stand using tag numbers as labels</span>
+<span class='fu'>stand_map</span><span class='op'>(</span><span class='va'>one_stand_map</span>, <span class='va'>one_stand_tree</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>50</span>, <span class='fl'>100</span><span class='op'>)</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>50</span>, <span class='fl'>100</span><span class='op'>)</span>, <span class='st'>"tag"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error in stand_map(one_stand_map, one_stand_tree, c(50, 100), c(50, 100),     "tag"): unused argument ("tag")</span></div><div class='input'>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

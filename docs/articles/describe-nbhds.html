@@ -204,7 +204,7 @@
 <h3 class="hasAnchor">
 <a href="#neighborhood_summarydensities-angular" class="anchor"></a><code>neighborhood_summary(densities = "angular")</code>
 </h3>
-<p>Overall tree density and species-specific densities calculated as the sum of angles occupied by trees, where the angle occupied by a single tree is: <span class="math display">\[arctan(\frac{dbh}{proximity})\]</span> In the above, <code>dbh</code> is the dbh of the neighbor tree and <code>proximity</code> is the distance from the neighborhood center to the neighbor tree.</p>
+<p>Overall tree density and species-specific densities calculated as the sum of angles occupied by trees, where the angle occupied by a single tree is: <span class="math display">\[arctan(\frac{dbh}{distance})\]</span> In the above, <code>dbh</code> is the dbh of the neighbor tree and <code>distance</code> is the distance from the neighborhood center to the neighbor tree.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">nbhd_summ</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/neighborhood_summary.html">neighborhood_summary</a></span><span class="op">(</span><span class="va">nbhds</span>, id_column <span class="op">=</span> <span class="st">"tree_id"</span>, radius <span class="op">=</span> <span class="fl">10</span>,
                                   densities <span class="op">=</span> <span class="st">"angular"</span><span class="op">)</span>

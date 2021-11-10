@@ -13,8 +13,11 @@
 #' This function returns a neighborhoods object, which is a data frame where
 #' each focal tree or user-provided set of coordinates appears on multiple 
 #' lines with each line containing information on one of the trees in its
-#' neighborhood. The neighborhoods object can be passed into a number of other
-#' functions in ForestPlot, including \code{neighborhood_summary} and 
+#' neighborhood. Specifically, each line contains the ID number
+#' (\code{id_comp}), species identity (\code{sps_comp}), size (\code{dbh_comp} 
+#' and \code{abh_comp}), and distance from the neighborhood center (\code{prox})
+#' of the neighbor tree. The neighborhoods object can be passed into a number
+#' of other functions in ForestPlot, including \code{neighborhood_summary} and 
 #' \code{site_by_species}.
 #' 
 #' @param mapping Data frame containing tree coordinates.

@@ -109,9 +109,9 @@ nbhd_summ %>%
 
 Overall tree density and species-specific densities calculated as the sum of 
 angles occupied by trees, where the angle occupied by a single tree is:
-$$arctan(\frac{dbh}{proximity})$$ In the above, `dbh` is the dbh of the neighbor
-tree and `proximity` is the distance from the neighborhood center to the
-neighbor tree.
+$$arctan(\frac{dbh}{distance})$$ In the above, `dbh` is the dbh of the
+neighbor tree and `distance` is the distance from the neighborhood center to
+the neighbor tree.
 
 ```{r}
 nbhd_summ <- neighborhood_summary(nbhds, id_column = "tree_id", radius = 10,

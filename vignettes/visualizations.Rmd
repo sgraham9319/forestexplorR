@@ -124,5 +124,5 @@ one_stand_tree <- tree %>%
   filter(stand_id == "AB08")
 
 # Create stand map
-stand_map(one_stand_map, one_stand_tree, c(50, 100), c(50, 100))
+stand_map(one_stand_map, one_stand_tree, c(50, 100), c(50, 100), "tag")
 ```

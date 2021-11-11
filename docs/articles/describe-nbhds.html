@@ -162,6 +162,7 @@
 <h2 class="hasAnchor">
 <a href="#neighborhood_summary-summarize-neighborhoods" class="anchor"></a><code>neighborhood_summary()</code>: Summarize neighborhoods</h2>
 <p>The <code><a href="../reference/neighborhood_summary.html">neighborhood_summary()</a></code> function takes output of the <code><a href="../reference/neighborhoods.html">neighborhoods()</a></code> function and calculates species richness, overall tree density, and densities of each tree species for each neighborhood. The <code>densities</code> argument is used to specify how densities should be calculated.</p>
+<p>The optimal method for density calculation is likely to vary between study systems and processes of interest. If the differential effects of neighbor tree species are likely to be influenced by how close the neighbors of each species are to the focal (e.g. when differences relate to competition for soil moisture or nutrients), the <code>angular</code> method may be more appropriate. However, if the forest is in the vertical diversification stage of successional development, the influence of a large canopy-forming neighbor species may be relatively unaffected by whether neighbors of that species are 5m vs. 10m from the focal tree - in this case the <code>raw</code> or <code>proportional</code> measures may be more relevant.</p>
 <div id="neighborhood_summarydensities-raw" class="section level3">
 <h3 class="hasAnchor">
 <a href="#neighborhood_summarydensities-raw" class="anchor"></a><code>neighborhood_summary(densities = "raw")</code>

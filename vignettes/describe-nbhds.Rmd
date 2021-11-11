@@ -80,6 +80,16 @@ function and calculates species richness, overall tree density, and densities of
 each tree species for each neighborhood. The `densities` argument is used to
 specify how densities should be calculated.
 
+The optimal method for density calculation is likely to vary between study 
+systems and processes of interest. If the differential effects of neighbor tree 
+species are likely to be influenced by how close the neighbors of each species 
+are to the focal (e.g. when differences relate to competition for soil moisture 
+or nutrients), the `angular` method may be more appropriate. However, if the
+forest is in the vertical diversification stage of successional development, the
+influence of a large canopy-forming neighbor species may be relatively 
+unaffected by whether neighbors of that species are 5m vs. 10m from the focal 
+tree - in this case the `raw` or `proportional` measures may be more relevant.
+
 ### `neighborhood_summary(densities = "raw")`
 
 Overall tree density and species-specific densities will be presented in units

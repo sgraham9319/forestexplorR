@@ -165,13 +165,17 @@ an example.</p></td>
     <p>A data frame containing between-census annual growth of each tree:</p><dl>
   <dt>tree_id</dt><dd><p>unique identification code of the tree</p></dd>
   <dt>start_year</dt><dd><p>first year of between-census period</p></dd>
-  <dt>start_dbh</dt><dd><p>diameter at breast height at beginning of between-census
+  <dt>begin_size</dt><dd><p>diameter at breast height at beginning of between-census
   period, in cm</p></dd>
   <dt>end_year</dt><dd><p>last year of between-census period</p></dd>
-  <dt>end_dbh</dt><dd><p>diameter at breast height at end of between-census
+  <dt>end_size</dt><dd><p>diameter at breast height at end of between-census
   period, in cm</p></dd>
   <dt>annual_growth</dt><dd><p>annual growth rate as average yearly increase in 
   diameter at breast height, in cm/year</p></dd>
+  <dt>annual_bai</dt><dd><p>annual basal area increment as average yearly increase
+  in area at breast height, in cm^2/year</p></dd>
+  <dt>size_corr_growth</dt><dd><p>square root of <code>annual_growth</code> divided by
+  <code>begin_size</code> to give somewhat normally distributed growth rates</p></dd>
   <dt>...</dt><dd><p>any other columns that appeared in <code>data</code></p></dd>
 
 </dl>
@@ -179,7 +183,7 @@ an example.</p></td>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='fu'>detailed_growth</span><span class='op'>(</span><span class='va'>tree</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; [1] "Warning: 2913 cases of negative annual growth"</div><div class='output co'>#&gt; <span style='color: #949494;'># A tibble: 50,959 x 10</span>
+</div><div class='output co'>#&gt; [1] "Warning: 2913 cases of negative annual growth"</div><div class='output co'>#&gt; <span style='color: #949494;'># A tibble: 50,959 x 11</span>
 #&gt; <span style='color: #949494;'># Groups:   tree_id [8,721]</span>
 #&gt;    tree_id       stand_id   tag species start_year begin_size end_year end_size
 #&gt;    <span style='color: #949494; font-style: italic;'>&lt;chr&gt;</span>         <span style='color: #949494; font-style: italic;'>&lt;chr&gt;</span>    <span style='color: #949494; font-style: italic;'>&lt;int&gt;</span> <span style='color: #949494; font-style: italic;'>&lt;chr&gt;</span>        <span style='color: #949494; font-style: italic;'>&lt;int&gt;</span>      <span style='color: #949494; font-style: italic;'>&lt;dbl&gt;</span>    <span style='color: #949494; font-style: italic;'>&lt;int&gt;</span>    <span style='color: #949494; font-style: italic;'>&lt;dbl&gt;</span>
@@ -193,8 +197,8 @@ an example.</p></td>
 #&gt; <span style='color: #BCBCBC;'> 8</span> AB08000100002 AB08      <span style='text-decoration: underline;'>4</span>002 TSHE          <span style='text-decoration: underline;'>1</span>978       76.3     <span style='text-decoration: underline;'>1</span>984     76.8
 #&gt; <span style='color: #BCBCBC;'> 9</span> AB08000100002 AB08      <span style='text-decoration: underline;'>4</span>002 TSHE          <span style='text-decoration: underline;'>1</span>984       76.8     <span style='text-decoration: underline;'>1</span>990     77.3
 #&gt; <span style='color: #BCBCBC;'>10</span> AB08000100002 AB08      <span style='text-decoration: underline;'>4</span>002 TSHE          <span style='text-decoration: underline;'>1</span>990       77.3     <span style='text-decoration: underline;'>1</span>995     78.7
-#&gt; <span style='color: #949494;'># ... with 50,949 more rows, and 2 more variables: annual_growth &lt;dbl&gt;,</span>
-#&gt; <span style='color: #949494;'>#   size_corr_growth &lt;dbl&gt;</span></div></pre>
+#&gt; <span style='color: #949494;'># ... with 50,949 more rows, and 3 more variables: annual_growth &lt;dbl&gt;,</span>
+#&gt; <span style='color: #949494;'>#   annual_bai &lt;dbl&gt;, size_corr_growth &lt;dbl&gt;</span></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

@@ -114,15 +114,15 @@
 <code class="sourceCode R"><span class="va">growth</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/growth_summary.html">growth_summary</a></span><span class="op">(</span><span class="va">tree</span><span class="op">)</span>
 <span class="co">#&gt; [1] "Warning: 139 trees exhibited negative annual growth"</span>
 <span class="va">growth</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">tree_id</span>, <span class="va">stand_id</span>, <span class="va">species</span>, <span class="va">begin_size</span>, <span class="va">annual_growth</span>,
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">tree_id</span>, <span class="va">stand_id</span>, <span class="va">species</span>, <span class="va">begin_size</span>, <span class="va">annual_growth</span>, <span class="va">annual_bai</span>,
          <span class="va">size_corr_growth</span><span class="op">)</span>
-<span class="co">#&gt; # A tibble: 9,155 x 6</span>
-<span class="co">#&gt;   tree_id       stand_id species begin_size annual_growth size_corr_growth</span>
-<span class="co">#&gt;   &lt;chr&gt;         &lt;chr&gt;    &lt;chr&gt;        &lt;dbl&gt;         &lt;dbl&gt;            &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 AB08000100001 AB08     TSHE          48.2        0.0615           0.0357</span>
-<span class="co">#&gt; 2 AB08000100002 AB08     TSHE          76.3        0.136            0.0422</span>
-<span class="co">#&gt; 3 AB08000100003 AB08     TSHE          15.7        0.115            0.0857</span>
-<span class="co">#&gt; 4 AB08000100004 AB08     TSHE          50.5        0.0897           0.0422</span>
+<span class="co">#&gt; # A tibble: 9,155 x 7</span>
+<span class="co">#&gt;   tree_id       stand_id species begin_size annual_growth annual_bai size_corr_growth</span>
+<span class="co">#&gt;   &lt;chr&gt;         &lt;chr&gt;    &lt;chr&gt;        &lt;dbl&gt;         &lt;dbl&gt;      &lt;dbl&gt;            &lt;dbl&gt;</span>
+<span class="co">#&gt; 1 AB08000100001 AB08     TSHE          48.2        0.0615       4.78           0.0357</span>
+<span class="co">#&gt; 2 AB08000100002 AB08     TSHE          76.3        0.136       16.9            0.0422</span>
+<span class="co">#&gt; 3 AB08000100003 AB08     TSHE          15.7        0.115        3.25           0.0857</span>
+<span class="co">#&gt; 4 AB08000100004 AB08     TSHE          50.5        0.0897       7.37           0.0422</span>
 <span class="co">#&gt; # ... with 9,151 more rows</span></code></pre></div>
 </div>
 <div id="detailed_growth-calculate-between-census-growth-rates" class="section level2">
@@ -133,15 +133,16 @@
 <code class="sourceCode R"><span class="va">bt_census_growth</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/detailed_growth.html">detailed_growth</a></span><span class="op">(</span><span class="va">tree</span><span class="op">)</span>
 <span class="co">#&gt; [1] "Warning: 2913 cases of negative annual growth"</span>
 <span class="va">bt_census_growth</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">tree_id</span>, <span class="va">stand_id</span>, <span class="va">species</span>, <span class="va">start_year</span>, <span class="va">end_year</span>, <span class="va">annual_growth</span><span class="op">)</span>
-<span class="co">#&gt; # A tibble: 50,959 x 6</span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">tree_id</span>, <span class="va">stand_id</span>, <span class="va">species</span>, <span class="va">start_year</span>, <span class="va">end_year</span>, <span class="va">annual_growth</span>,
+         <span class="va">annual_bai</span><span class="op">)</span>
+<span class="co">#&gt; # A tibble: 50,959 x 7</span>
 <span class="co">#&gt; # Groups:   tree_id [8,721]</span>
-<span class="co">#&gt;   tree_id       stand_id species start_year end_year annual_growth</span>
-<span class="co">#&gt;   &lt;chr&gt;         &lt;chr&gt;    &lt;chr&gt;        &lt;int&gt;    &lt;int&gt;         &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 AB08000100001 AB08     TSHE          1978     1984        0     </span>
-<span class="co">#&gt; 2 AB08000100001 AB08     TSHE          1984     1990        0.0667</span>
-<span class="co">#&gt; 3 AB08000100001 AB08     TSHE          1990     1995        0.0800</span>
-<span class="co">#&gt; 4 AB08000100001 AB08     TSHE          1995     2002        0.0857</span>
+<span class="co">#&gt;   tree_id       stand_id species start_year end_year annual_growth annual_bai</span>
+<span class="co">#&gt;   &lt;chr&gt;         &lt;chr&gt;    &lt;chr&gt;        &lt;int&gt;    &lt;int&gt;         &lt;dbl&gt;      &lt;dbl&gt;</span>
+<span class="co">#&gt; 1 AB08000100001 AB08     TSHE          1978     1984        0            0   </span>
+<span class="co">#&gt; 2 AB08000100001 AB08     TSHE          1984     1990        0.0667       5.07</span>
+<span class="co">#&gt; 3 AB08000100001 AB08     TSHE          1990     1995        0.0800       6.13</span>
+<span class="co">#&gt; 4 AB08000100001 AB08     TSHE          1995     2002        0.0857       6.64</span>
 <span class="co">#&gt; # ... with 50,955 more rows</span></code></pre></div>
 </div>
   </div>

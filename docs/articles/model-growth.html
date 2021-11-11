@@ -182,17 +182,17 @@
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># R^2 value</span>
 <span class="va">basic_growth_mod</span><span class="op">$</span><span class="va">R_squared</span>
-<span class="co">#&gt; [1] 0.1893548</span>
+<span class="co">#&gt; [1] 0.1868865</span>
 
 <span class="co"># Observations and model predictions</span>
 <span class="va">basic_growth_mod</span><span class="op">$</span><span class="va">obs_pred</span>
 <span class="co">#&gt; # A tibble: 1,804 x 3</span>
 <span class="co">#&gt;   tree_id       observations predictions</span>
 <span class="co">#&gt;   &lt;chr&gt;                &lt;dbl&gt;       &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 AB08000300014        0.129       0.127</span>
-<span class="co">#&gt; 2 AB08000300021        0.160       0.138</span>
-<span class="co">#&gt; 3 AB08000300024        0.119       0.146</span>
-<span class="co">#&gt; 4 AB08000300027        0.128       0.132</span>
+<span class="co">#&gt; 1 AB08000300012        0.165       0.129</span>
+<span class="co">#&gt; 2 AB08000300027        0.128       0.123</span>
+<span class="co">#&gt; 3 AB08000300028        0.149       0.125</span>
+<span class="co">#&gt; 4 AB08000300030        0.189       0.133</span>
 <span class="co">#&gt; # ... with 1,800 more rows</span></code></pre></div>
 <p>The evaluate the robustness of the stochastic model fitting process there is an optional argument (<code>iterations</code>) that specifies how many times the model should be fit. When this argument is specified, the model object, r-squared value and table of observations and predictions refer to the model that had the lowest mean square error. However, the <code>mod_coef</code> element will contain the fitted coefficients for all fitted models.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
@@ -200,7 +200,7 @@
 <span class="va">iter_growth_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/growth_model.html">growth_model</a></span><span class="op">(</span><span class="va">training</span>, outcome_var <span class="op">=</span> <span class="st">"size_corr_growth"</span>,
                                 iterations <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>
 <span class="va">iter_growth_mod</span><span class="op">$</span><span class="va">R_squared</span>
-<span class="co">#&gt; [1] 0.190195</span></code></pre></div>
+<span class="co">#&gt; [1] 0.1898632</span></code></pre></div>
 <p>The <code><a href="../reference/growth_model.html">growth_model()</a></code> function can also handle rare competitor tree species. The optional argument <code>rare_comps</code> specifies the minimum number of interactions a competitor species must be a part of to be considered a common competitor. Any species with fewer interactions will be grouped together under the new species identity of <code>"RARE"</code>. If species-specific densities are included as covariates in the training data, a <code>"RARE_density"</code> variable can also be created by indicating the suffix attached to density variables under the argument <code>density_suffix</code>.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">1000</span><span class="op">)</span>
@@ -213,11 +213,10 @@
 <span class="co">#&gt;  [5] "sps_compPSME"   "sps_compRARE"   "sps_compTABR"   "sps_compTHPL"  </span>
 <span class="co">#&gt;  [9] "sps_compTSHE"   "sps_compTSME"   "dbh_comp"       "sps_richness"  </span>
 <span class="co">#&gt; [13] "ABAM_angle_sum" "ALRU_angle_sum" "ALVI_angle_sum" "CANO_angle_sum"</span>
-<span class="co">#&gt; [17] "PIEN_angle_sum" "PISI_angle_sum" "POBA_angle_sum" "PSME_angle_sum"</span>
-<span class="co">#&gt; [21] "TABR_angle_sum" "THPL_angle_sum" "TSHE_angle_sum" "TSME_angle_sum"</span>
-<span class="co">#&gt; [25] "all_angle_sum"  "precip_mm"      "temp_C"         "elev_m"        </span>
-<span class="co">#&gt; [29] "aet_mm"         "pet_mm"         "RARE_density"   "mse"           </span>
-<span class="co">#&gt; [33] "R_squared"</span></code></pre></div>
+<span class="co">#&gt; [17] "PISI_angle_sum" "PSME_angle_sum" "TABR_angle_sum" "THPL_angle_sum"</span>
+<span class="co">#&gt; [21] "TSHE_angle_sum" "TSME_angle_sum" "all_angle_sum"  "precip_mm"     </span>
+<span class="co">#&gt; [25] "temp_C"         "elev_m"         "aet_mm"         "pet_mm"        </span>
+<span class="co">#&gt; [29] "RARE_density"   "mse"            "R_squared"</span></code></pre></div>
 <p>Finally, the <code><a href="../reference/growth_model.html">growth_model()</a></code> function can evaluate the ability of the fitted model to predict the growth of trees in a test set i.e. trees not used in the model fitting process. To do this, a test set must be provided under the optional argument <code>test</code>. Predictive ability is quantified with an R^2 value that constitutes a new element in the output list.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">1000</span><span class="op">)</span>
@@ -226,7 +225,7 @@
 
 <span class="co"># Ability to predict test data</span>
 <span class="va">test_growth_mod</span><span class="op">$</span><span class="va">test_R_squared</span>
-<span class="co">#&gt; [1] 0.2095724</span></code></pre></div>
+<span class="co">#&gt; [1] 0.2145086</span></code></pre></div>
 </div>
   </div>
 

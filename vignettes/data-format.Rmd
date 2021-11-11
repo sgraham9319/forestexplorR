@@ -17,19 +17,19 @@ library(ForestPlot)
 library(dplyr)
 ```
 
-This vignette describes how mapped forest plot datasets should be formatted to
+This vignette describes how mapped forest stand datasets should be formatted to
 ensure full compatibility with ForestPlot and introduces some data checking
 functions to assist with the formatting process.
 
 ## Data file types
 
-The ForestPlot package expects raw mapped forest plot data to consist of at 
+The ForestPlot package expects raw mapped forest stand data to consist of at 
 least two distinct files:
 
-1. Mapping data - coordinate locations of individual trees within plots
+1. Mapping data - coordinate locations of individual trees within stands
 
 2. Tree census data - measurements of individual trees taken during repeated
-censuses of the plots
+censuses of the stands
 
 ### Mapping data
 
@@ -54,7 +54,7 @@ columns.
 ### Tree census data
 
 The tree census dataset should be a data frame where each row represents the 
-measurement data for a single tree during a specific census of the plot. This
+measurement data for a single tree during a specific census of the stand. This
 means each tree will appear on *x* rows where *x* is the number of censuses in 
 which that tree was measured. The required columns are: `tree_id`, `stand_id`,
 `species`, `year` and `dbh`. For details on what each required column
@@ -98,7 +98,7 @@ errors and returns a list containing two elements. The first element
 (`$problem_trees`) is a data frame containing the rows of the input mapping
 dataset that contain issues, with an additional final column describing the
 issue. The arguments "max_x" and "max_y" must be provided so the function can
-check for x and y coordinates beyond the plot boundary.
+check for x and y coordinates beyond the stand boundary.
 
 ```{r}
 map_issues <- mapping_check(messy_mapping, max_x = 100, max_y = 100)

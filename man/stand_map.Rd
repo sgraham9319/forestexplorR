@@ -33,7 +33,7 @@ Creates a map of the forest stand where each tree is a point, sized relative
 to its most recent diameter at breast height (dbh) measurement. Trees for
 which dbh data is missing from \code{dbh_data} will be plotted in blue
 instead of the standard red and assigned a size equal to mean dbh in the
-plot. Points can optinally be labeled using a column included in
+stand. Points can optinally be labeled using a column included in
 \code{map_data}, such as tag numbers of the trees.
 }
 \details{

@@ -4,7 +4,7 @@
 #' to its most recent diameter at breast height (dbh) measurement. Trees for
 #' which dbh data is missing from \code{dbh_data} will be plotted in blue
 #' instead of the standard red and assigned a size equal to mean dbh in the
-#' plot. Points can optinally be labeled using a column included in
+#' stand. Points can optinally be labeled using a column included in
 #' \code{map_data}, such as tag numbers of the trees.
 #' 
 #' The x and y limits of the stand map can be specified because if a large

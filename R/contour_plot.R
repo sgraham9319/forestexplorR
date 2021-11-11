@@ -20,13 +20,13 @@
 #' be named \code{x_coord} and \code{y_coord} respectively but the name of the
 #' contour variable column can be anything.
 #' @param value Name of contour variable column as a string.
-#' @param edge_handling String specifying whether values close to the plot edge
+#' @param edge_handling String specifying whether values close to the stand edge
 #' should be adjusted. Possible values are \code{"none"} (default) and
 #' \code{"multiply"}. See Details.
-#' @param rad Distance from edge of plot below which values should be adjusted.
-#' Must be in same units as the coordinates in \code{grid_vals}
-#' @param max_x Maximum possible x coordinate of forest plot.
-#' @param max_y Maximum possible y coordinate of forest plot.
+#' @param rad Distance from edge of stand below which values should be adjusted.
+#' Must be in same units as the coordinates in \code{grid_vals}.
+#' @param max_x Maximum possible x coordinate of forest stand.
+#' @param max_y Maximum possible y coordinate of forest stand.
 #' @return A contour plot will appear in the plotting window.
 #' @examples
 #' library(dplyr, warn.conflicts = F)

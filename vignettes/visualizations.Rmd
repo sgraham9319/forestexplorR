@@ -1,8 +1,8 @@
 ---
-title: "Visualizing mapped plots"
+title: "Visualizing mapped stands"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Visualizing mapped plots}
+  %\VignetteIndexEntry{Visualizing mapped stands}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -17,13 +17,13 @@ library(ForestPlot)
 library(dplyr)
 ```
 
-This vignette describes the ways in which mapped forest plot data can be 
+This vignette describes the ways in which mapped forest stand data can be 
 visualized using the ForestPlot package.
 
 The `size_dist()` function can be used to produce and compare size-class
 distribution figures. `contour_plot()` uses measurements of any quantitative
 variable associated with coordinates to fit a contour map of that variable over
-a mapped plot `stand_map()` produces a map of all trees in a mapped plot that
+a mapped stand. `stand_map()` produces a map of all trees in a mapped stand that
 can be used to navigate in the field.
 
 ## `size_dist()`: Explore size-class distributions
@@ -44,22 +44,22 @@ can be changed:
 size_dist(size_data = tree, stands = "AB08", bin_size = 5)
 ```
  
-It is also possible to produce size-class distributions for multiple plots in
+It is also possible to produce size-class distributions for multiple stands in
 order to compare them. To ensure clarity of individual distributions it is 
-recommended that fewer than 10 plots be compared at once.
+recommended that fewer than 10 stands be compared at once.
 
 ```{r}
 size_dist(size_data = tree, stands = c("AM16", "AO03", "AR07"))
 ```
 
-## `contour_plot()`: Interpolate contours across plots
+## `contour_plot()`: Interpolate contours across stands
 
-We often measure variables at known coordinates within mapped forest plots. If 
+We often measure variables at known coordinates within mapped forest stands. If 
 measurements are taken at enough locations, it may be desirable to interpolate
-the measured variable across the entire plot. This is the aim of the
+the measured variable across the entire stand. This is the aim of the
 `contour_plot()` function.
 
-With mapped forest plot data it is also possible to derive measurements at 
+With mapped forest stand data it is also possible to derive measurements at 
 coordinate locations by calculating features of neighborhoods centered at those
 coordinates. As an example, here we will calculate tree density across a 
 coordinate grid and create a contour plot of tree density.
@@ -98,10 +98,10 @@ Now we can make the contour plot:
 contour_plot(grid_data, "all_angle_sum", rad = 10, max_x = 100, max_y = 100)
 ```
 
-In the above plot, density appears to decrease toward the plot edges. This is
-because the locations close to the plot boundary did not have their entire
+In the above plot, density appears to decrease toward the stand edges. This is
+because the locations close to the stand boundary did not have their entire
 neighborhood sampled. `contour_plot()` offers a method of estimating the missing
-regions of neighborhoods that overlap the plot boundary, specified by the 
+regions of neighborhoods that overlap the stand boundary, specified by the 
 `edge_handling` argument:
 
 ```{r}
@@ -109,12 +109,12 @@ contour_plot(grid_data, "all_angle_sum", edge_handling = "multiply",
              rad = 10, max_x = 100, max_y = 100)
 ```
 
-## `stand_map()`: Create maps of forest plots
+## `stand_map()`: Create maps of forest stands
 
-The `stand_map()` function creates a map of a forest plot with each tree
+The `stand_map()` function creates a map of a forest stand with each tree
 represented by a point sized relative to its `dbh` and labeled with its `tag`
 number. The x and y coordinate limits must also be provided and can be used
-to create a map of only a portion of the plot:
+to create a map of only a portion of the stand:
 
 ```{r, fig.height = 6, fig.width = 6}
 # Isolate mapping and tree data for one stand

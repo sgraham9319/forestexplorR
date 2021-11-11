@@ -18,9 +18,9 @@ library(dplyr)
 ```
 
 This vignette describes a series of functions in the ForestPlot package that 
-provide quantitative descriptions of local neighborhoods in mapped forest plots.
-The neighborhood of a specific location in a mapped plot is the collection of
-trees growing within a specified distance of that location. 
+provide quantitative descriptions of local neighborhoods in mapped forest
+stands. The neighborhood of a specific location in a mapped stand is the 
+collection of trees growing within a specified distance of that location. 
 
 Of these functions, `neighborhoods()` constructs the list of all trees in each
 neighborhood. `neighborhood_summary()` takes the output of `neighborhoods()` as
@@ -37,7 +37,7 @@ as topography.
 The `neighborhoods()` function uses a mapping dataset to determine, for each
 tree, all the trees that are within a certain distance (`radius`). The argument
 `stand` can be used to indicate that neighborhoods should be constructed only
-for the trees of one or more of the plots included in `mapping`. If `stand` is
+for the trees of one or more of the stands included in `mapping`. If `stand` is
 not specified, neighborhoods will be constructed for all trees in `mapping`.
 
 The output is a data frame where each row contains information on a focal tree
@@ -54,7 +54,7 @@ nbhds %>%
 ```
 
 The `neighborhoods()` function can also be used to construct neighborhoods for
-specific coordinates within the mapped plot instead of constructing a
+specific coordinates within the mapped stand instead of constructing a
 neighborhood centered on each tree in the dataset. This is achieved by
 providing a data frame of coordinates under the optional argument `coords` (see
 `neighborhoods()` documentation for details on how this data frame should be
@@ -150,10 +150,10 @@ coordinates for each tree. The output spatial object can be used to extract
 further data for each tree from data sources with very high spatial resolution
 e.g. topography.
 
-The required arguments for `tree_utm()` are: geographic coordinates of the plots
-(`stand_locs`), the ESPG code of the coordinate reference system of `stand_locs`
-(`original_crs`), and the ESPG code of the UTM zone in which the plots exist
-(`utm_crs`).
+The required arguments for `tree_utm()` are: geographic coordinates of the 
+stands (`stand_locs`), the ESPG code of the coordinate reference system of 
+`stand_locs` (`original_crs`), and the ESPG code of the UTM zone in which the 
+stands exist (`utm_crs`).
 
 The built-in `stand_locations` dataset shows the expected structure of 
 `stand_locs` - see `?stand_locations` for details:

@@ -66,7 +66,7 @@
       <a href="../articles/model-growth.html">Modeling tree growth</a>
     </li>
     <li>
-      <a href="../articles/visualizations.html">Visualizing mapped plots</a>
+      <a href="../articles/visualizations.html">Visualizing mapped stands</a>
     </li>
   </ul>
 </li>
@@ -104,12 +104,12 @@
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://sgraham9319.github.io/ForestPlot/">ForestPlot</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></code></pre></div>
-<p>This vignette describes a series of functions in the ForestPlot package that provide quantitative descriptions of local neighborhoods in mapped forest plots. The neighborhood of a specific location in a mapped plot is the collection of trees growing within a specified distance of that location.</p>
+<p>This vignette describes a series of functions in the ForestPlot package that provide quantitative descriptions of local neighborhoods in mapped forest stands. The neighborhood of a specific location in a mapped stand is the collection of trees growing within a specified distance of that location.</p>
 <p>Of these functions, <code><a href="../reference/neighborhoods.html">neighborhoods()</a></code> constructs the list of all trees in each neighborhood. <code><a href="../reference/neighborhood_summary.html">neighborhood_summary()</a></code> takes the output of <code><a href="../reference/neighborhoods.html">neighborhoods()</a></code> as input and calculates tree species richness and species-specific densities for each neighborhood. <code><a href="../reference/site_by_species.html">site_by_species()</a></code> also takes the output of <code><a href="../reference/neighborhoods.html">neighborhoods()</a></code> as input but creates a site-by-species matrix, where each site is a different neighborhood, that can be used to calculate diversity metrics. <code><a href="../reference/tree_utm.html">tree_utm()</a></code> takes a mapping object as input and calculates UTM coordinates for each tree, thereby allowing trees to be linked to fine-scale spatial data such as topography.</p>
 <div id="neighborhoods-construct-neighborhoods" class="section level2">
 <h2 class="hasAnchor">
 <a href="#neighborhoods-construct-neighborhoods" class="anchor"></a><code>neighborhoods()</code>: Construct neighborhoods</h2>
-<p>The <code><a href="../reference/neighborhoods.html">neighborhoods()</a></code> function uses a mapping dataset to determine, for each tree, all the trees that are within a certain distance (<code>radius</code>). The argument <code>stand</code> can be used to indicate that neighborhoods should be constructed only for the trees of one or more of the plots included in <code>mapping</code>. If <code>stand</code> is not specified, neighborhoods will be constructed for all trees in <code>mapping</code>.</p>
+<p>The <code><a href="../reference/neighborhoods.html">neighborhoods()</a></code> function uses a mapping dataset to determine, for each tree, all the trees that are within a certain distance (<code>radius</code>). The argument <code>stand</code> can be used to indicate that neighborhoods should be constructed only for the trees of one or more of the stands included in <code>mapping</code>. If <code>stand</code> is not specified, neighborhoods will be constructed for all trees in <code>mapping</code>.</p>
 <p>The output is a data frame where each row contains information on a focal tree and one other tree growing in the focal tree’s neighborhood. Therefore, the information for each focal tree will appear on <em>x</em> lines, where <em>x</em> is the number of trees in that focal tree’s neighborhood. This structure is shown below by isolating a single focal tree in the output of applying <code><a href="../reference/neighborhoods.html">neighborhoods()</a></code> to the built-in <code>mapping</code> dataset:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">nbhds</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/neighborhoods.html">neighborhoods</a></span><span class="op">(</span><span class="va">mapping</span>, stand <span class="op">=</span> <span class="st">"AB08"</span>, radius <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>
@@ -131,7 +131,7 @@
 <span class="co">#&gt; 5 7.283028     TSHE     24.4  467.5947</span>
 <span class="co">#&gt; 6 7.504265     THPL     57.0 2551.7586</span>
 <span class="co">#&gt; 7 6.124255     TSHE     24.6  475.2916</span></code></pre></div>
-<p>The <code><a href="../reference/neighborhoods.html">neighborhoods()</a></code> function can also be used to construct neighborhoods for specific coordinates within the mapped plot instead of constructing a neighborhood centered on each tree in the dataset. This is achieved by providing a data frame of coordinates under the optional argument <code>coords</code> (see <code><a href="../reference/neighborhoods.html">neighborhoods()</a></code> documentation for details on how this data frame should be structured).</p>
+<p>The <code><a href="../reference/neighborhoods.html">neighborhoods()</a></code> function can also be used to construct neighborhoods for specific coordinates within the mapped stand instead of constructing a neighborhood centered on each tree in the dataset. This is achieved by providing a data frame of coordinates under the optional argument <code>coords</code> (see <code><a href="../reference/neighborhoods.html">neighborhoods()</a></code> documentation for details on how this data frame should be structured).</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Create a data frame of coordinates</span>
 <span class="va">locations</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>
@@ -251,7 +251,7 @@
 <h2 class="hasAnchor">
 <a href="#tree_utm-calculate-tree-utm-coordinates" class="anchor"></a><code>tree_utm()</code>: Calculate tree UTM coordinates</h2>
 <p>The <code><a href="../reference/tree_utm.html">tree_utm()</a></code> function takes a mapping object as input and calculates UTM coordinates for each tree. The output spatial object can be used to extract further data for each tree from data sources with very high spatial resolution e.g. topography.</p>
-<p>The required arguments for <code><a href="../reference/tree_utm.html">tree_utm()</a></code> are: geographic coordinates of the plots (<code>stand_locs</code>), the ESPG code of the coordinate reference system of <code>stand_locs</code> (<code>original_crs</code>), and the ESPG code of the UTM zone in which the plots exist (<code>utm_crs</code>).</p>
+<p>The required arguments for <code><a href="../reference/tree_utm.html">tree_utm()</a></code> are: geographic coordinates of the stands (<code>stand_locs</code>), the ESPG code of the coordinate reference system of <code>stand_locs</code> (<code>original_crs</code>), and the ESPG code of the UTM zone in which the stands exist (<code>utm_crs</code>).</p>
 <p>The built-in <code>stand_locations</code> dataset shows the expected structure of <code>stand_locs</code> - see <code><a href="../reference/stand_locations.html">?stand_locations</a></code> for details:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">stand_locations</span><span class="op">)</span>

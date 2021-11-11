@@ -21,16 +21,16 @@ contour variable column can be anything.}
 
 \item{value}{Name of contour variable column as a string.}
 
-\item{edge_handling}{String specifying whether values close to the plot edge
+\item{edge_handling}{String specifying whether values close to the stand edge
 should be adjusted. Possible values are \code{"none"} (default) and
 \code{"multiply"}. See Details.}
 
-\item{rad}{Distance from edge of plot below which values should be adjusted.
-Must be in same units as the coordinates in \code{grid_vals}}
+\item{rad}{Distance from edge of stand below which values should be adjusted.
+Must be in same units as the coordinates in \code{grid_vals}.}
 
-\item{max_x}{Maximum possible x coordinate of forest plot.}
+\item{max_x}{Maximum possible x coordinate of forest stand.}
 
-\item{max_y}{Maximum possible y coordinate of forest plot.}
+\item{max_y}{Maximum possible y coordinate of forest stand.}
 }
 \value{
 A contour plot will appear in the plotting window.

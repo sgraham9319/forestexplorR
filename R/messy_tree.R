@@ -9,7 +9,7 @@
 #' @format A data frame with 6501 rows and 6 variables:
 #' \describe{
 #'   \item{tree_id}{unique identification code of the tree}
-#'   \item{stand_id}{name of plot in which tree is located}
+#'   \item{stand_id}{name of stand in which tree is located}
 #'   \item{tag}{unique tag number of the tree}
 #'   \item{species}{species identity of tree as a four letter code}
 #'   \item{year}{year when measurement was taken}

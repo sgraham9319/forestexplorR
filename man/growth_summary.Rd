@@ -17,7 +17,7 @@ an example.}
 A dataframe containing growth rate measurements for each tree:
 \describe{
   \item{tree_id}{unique identification code of the tree}
-  \item{stand_id}{name of plot in which tree is located - only appears if 
+  \item{stand_id}{name of stand in which tree is located - only appears if 
   input dataframe contains a \code{stand_id} column}
   \item{species}{species identity of tree as a four letter code}
   \item{first_record}{year of first size measurement of the tree}

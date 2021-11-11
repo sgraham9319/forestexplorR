@@ -32,6 +32,8 @@ A dataframe containing growth rate measurements for each tree:
   measurements as diameter at breast height, in cm}
   \item{annual_growth}{annual growth rate as average yearly increase in 
   diameter at breast height, in cm/year}
+  \item{annual_bai}{annual basal area increment as average yearly increase
+  in area at breast height, in cm^2/year}
   \item{size_corr_growth}{square root of \code{annual_growth} divided by
   \code{begin_size} to give somewhat normally distributed growth rates}
 }

@@ -18,13 +18,17 @@ A data frame containing between-census annual growth of each tree:
 \describe{
   \item{tree_id}{unique identification code of the tree}
   \item{start_year}{first year of between-census period}
-  \item{start_dbh}{diameter at breast height at beginning of between-census
+  \item{begin_size}{diameter at breast height at beginning of between-census
   period, in cm}
   \item{end_year}{last year of between-census period}
-  \item{end_dbh}{diameter at breast height at end of between-census
+  \item{end_size}{diameter at breast height at end of between-census
   period, in cm}
   \item{annual_growth}{annual growth rate as average yearly increase in 
   diameter at breast height, in cm/year}
+  \item{annual_bai}{annual basal area increment as average yearly increase
+  in area at breast height, in cm^2/year}
+  \item{size_corr_growth}{square root of \code{annual_growth} divided by
+  \code{begin_size} to give somewhat normally distributed growth rates}
   \item{...}{any other columns that appeared in \code{data}}
 }
 }

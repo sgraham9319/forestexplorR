@@ -27,6 +27,8 @@
 #'   measurements as diameter at breast height, in cm}
 #'   \item{annual_growth}{annual growth rate as average yearly increase in 
 #'   diameter at breast height, in cm/year}
+#'   \item{annual_bai}{annual basal area increment as average yearly increase
+#'   in area at breast height, in cm^2/year}
 #'   \item{size_corr_growth}{square root of \code{annual_growth} divided by
 #'   \code{begin_size} to give somewhat normally distributed growth rates}
 #' }
@@ -50,7 +52,7 @@ growth_summary <- function(data){
   }
   
   # Calculate annual growth
-  output <- data %>% 
+  output <- data %>%
     group_by(tree_id) %>% 
     arrange(year) %>%
     summarize(
@@ -67,7 +69,12 @@ growth_summary <- function(data){
       annual_growth = if_else(
         first_record == last_record,
         NA_real_,
-        (final_size - begin_size) / (last_record - first_record)))
+        (final_size - begin_size) / (last_record - first_record)),
+      annual_bai = if_else(
+        first_record == last_record,
+        NA_real_,
+        (circ_area(final_size / 2) - circ_area(begin_size / 2)) /
+          (last_record - first_record)))
   
   # Remove stand_id column if all NA
   if(all(is.na(output$stand_id))){

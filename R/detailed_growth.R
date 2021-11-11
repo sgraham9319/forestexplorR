@@ -13,13 +13,17 @@
 #' \describe{
 #'   \item{tree_id}{unique identification code of the tree}
 #'   \item{start_year}{first year of between-census period}
-#'   \item{start_dbh}{diameter at breast height at beginning of between-census
+#'   \item{begin_size}{diameter at breast height at beginning of between-census
 #'   period, in cm}
 #'   \item{end_year}{last year of between-census period}
-#'   \item{end_dbh}{diameter at breast height at end of between-census
+#'   \item{end_size}{diameter at breast height at end of between-census
 #'   period, in cm}
 #'   \item{annual_growth}{annual growth rate as average yearly increase in 
 #'   diameter at breast height, in cm/year}
+#'   \item{annual_bai}{annual basal area increment as average yearly increase
+#'   in area at breast height, in cm^2/year}
+#'   \item{size_corr_growth}{square root of \code{annual_growth} divided by
+#'   \code{begin_size} to give somewhat normally distributed growth rates}
 #'   \item{...}{any other columns that appeared in \code{data}}
 #' }
 #' @examples
@@ -44,16 +48,19 @@ detailed_growth <- function(data){
   # Calculate annual growth
   output <- data %>%
     filter(!is.na(year) & !is.na(dbh)) %>%
+    mutate(abh = circ_area(dbh / 2)) %>%
     group_by(tree_id) %>% 
     arrange(tree_id, year) %>%
     rename(begin_size = dbh,
            start_year = year) %>%
     mutate(year_diff = c(diff(start_year), NA),
            size_diff = c(diff(begin_size), NA),
+           size_ba_diff = c(diff(abh), NA),
            end_year = start_year + year_diff,
            end_size = begin_size + size_diff,
-           annual_growth = size_diff / year_diff) %>%
-    select(-year_diff, -size_diff) %>%
+           annual_growth = size_diff / year_diff,
+           annual_bai = size_ba_diff / year_diff) %>%
+    select(-year_diff, -size_diff, -abh, -size_ba_diff) %>%
     filter(!is.na(end_year))
   
   # Calculate size corrected growth for trees where defined

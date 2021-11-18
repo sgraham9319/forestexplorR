@@ -13,18 +13,18 @@ options(tibble.print_min = 4, tibble.print_max = 4)
 ```
 
 ```{r setup, warning=FALSE, message=FALSE}
-library(ForestPlot)
+library(ForestPlotR)
 library(dplyr)
 ```
 
 This vignette demonstrates how the neighborhood description and growth
-calculation functions of ForestPlot can be used to setup a neighborhood model
+calculation functions of ForestPlotR can be used to setup a neighborhood model
 of tree growth.
 
 ## Formating data for a growth model
 
 To build a neighborhood model of tree growth, we first need to describe tree
-neighborhoods. The ForestPlot functions `neighborhoods()` and
+neighborhoods. The ForestPlotR functions `neighborhoods()` and
 `neighborhood_summary()` make this very simple.
 
 ```{r}

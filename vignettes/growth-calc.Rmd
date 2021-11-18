@@ -13,11 +13,11 @@ options(tibble.print_min = 4, tibble.print_max = 4)
 ```
 
 ```{r setup, warning=FALSE, message=FALSE}
-library(ForestPlot)
+library(ForestPlotR)
 library(dplyr)
 ```
 
-The ForestPlot package contains two functions for calculating annual growth
+The ForestPlotR package contains two functions for calculating annual growth
 rates of trees in a tree census dataset. `growth_summary()` uses the earliest
 and most recent measurements of each tree to calculate average annual growth
 over the entire period. `detailed_growth()` calculates average annual growth 

@@ -13,12 +13,12 @@ options(tibble.print_min = 4, tibble.print_max = 4)
 ```
 
 ```{r setup, warning=FALSE, message=FALSE}
-library(ForestPlot)
+library(ForestPlotR)
 library(dplyr)
 ```
 
 This vignette describes the ways in which mapped forest stand data can be 
-visualized using the ForestPlot package.
+visualized using the ForestPlotR package.
 
 The `size_dist()` function can be used to produce and compare size-class
 distribution figures. `contour_plot()` uses measurements of any quantitative
@@ -73,7 +73,7 @@ locations <- data.frame(
   y_coord = rep(seq(0, 100, 5), each = 21))
 ```
 
-Then we calculate tree density at each of these locations using ForestPlot
+Then we calculate tree density at each of these locations using ForestPlotR
 functions:
 
 ```{r}

@@ -1,6 +1,6 @@
-# ForestPlot
+# ForestPlotR
 
-The ForestPlot R package is designed to facilitate the cleaning, analysis and
+The ForestPlotR package is designed to facilitate the cleaning, analysis and
 visualization of rectangular mapped forest stand data.
 
 Mapped forest stands are areas of the forest where the size, species identity
@@ -20,7 +20,7 @@ want to calculate the annual growth rate of each tree using its repeated size
 measurements. We may also want to generate gps locations for individual trees
 in order to connect them with spatially explicit data sources such as lidar 
 topographical data. Typically, each research group working with mapped forest
-stand data must complete these arduous coding tasks independently. ForestPlot
+stand data must complete these arduous coding tasks independently. ForestPlotR
 attempts to negate this time-consuming process by providing flexible functions
 that can perform each of these tasks on any mapped forest stand dataset.
 
@@ -32,18 +32,18 @@ machine. This can be installed using homebrew with:
 brew install libgit2
 ```
 
-ForestPlot can then be installed with the following:
+ForestPlotR can then be installed with the following:
 ```
 # Install devtools package if not already installed
 install.packages("devtools")
 
-# Use devtools to install ForestPlot
-devtools::install_github("sgraham9319/ForestPlot")
+# Use devtools to install ForestPlotR
+devtools::install_github("sgraham9319/ForestPlotR")
 ```
 
 ## Updates
 
-The functions of ForestPlot handle only the most common analytical tasks
+The functions of ForestPlotR handle only the most common analytical tasks
 associated with mapped forest stand data. If you encounter a task that is not
-covered by ForestPlot, please feel free to build that functionality and submit
+covered by ForestPlotR, please feel free to build that functionality and submit
 a pull request, or contact us if you're not sure where to start.

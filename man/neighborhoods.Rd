@@ -44,7 +44,7 @@ neighborhood. Specifically, each line contains the ID number
 (\code{id_comp}), species identity (\code{sps_comp}), size (\code{dbh_comp} 
 and \code{abh_comp}), and distance from the neighborhood center (\code{prox})
 of the neighbor tree. The neighborhoods object can be passed into a number
-of other functions in ForestPlot, including \code{neighborhood_summary} and 
+of other functions in ForestPlotR, including \code{neighborhood_summary} and 
 \code{site_by_species}.
 }
 \examples{

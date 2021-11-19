@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Plot size class distributions — size_dist • ForestPlotR</title>
+<title>Select neighborhood size — select_nbhd_size • ForestPlotR</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,13 @@
 
 
 
-<meta property="og:title" content="Plot size class distributions — size_dist" />
-<meta property="og:description" content="Creates tree size class distribution plots for one or more stands." />
+<meta property="og:title" content="Select neighborhood size — select_nbhd_size" />
+<meta property="og:description" content="Fits tree growth models using neighborhood metrics based on differing
+neighborhood sizes, calculating mean square error of each model, thereby
+providing useful data on the appropriate neighborhood size for analysis. It
+is strongly recommended that this sensitivity analysis or a similar one is
+used to select a neighborhood size for modeling because the appropriate 
+neighborhood size varies between study systems and ecological processes." />
 
 
 
@@ -135,59 +140,124 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Plot size class distributions</h1>
-    <small class="dont-index">Source: <a href='https://github.com/sgraham9319/ForestPlotR/blob/master/R/size_dist.R'><code>R/size_dist.R</code></a></small>
-    <div class="hidden name"><code>size_dist.Rd</code></div>
+    <h1>Select neighborhood size</h1>
+    <small class="dont-index">Source: <a href='https://github.com/sgraham9319/ForestPlotR/blob/master/R/select_nbhd_size.R'><code>R/select_nbhd_size.R</code></a></small>
+    <div class="hidden name"><code>select_nbhd_size.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Creates tree size class distribution plots for one or more stands.</p>
+    <p>Fits tree growth models using neighborhood metrics based on differing
+neighborhood sizes, calculating mean square error of each model, thereby
+providing useful data on the appropriate neighborhood size for analysis. It
+is strongly recommended that this sensitivity analysis or a similar one is
+used to select a neighborhood size for modeling because the appropriate 
+neighborhood size varies between study systems and ecological processes.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>size_dist</span><span class='op'>(</span><span class='va'>size_data</span>, <span class='va'>stands</span>, bin_size <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>select_nbhd_size</span><span class='op'>(</span>
+  <span class='va'>radii</span>,
+  <span class='va'>map_data</span>,
+  <span class='va'>growth_data</span>,
+  abiotic_data <span class='op'>=</span> <span class='cn'>NULL</span>,
+  <span class='va'>focal_sps</span>,
+  <span class='va'>dens_type</span>,
+  <span class='va'>max_x</span>,
+  <span class='va'>max_y</span>,
+  rare_sps <span class='op'>=</span> <span class='fl'>100</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>size_data</th>
-      <td><p>Data frame containing size information of trees. Must 
-include the columns: <code>tree_id</code>, <code>stand_id</code>, <code>dbh</code>, and
-<code>year</code> (i.e. year in which size measurement was taken).</p></td>
+      <th>radii</th>
+      <td><p>Vector of the neighborhood radii to try.</p></td>
     </tr>
     <tr>
-      <th>stands</th>
-      <td><p>Character vector of names of stands for which size class
-distributions are desired. To maintain plot clarity it is recommended that
-10 stands or fewer are specified.</p></td>
+      <th>map_data</th>
+      <td><p>Data frame containing tree coordinates.</p></td>
     </tr>
     <tr>
-      <th>bin_size</th>
-      <td><p>Integer representing desired width of size classes. Default
-is 10 dbh units.</p></td>
+      <th>growth_data</th>
+      <td><p>Data frame containing repeated measurements of DBH for
+trees in <code>map_data</code></p></td>
+    </tr>
+    <tr>
+      <th>abiotic_data</th>
+      <td><p>Data frame containing abiotic data for each of the stands
+in <code>map_data</code>. Must contain a stand_id column. All other columns will be
+included as explanatory variables in the fitted models. This argument is
+optional.</p></td>
+    </tr>
+    <tr>
+      <th>focal_sps</th>
+      <td><p>Vector of species names (i.e. character strings) for which
+a neighborhood size should be selected.</p></td>
+    </tr>
+    <tr>
+      <th>dens_type</th>
+      <td><p>Method for calculating tree densities in each neighborhood.
+Must take one of the values: <code>"raw"</code>, <code>"proportional"</code>, or
+<code>"angular"</code>. See <code><a href='neighborhood_summary.html'>?neighborhood_summary</a></code> for details.</p></td>
+    </tr>
+    <tr>
+      <th>max_x</th>
+      <td><p>Maximum expected x coordinate (i.e. should be 100 if the stands
+are 100 x 100 m).</p></td>
+    </tr>
+    <tr>
+      <th>max_y</th>
+      <td><p>Maximum expected y coordinate.</p></td>
+    </tr>
+    <tr>
+      <th>rare_sps</th>
+      <td><p>Minimum number of interactions a competitor species must
+appear in to remain separate from the "RARE" category in the growth models
+(see <code><a href='growth_model.html'>?growth_model</a></code> for details). If not specified, this argument will
+default to a value of 100 interactions.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A single plot containing a panel for each of the specified
-<code>stands</code>.</p>
+    <p>A list containing a number of named elements (exact number will be
+the number of <code>focal_sps</code> plus one:</p><ul>
+<li><p><code>mse_vals</code> is a data frame containing the mean square error of
+the fitted model for each <code>focal_sps</code> using each neighborhood size
+listed in <code>radii</code>.</p></li>
+<li><p>each additional element of the list will be a plot of model mean square
+error vs. neighborhood size for one of the <code>focal_sps</code>.</p></li>
+</ul>
+
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>The user-provided data frame <code>size_data</code> can contain trees from an 
-unlimited number of stands but it is recommended that no more that 10 stands
-be specified in the <code>stands</code> argument to maintain resolution in the 
-resulting multi-panel plot. If <code>size_data</code> contains multiple size
-measurements for a single tree, the <code>tree_id</code> and <code>year</code> columns
-will be used to select the most recent size measurement for plotting.</p>
+    <p>This function uses a data frame of tree coordinates (<code>map_data</code>) to
+calculate a series of metrics to describe the neighborhoods around each tree.
+It does this by applying the <code>neighborhoods</code> and then the
+<code>neighborhood_summary</code> function. It is therefore necessary to provide,
+under the argument <code>dens_type</code>, instruction for the method that
+<code>neighborhood_summary</code> should use to calculate densities. This process
+is repeated for each of the neighborhood sizes specified by the argument
+<code>radii</code>. To prevent edge effects, trees whose neighborhood overlaps the
+stand boundary are excluded from modeling (hence the need to provide stand
+sizes with the arguments <code>max_x</code> and <code>max_y</code>). Boundary overlap is
+determined using the largest neighborhood size in <code>radii</code> to ensure
+the number of focal trees is constant across neighborhood sizes.</p>
+<p>The neighborhood metrics are then combined with the growth rates of their
+focal tree, specifically the <code>size_corr_growth</code> output by 
+<code>growth_summary</code> (any trees with illogical negative annual growth rates
+are excluded as focal trees). If the user also provides abiotic data for the
+stands using the argument <code>abiotic_data</code>, these are also joined to the
+neighborhood metric and growth data. The result is a design matrix that is
+given to the <code>growth_model</code> function. This entire process is repeated
+for each neighborhood size (<code>radii</code>) and <code>focal_sps</code>, with the 
+mean square error of each resulting model being recorded. The function
+outputs a list containing a data frame of all mean square error values and
+a plot of mean square error vs. neighborhood size for each <code>focal_sps</code>.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'># Single stand</span>
-<span class='fu'>size_dist</span><span class='op'>(</span>size_data <span class='op'>=</span> <span class='va'>tree</span>, stands <span class='op'>=</span> <span class='st'>"AB08"</span>, bin_size <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span>
-</div><div class='img'><img src='size_dist-1.png' alt='' width='700' height='433' /></div><div class='input'>
-<span class='co'># Multiple stands</span>
-<span class='fu'>size_dist</span><span class='op'>(</span>size_data <span class='op'>=</span> <span class='va'>tree</span>, stands <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"AM16"</span>, <span class='st'>"AO03"</span>, <span class='st'>"AR07"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='img'><img src='size_dist-2.png' alt='' width='700' height='433' /></div></pre>
+    <pre class="examples"><div class='input'><span class='co'># See vignette "Selecting neighborhood size"</span>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

@@ -62,7 +62,7 @@
 #' error vs. neighborhood size for one of the \code{focal_sps}.
 #' }
 #' @examples
-#' See vignette "Selecting neighborhood size"
+#' # See vignette "Selecting neighborhood size"
 #' @export
 #' @importFrom magrittr %>%
 #' @import dplyr

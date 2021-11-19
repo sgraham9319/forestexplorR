@@ -92,5 +92,5 @@ outputs a list containing a data frame of all mean square error values and
 a plot of mean square error vs. neighborhood size for each \code{focal_sps}.
 }
 \examples{
-See vignette "Selecting neighborhood size"
+# See vignette "Selecting neighborhood size"
 }

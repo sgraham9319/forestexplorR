@@ -21,6 +21,7 @@ reference:
 - title: "Modeling"
 - contents:
   - growth_model
+  - select_nbhd_size
 - title: "Built-in datasets"
 - contents:
   - mapping

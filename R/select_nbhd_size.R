@@ -159,12 +159,12 @@ select_nbhd_size <- function(radii, map_data, growth_data,
     # locally (i.e. within the loop)
     output_list[[a + 1]] <- local({
       local_a <- a
-      sps_plot <- ggplot(data = nb_rad_comp,
-                         aes(x = radius,
-                             y = get(paste0(focal_sps[local_a], "_mse")))) +
-        geom_line(col = "green") +
-        labs(x = "Neighborhood radius (m)", y = "Mean square error") +
-        theme_classic()
+      sps_plot <- ggplot2::ggplot(data = nb_rad_comp,
+                                  ggplot2::aes(x = radius,
+                                               y = get(paste0(focal_sps[local_a], "_mse")))) +
+        ggplot2::geom_line(col = "green") +
+        ggplot2::labs(x = "Neighborhood radius (m)", y = "Mean square error") +
+        ggplot2::theme_classic()
     })
   }
   

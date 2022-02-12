@@ -20,17 +20,6 @@ be named \code{x_coord} and \code{y_coord} respectively but the name of the
 contour variable column can be anything.}
 
 \item{value}{Name of contour variable column as a string.}
-
-\item{edge_handling}{String specifying whether values close to the stand edge
-should be adjusted. Possible values are \code{"none"} (default) and
-\code{"multiply"}. See Details.}
-
-\item{rad}{Distance from edge of stand below which values should be adjusted.
-Must be in same units as the coordinates in \code{grid_vals}.}
-
-\item{max_x}{Maximum possible x coordinate of forest stand.}
-
-\item{max_y}{Maximum possible y coordinate of forest stand.}
 }
 \value{
 A contour plot will appear in the plotting window.
@@ -45,12 +34,9 @@ continuous contour plot across the forest stand. For some variables, such as
 soil nutrient levels, the contour will remain accurate up to the stand
 boundary. However, if the variable represents a summary of the neighborhood
 around the points such as local tree density, any point whose neighborhood
-overlaps the stand boundary will be an underestimate.
-
-This function can handle these edge effects by calculating the proportion of
-each point's neighborhood included in the data and multiplying their value
-to estimate a complete neighborhood. This is achieved by specifying
-\code{edge_handling = "multiply"} - see Examples.
+overlaps the stand boundary will be an underestimate. In the latter case,
+we recommend users correct for edge effects in their implementation of
+\code{neighborhood_summary()}
 }
 \examples{
 library(dplyr, warn.conflicts = F)
@@ -63,7 +49,9 @@ locations <- data.frame(
 # Calculate density for each point
 nbhds <- neighborhoods(mapping, stands = "AB08", radius = 10,
                        coords = locations)
-nbhd_summ <- neighborhood_summary(nbhds, "loc_id", 10, "angular")
+nbhd_summ <- neighborhood_summary(nbhds, "loc_id", 10, "angular",
+                                  edge_correction = T, x_limit = 100,
+                                  y_limit = 100)
 
 # Format data for contour_plot
 grid_data <- locations \%>\%
@@ -73,6 +61,5 @@ grid_data <- locations \%>\%
   select(-loc_id)
 
 # Create contour plot
-contour_plot(grid_data, "all_angle_sum", edge_handling = "multiply",
-  rad = 10, max_x = 100, max_y = 100)
+contour_plot(grid_data, "all_angle_sum")
 }

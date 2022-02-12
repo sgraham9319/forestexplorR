@@ -107,7 +107,8 @@ proportion of the neighborhood area that lies beyond the stand boundary:
 
 ```{r}
 nbhd_summ <- neighborhood_summary(nbhds, "loc_id", 10, "angular",
-                                  edge_correction = T, 100, 100)
+                                  edge_correction = T, x_limit = 100, 
+                                  y_limit = 100)
 grid_data <- locations %>%
   left_join(nbhd_summ %>%
               select(loc_id, all_angle_sum),

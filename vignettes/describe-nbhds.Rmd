@@ -137,6 +137,22 @@ nbhd_summ %>%
   select(tree_id, sps_richness, ABAM_angle_sum, TSHE_angle_sum, all_angle_sum)
 ```
 
+### `neighborhood_summary(neighbors_incl = "larger_only")`
+
+It is also possible to restrict the diversity and density calculations to 
+include only the neighbor trees that are larger than the focal. This may be 
+useful if trees in the study system are expected to compete far less strongly
+with neighbors that are smaller than them.
+
+```{r}
+nbhd_summ <- neighborhood_summary(nbhds, id_column = "tree_id", radius = 10,
+                                  densities = "angular",
+                                  neighbors_incl = "larger_only")
+nbhd_summ %>%
+  select(tree_id, sps_richness, ABAM_angle_sum, TSHE_angle_sum, all_angle_sum)
+```
+
+
 ## `site_by_species()`: Create site-by-species matrices
 
 The `site_by_species()` function takes output of the `neighborhoods()` function

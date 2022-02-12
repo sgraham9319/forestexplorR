@@ -224,13 +224,33 @@
 <span class="co">#&gt; 4 AB08000100003            3         0.0391          0.509         0.805</span>
 <span class="co">#&gt; # ... with 397 more rows</span></code></pre></div>
 </div>
+<div id="neighborhood_summaryneighbors_incl-larger_only" class="section level3">
+<h3 class="hasAnchor">
+<a href="#neighborhood_summaryneighbors_incl-larger_only" class="anchor"></a><code>neighborhood_summary(neighbors_incl = "larger_only")</code>
+</h3>
+<p>It is also possible to restrict the diversity and density calculations to include only the neighbor trees that are larger than the focal. This may be useful if trees in the study system are expected to compete far less strongly with neighbors that are smaller than them.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">nbhd_summ</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/neighborhood_summary.html">neighborhood_summary</a></span><span class="op">(</span><span class="va">nbhds</span>, id_column <span class="op">=</span> <span class="st">"tree_id"</span>, radius <span class="op">=</span> <span class="fl">10</span>,
+                                  densities <span class="op">=</span> <span class="st">"angular"</span>,
+                                  neighbors_incl <span class="op">=</span> <span class="st">"larger_only"</span><span class="op">)</span>
+<span class="va">nbhd_summ</span> <span class="op">%&gt;%</span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">tree_id</span>, <span class="va">sps_richness</span>, <span class="va">ABAM_angle_sum</span>, <span class="va">TSHE_angle_sum</span>, <span class="va">all_angle_sum</span><span class="op">)</span>
+<span class="co">#&gt; # A tibble: 364 x 5</span>
+<span class="co">#&gt;   tree_id       sps_richness ABAM_angle_sum TSHE_angle_sum all_angle_sum</span>
+<span class="co">#&gt;   &lt;chr&gt;                &lt;int&gt;          &lt;dbl&gt;          &lt;dbl&gt;         &lt;dbl&gt;</span>
+<span class="co">#&gt; 1 AB08000100022            2         0               0.428         0.503</span>
+<span class="co">#&gt; 2 AB08000100001            2         0               0.535         0.606</span>
+<span class="co">#&gt; 3 AB08000100003            3         0.0391          0.479         0.774</span>
+<span class="co">#&gt; 4 AB08000100004            1         0               0.174         0.174</span>
+<span class="co">#&gt; # ... with 360 more rows</span></code></pre></div>
+</div>
 </div>
 <div id="site_by_species-create-site-by-species-matrices" class="section level2">
 <h2 class="hasAnchor">
 <a href="#site_by_species-create-site-by-species-matrices" class="anchor"></a><code>site_by_species()</code>: Create site-by-species matrices</h2>
 <p>The <code><a href="../reference/site_by_species.html">site_by_species()</a></code> function takes output of the <code><a href="../reference/neighborhoods.html">neighborhoods()</a></code> function and creates a site-by-species matrix where each site is a neighborhood. The resulting matrix can be used as input for functions in other packages (e.g. picante, vegan) that calculate various diversity metrics from site-by-species matrices.</p>
 <p>The default is to present presence/absence data in the matrix:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ss_mat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/site_by_species.html">site_by_species</a></span><span class="op">(</span><span class="va">nbhds</span>, id_column <span class="op">=</span> <span class="st">"tree_id"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">ss_mat</span><span class="op">)</span>
 <span class="co">#&gt;               ABAM ABPR CANO PSME TABR THPL TSHE</span>
@@ -241,7 +261,7 @@
 <span class="co">#&gt; AB08000100004    0    0    0    0    0    0    1</span>
 <span class="co">#&gt; AB08000100005    1    0    0    0    0    1    1</span></code></pre></div>
 <p>But if <code>abundance = T</code> is specified, matrix element values will represent the number of trees of the associated species in the neighborhood:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ss_mat_abund</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/site_by_species.html">site_by_species</a></span><span class="op">(</span><span class="va">nbhds</span>, id_column <span class="op">=</span> <span class="st">"tree_id"</span>, abundance <span class="op">=</span> <span class="cn">T</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">ss_mat_abund</span><span class="op">)</span>
 <span class="co">#&gt;               ABAM ABPR CANO PSME TABR THPL TSHE</span>
@@ -258,7 +278,7 @@
 <p>The <code><a href="../reference/tree_utm.html">tree_utm()</a></code> function takes a mapping object as input and calculates UTM coordinates for each tree. The output spatial object can be used to extract further data for each tree from data sources with very high spatial resolution e.g. topography.</p>
 <p>The required arguments for <code><a href="../reference/tree_utm.html">tree_utm()</a></code> are: geographic coordinates of the stands (<code>stand_locs</code>), the ESPG code of the coordinate reference system of <code>stand_locs</code> (<code>original_crs</code>), and the ESPG code of the UTM zone in which the stands exist (<code>utm_crs</code>).</p>
 <p>The built-in <code>stand_locations</code> dataset shows the expected structure of <code>stand_locs</code> - see <code><a href="../reference/stand_locations.html">?stand_locations</a></code> for details:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">stand_locations</span><span class="op">)</span>
 <span class="co">#&gt;   stand_id y_azim latitude longitude</span>
 <span class="co">#&gt; 1     TO04  12.58 46.74002 -121.8887</span>
@@ -268,7 +288,7 @@
 <span class="co">#&gt; 5     AV06  45.74 46.77602 -121.7851</span>
 <span class="co">#&gt; 6     AM16  58.80 46.76848 -121.7585</span></code></pre></div>
 <p>The output of <code><a href="../reference/tree_utm.html">tree_utm()</a></code> looks like the following:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">mapping_utm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tree_utm.html">tree_utm</a></span><span class="op">(</span><span class="va">mapping</span>, <span class="va">stand_locations</span>, <span class="fl">4326</span>, <span class="fl">32610</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">mapping_utm</span><span class="op">)</span>
 <span class="co">#&gt; Simple feature collection with 6 features and 8 fields</span>

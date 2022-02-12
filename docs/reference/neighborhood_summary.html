@@ -155,6 +155,7 @@ horizontal angles.</p>
   <span class='va'>id_column</span>,
   <span class='va'>radius</span>,
   densities <span class='op'>=</span> <span class='st'>"raw"</span>,
+  neighbors_incl <span class='op'>=</span> <span class='st'>"all"</span>,
   edge_correction <span class='op'>=</span> <span class='cn'>F</span>,
   x_limit <span class='op'>=</span> <span class='cn'>NULL</span>,
   y_limit <span class='op'>=</span> <span class='cn'>NULL</span>
@@ -184,6 +185,13 @@ calculate - raw (m^2 per hectare), proportional (as proportions of overall
 tree density), angular (angular size of trees).</p></td>
     </tr>
     <tr>
+      <th>neighbors_incl</th>
+      <td><p>Character specifying whether all neighbors 
+(<code>neighbors_incl = "all"</code>) or only neighbors larger than the focal tree
+(<code>neighbors_incl = "larger_only"</code>) should be included in diversity and
+density calculations.</p></td>
+    </tr>
+    <tr>
       <th>edge_correction</th>
       <td><p>Boolean indicating whether edge correction should be
 used.</p></td>
@@ -191,12 +199,12 @@ used.</p></td>
     <tr>
       <th>x_limit</th>
       <td><p>maximum possible x-coordinate in the stand (only required if
-<code>edge_correction = T</code>)</p></td>
+<code>edge_correction = T</code>).</p></td>
     </tr>
     <tr>
       <th>y_limit</th>
       <td><p>maximum possible y-coordinate in the stand (only required if
-<code>edge_correction = T</code>)</p></td>
+<code>edge_correction = T</code>).</p></td>
     </tr>
     </table>
 

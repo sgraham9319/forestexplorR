@@ -9,6 +9,7 @@ neighborhood_summary(
   id_column,
   radius,
   densities = "raw",
+  neighbors_incl = "all",
   edge_correction = F,
   x_limit = NULL,
   y_limit = NULL
@@ -27,14 +28,19 @@ a string.}
 calculate - raw (m^2 per hectare), proportional (as proportions of overall
 tree density), angular (angular size of trees).}
 
+\item{neighbors_incl}{Character specifying whether all neighbors 
+(\code{neighbors_incl = "all"}) or only neighbors larger than the focal tree
+(\code{neighbors_incl = "larger_only"}) should be included in diversity and
+density calculations.}
+
 \item{edge_correction}{Boolean indicating whether edge correction should be
 used.}
 
 \item{x_limit}{maximum possible x-coordinate in the stand (only required if
-\code{edge_correction = T})}
+\code{edge_correction = T}).}
 
 \item{y_limit}{maximum possible y-coordinate in the stand (only required if
-\code{edge_correction = T})}
+\code{edge_correction = T}).}
 }
 \value{
 Data frame containing a summary for each neighborhood in

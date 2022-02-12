@@ -19,12 +19,16 @@
 #' @param densities Character specifying the type of density measurements to
 #' calculate - raw (m^2 per hectare), proportional (as proportions of overall
 #' tree density), angular (angular size of trees).
+#' @param neighbors_incl Character specifying whether all neighbors 
+#' (\code{neighbors_incl = "all"}) or only neighbors larger than the focal tree
+#' (\code{neighbors_incl = "larger_only"}) should be included in diversity and
+#' density calculations.
 #' @param edge_correction Boolean indicating whether edge correction should be
 #' used.
 #' @param x_limit maximum possible x-coordinate in the stand (only required if
-#' \code{edge_correction = T})
+#' \code{edge_correction = T}).
 #' @param y_limit maximum possible y-coordinate in the stand (only required if
-#' \code{edge_correction = T})
+#' \code{edge_correction = T}).
 #' @return Data frame containing a summary for each neighborhood in
 #' \code{neighbors}.
 #' @examples
@@ -44,8 +48,15 @@
 #' @import dplyr
 
 neighborhood_summary <- function(neighbors, id_column, radius,
-                                 densities = "raw", edge_correction = F,
+                                 densities = "raw", neighbors_incl = "all",
+                                 edge_correction = F,
                                  x_limit = NULL, y_limit = NULL){
+  
+  # Exclude unwanted neighbors
+  if(neighbors_incl == "larger_only"){
+    neighbors <- neighbors %>%
+      filter(dbh_comp > dbh)
+  }
   
   # Create unique ID for each row
   neighbors$id <- 1:nrow(neighbors)

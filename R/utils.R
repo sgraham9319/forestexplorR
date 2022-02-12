@@ -13,9 +13,6 @@ if(getRversion() >= "2.15.1")
 # Calculate circle segment area
 #==============================
 
-seg_area <- function(r, s){
-  r ^ 2 * acos(1 - (s / r)) - (r - s) * (sqrt(r ^ 2 - (r - s) ^ 2))
-}
 segment_area <- function(a, r){
   return(0.5 * (a - sin(a)) * (r ^ 2))
 }
@@ -34,14 +31,6 @@ circ_area <- function(radius){
 
 tri_opp <- function(hyp, adj){
   return(sqrt((hyp ^ 2) - (adj ^ 2)))
-}
-
-#==============================
-# Calculate circle chord length
-#==============================
-
-chord_len <- function(r, s){
-  2 * (sqrt(2 * s * r - s ^ 2))
 }
 
 #==================================

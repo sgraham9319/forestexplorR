@@ -4,7 +4,15 @@
 \alias{neighborhood_summary}
 \title{Summarize neighborhoods}
 \usage{
-neighborhood_summary(neighbors, id_column, radius, densities = "raw")
+neighborhood_summary(
+  neighbors,
+  id_column,
+  radius,
+  densities = "raw",
+  edge_correction = F,
+  x_limit = NULL,
+  y_limit = NULL
+)
 }
 \arguments{
 \item{neighbors}{Data frame of neighborhoods outputted by
@@ -18,6 +26,15 @@ a string.}
 \item{densities}{Character specifying the type of density measurements to
 calculate - raw (m^2 per hectare), proportional (as proportions of overall
 tree density), angular (angular size of trees).}
+
+\item{edge_correction}{Boolean indicating whether edge correction should be
+used.}
+
+\item{x_limit}{maximum possible x-coordinate in the stand (only required if
+\code{edge_correction = T})}
+
+\item{y_limit}{maximum possible y-coordinate in the stand (only required if
+\code{edge_correction = T})}
 }
 \value{
 Data frame containing a summary for each neighborhood in
@@ -29,6 +46,13 @@ neighborhood in the provided data frame. Densities can be provided as
 area covered in the neighborhood, area covered per hectare, or the sum of
 horizontal angles.
 }
+\details{
+This function contains an optional argument for handling edge effects. When
+specified, the density and species richness values for neighborhoods that
+overlap the stand boundary will be multiplied according to the fraction of 
+their neighborhood that is missing from the stand. Species richness values
+are rounded to the nearest whole number.
+}
 \examples{
 # Create a neighborhoods object
 nbhds <- neighborhoods(mapping, stands = "AB08", radius = 10)
@@ -36,4 +60,9 @@ nbhds <- neighborhoods(mapping, stands = "AB08", radius = 10)
 # Summarize neighborhoods using angular densities
 nbhd_summ <- neighborhood_summary(nbhds, id_column = "tree_id", radius = 10,
                                   densities = "angular")
+
+# Using raw densities with edge correction
+nbhd_summ <- neighborhood_summary(nbhds, id_column = "tree_id", radius = 10,
+                                  densities = "raw", edge_correction = T,
+                                  x_limit = 100, y_limit = 100)
 }

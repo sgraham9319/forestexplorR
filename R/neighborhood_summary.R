@@ -4,6 +4,12 @@
 #' neighborhood in the provided data frame. Densities can be provided as
 #' area covered in the neighborhood, area covered per hectare, or the sum of
 #' horizontal angles.
+#' 
+#' This function contains an optional argument for handling edge effects. When
+#' specified, the density and species richness values for neighborhoods that
+#' overlap the stand boundary will be multiplied according to the fraction of 
+#' their neighborhood that is missing from the stand. Species richness values
+#' are rounded to the nearest whole number.
 #'
 #' @param neighbors Data frame of neighborhoods outputted by
 #' \code{neighborhoods} function.
@@ -13,6 +19,12 @@
 #' @param densities Character specifying the type of density measurements to
 #' calculate - raw (m^2 per hectare), proportional (as proportions of overall
 #' tree density), angular (angular size of trees).
+#' @param edge_correction Boolean indicating whether edge correction should be
+#' used.
+#' @param x_limit maximum possible x-coordinate in the stand (only required if
+#' \code{edge_correction = T})
+#' @param y_limit maximum possible y-coordinate in the stand (only required if
+#' \code{edge_correction = T})
 #' @return Data frame containing a summary for each neighborhood in
 #' \code{neighbors}.
 #' @examples
@@ -22,6 +34,11 @@
 #' # Summarize neighborhoods using angular densities
 #' nbhd_summ <- neighborhood_summary(nbhds, id_column = "tree_id", radius = 10,
 #'                                   densities = "angular")
+#' 
+#' # Using raw densities with edge correction
+#' nbhd_summ <- neighborhood_summary(nbhds, id_column = "tree_id", radius = 10,
+#'                                   densities = "raw", edge_correction = T,
+#'                                   x_limit = 100, y_limit = 100)
 #' @export
 #' @importFrom magrittr %>%
 #' @import dplyr

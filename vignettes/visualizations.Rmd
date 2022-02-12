@@ -100,13 +100,20 @@ contour_plot(grid_data, "all_angle_sum", rad = 10, max_x = 100, max_y = 100)
 
 In the above plot, density appears to decrease toward the stand edges. This is
 because the locations close to the stand boundary did not have their entire
-neighborhood sampled. `contour_plot()` offers a method of estimating the missing
-regions of neighborhoods that overlap the stand boundary, specified by the 
-`edge_handling` argument:
+neighborhood sampled. To improve the accuracy of values for these edge 
+neighborhoods, we can use the `edge_correction` argument of
+`neighborhood_summary()`, which multiplies density values according to the
+proportion of the neighborhood area that lies beyond the stand boundary:
 
 ```{r}
-contour_plot(grid_data, "all_angle_sum", edge_handling = "multiply",
-             rad = 10, max_x = 100, max_y = 100)
+nbhd_summ <- neighborhood_summary(nbhds, "loc_id", 10, "angular",
+                                  edge_correction = T, 100, 100)
+grid_data <- locations %>%
+  left_join(nbhd_summ %>%
+              select(loc_id, all_angle_sum),
+            by = "loc_id") %>%
+  select(-loc_id)
+contour_plot(grid_data, "all_angle_sum")
 ```
 
 ## `stand_map()`: Create maps of forest stands

@@ -171,6 +171,7 @@
 <p>The <code><a href="../reference/mapping_check.html">mapping_check()</a></code> function checks a mapping dataset for a variety of common errors and returns a list containing two elements. The first element (<code>$problem_trees</code>) is a data frame containing the rows of the input mapping dataset that contain issues, with an additional final column describing the issue. The arguments “max_x” and “max_y” must be provided so the function can check for x and y coordinates beyond the stand boundary.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">map_issues</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mapping_check.html">mapping_check</a></span><span class="op">(</span><span class="va">messy_mapping</span>, max_x <span class="op">=</span> <span class="fl">100</span>, max_y <span class="op">=</span> <span class="fl">100</span><span class="op">)</span>
+<span class="co">#&gt; [1] "This is version 0.2.0!"</span>
 <span class="co">#&gt; [1] "Potential formatting problems detected: please review output and correct errors or remove problem trees if necessary before continuing analysis"</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">map_issues</span><span class="op">$</span><span class="va">problem_trees</span><span class="op">)</span>
 <span class="co">#&gt;         tree_id stand_id  tag species year  dbh x_coord y_coord</span>

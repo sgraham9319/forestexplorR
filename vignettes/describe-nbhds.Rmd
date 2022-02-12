@@ -90,6 +90,13 @@ influence of a large canopy-forming neighbor species may be relatively
 unaffected by whether neighbors of that species are 5m vs. 10m from the focal 
 tree - in this case the `raw` or `proportional` measures may be more relevant.
 
+There is also an option to correct the density values for neighborhoods that
+overlap the stand boundary. When `edge_correction = T`, the density and species
+richness values for neighborhoods that overlap the stand boundary will be
+multiplied according to the proportion of their neighborhood that lies beyond
+the stand boundary (species richness values are rounded to the nearest whole
+number). See function documentation for details.
+
 ### `neighborhood_summary(densities = "raw")`
 
 Overall tree density and species-specific densities will be presented in units

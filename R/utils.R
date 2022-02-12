@@ -16,6 +16,25 @@ if(getRversion() >= "2.15.1")
 seg_area <- function(r, s){
   r ^ 2 * acos(1 - (s / r)) - (r - s) * (sqrt(r ^ 2 - (r - s) ^ 2))
 }
+segment_area <- function(a, r){
+  return(0.5 * (a - sin(a)) * (r ^ 2))
+}
+
+#=========================
+# Calculate area of circle
+#=========================
+
+circ_area <- function(radius){
+  pi * (radius ^ 2)
+}
+
+#===================================================
+# Calculate opposite length of right-angled triangle
+#===================================================
+
+tri_opp <- function(hyp, adj){
+  return(sqrt((hyp ^ 2) - (adj ^ 2)))
+}
 
 #==============================
 # Calculate circle chord length
@@ -30,6 +49,61 @@ chord_len <- function(r, s){
 #==================================
 
 non_na_len <- function(x){length(na.omit(x))}
+
+#=======================================================
+# Calculate proportion of neighborhood captured in stand
+#=======================================================
+
+nbhd_captured <- function(coord_data, x_limit, y_limit, radius){
+  
+  result <- coord_data %>%
+    mutate(
+      
+      # Calculate distance to each stand boundary
+      left_dist = x_coord,
+      right_dist = x_limit - x_coord,
+      bot_dist = y_coord,
+      top_dist = y_limit - y_coord,
+      
+      # Calculate smallest vertical and horizontal distance to stand boundary
+      tb_dist = if_else(bot_dist <= top_dist, bot_dist, top_dist),
+      lr_dist = if_else(left_dist <= right_dist, left_dist, right_dist),
+      
+      # For edge trees, calculate angle to sector with external segment
+      tb_sec_ang = ifelse(tb_dist < radius, 2 * acos(tb_dist / radius), 0),
+      lr_sec_ang = ifelse(lr_dist < radius, 2 * acos(lr_dist / radius), 0),
+      
+      # For corner trees, calculate angle to largest internal sector
+      int_sec_ang = ifelse(tb_dist < radius & lr_dist < radius,
+                           1.5 * pi - acos(lr_dist / radius) -
+                             acos(tb_dist / radius), 0),
+      
+      # Calculate areas of all segments defined by sector angles
+      tb_seg_area = segment_area(tb_sec_ang, radius),
+      lr_seg_area = segment_area(lr_sec_ang, radius),
+      int_seg_area = segment_area(int_sec_ang, radius),
+      
+      # For corner trees, calculate internal area excluding segment
+      int_tri_area = ifelse(int_seg_area > 0, 0.5 *
+                              (tri_opp(radius, lr_dist) + tb_dist) * 
+                              (tri_opp(radius, tb_dist) + lr_dist), 0),
+      
+      # Calculate total internal area for all trees
+      total_int_area = ifelse(int_seg_area > 0, int_seg_area + int_tri_area,
+                              circ_area(radius) - (tb_seg_area + lr_seg_area)),
+      
+      # Convert to proportion of total neighborhood area
+      prop_area_inc = total_int_area / circ_area(radius)) %>%
+    
+    # Remove unneeded columns
+    select(-c(left_dist, right_dist, bot_dist, top_dist, tb_dist, lr_dist,
+              tb_sec_ang, lr_sec_ang, int_sec_ang, tb_seg_area, lr_seg_area,
+              int_seg_area, int_tri_area, total_int_area))
+  
+  # Return output
+  return(result)
+  
+}
 
 #==============================================
 # Calculate annual growth over a defined period

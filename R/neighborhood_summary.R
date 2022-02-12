@@ -27,7 +27,8 @@
 #' @import dplyr
 
 neighborhood_summary <- function(neighbors, id_column, radius,
-                                 densities = "raw"){
+                                 densities = "raw", edge_correction = F,
+                                 x_limit = NULL, y_limit = NULL){
   
   # Create unique ID for each row
   neighbors$id <- 1:nrow(neighbors)
@@ -35,9 +36,21 @@ neighborhood_summary <- function(neighbors, id_column, radius,
   # Calculate species richness of each neighborhood
   sps_rich <- neighbors %>%
     group_by(get(id_column)) %>%
-    summarize(sps_richness = length(unique(sps_comp)))
+    summarize(sps_richness = length(unique(sps_comp)),
+              x_coord = x_coord[1],
+              y_coord = y_coord[1])
   
-  # Extract required columns
+  # Calculate proportion of neighborhood contained in stand if requested
+  if(edge_correction == T){
+    sps_rich <- suppressWarnings(nbhd_captured(sps_rich, x_limit, y_limit,
+                                               radius))
+  }
+  
+  # Remove x and y coordinate columns
+  sps_rich <- sps_rich %>%
+    select(-c(x_coord, y_coord))
+  
+  # Extract required columns for density calculations
   dens <- neighbors %>%
     select(id, id_column, prox, dbh_comp, sps_comp, abh_comp)
   
@@ -92,6 +105,15 @@ neighborhood_summary <- function(neighbors, id_column, radius,
   # Join species richness to densities
   output <- sps_rich %>%
     left_join(dens, by = "get(id_column)")
+  
+  # Multiply species richness and densities for edge neighborhoods
+  if(edge_correction == T & densities != "proportional"){
+    output <- output %>%
+      rowwise() %>%
+      mutate(across(c(2, 4:ncol(output)), ~ .*(1 / prop_area_inc))) %>%
+      mutate(sps_richness = round(sps_richness)) %>%
+      select(-(prop_area_inc))
+  }
   
   # Reorder rows to match input data frame
   output <- output[match(unique(neighbors[, id_column]),

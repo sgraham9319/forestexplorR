@@ -34,6 +34,8 @@
 
 mapping_check <- function(map_data, max_x, max_y){
   
+  print("This is version 0.2.0!")
+  
   # Check required columns are present
   if(sum(c("tree_id", "stand_id", "species", "x_coord", "y_coord") %in%
          names(map_data)) != 5){

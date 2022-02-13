@@ -1,0 +1,19 @@
+#' Mortality information for 2256 trees
+#' 
+#' Please note, THESE DATA ARE NOT REAL! The mortality records were generated
+#' for the purposes of demonstration only. This dataframe contains tree ids and
+#' their mortality records. The tree ids correspond to Abies amabilis (ABAM)
+#' trees from 15 mapped forest stands located in Mount Rainier National Park,
+#' WA, USA. These stands are part of the Pacific Northwest Permanent Sample Plot
+#' Network (\url{http://pnwpsp.forestry.oregonstate.edu/})
+#' 
+#' @format A data frame with 2256 rows and 2 variables:
+#' \describe{
+#'   \item{tree_id}{unique identification code of the tree}
+#'   \item{mort}{mortality status: 1 = dead, 0 = alive}
+#' }
+#' @source These mortality data were generated artificially, but the tree ids
+#' correspond to trees in the Pacific Northwest Permanent Sample Plot
+#' Network. Additional data for these trees are available on request
+#' \url{http://pnwpsp.forestry.oregonstate.edu/data}
+"mort_dummy"

@@ -1,9 +1,10 @@
 #' Model tree growth
 #' 
-#' Fits regularized linear regression models of tree growth for a single
-#' species, returning the model object, its growth predictions, its coefficient
-#' of determination when applied to the training set (and optionally a provided
-#' test set), and the fitted model coefficients.
+#' Fits regularized linear regression models of tree growth or logistic
+#' regression models of tree mortality for a single species, returning the model
+#' object, its growth predictions, its coefficient of determination when applied
+#' to the training set (and optionally a provided test set), and the fitted
+#' model coefficients.
 #' 
 #' All variables in the user-provided training data other than tree_id and the
 #' indicated outcome variable are included as explanatory variables in the
@@ -29,11 +30,14 @@
 #' 
 #' @param training A dataframe containing a separate row for each focal x
 #' neighbor tree pair and a column for each variable to include in the
-#' model, including the outcome variable. Outcome variable must be numeric,
-#' other variables can be of any type, including character. Character variables
-#' will be converted to factors before fitting the model.
+#' model, including the outcome variable. Outcome variable must be numeric
+#' (for mortality data, use 1s and 0s), other variables can be of any type,
+#' including character. Character variables will be converted to factors before
+#' fitting the model.
 #' @param outcome_var Name of column in \code{training} containing the outcome
 #' variable, provided as a string.
+#' @param model_type Character string specifying whether a growth model (linear)
+#' or a mortality model (logistic) is being fitted.
 #' @param iterations Number of times the model should be fitted.
 #' @param rare_comps Minimum number of interactions a competitor species must
 #' appear in to remain separate from the "OTHR" category (see details). If not
@@ -66,14 +70,14 @@
 #' \code{mse}.
 #' }
 #' @examples
-#' # See vignette "Modeling tree growth"
+#' # See vignette "Modeling tree growth and mortality"
 #' @export
 #' @importFrom magrittr %>%
 #' @import dplyr
 
-growth_model <- function(training, outcome_var, iterations = 1,
-                         rare_comps = "none", density_suffix = "none",
-                         test = NULL){
+growth_mort_model <- function(training, outcome_var, model_type = "growth",
+                         iterations = 1, rare_comps = "none",
+                         density_suffix = "none", test = NULL){
   
   # Order training by tree id
   sing_sp <- training %>%
@@ -139,12 +143,16 @@ growth_model <- function(training, outcome_var, iterations = 1,
   # Iterate the model fitting
   for(i in 1:iterations){
     
-    # Fit glmnet model
-    mod <- glmnet::cv.glmnet(x = dm, y = sing_sp[, outcome_var],
-                             family = "gaussian")
-    
-    # Calculate model predictions for training data
-    preds <- predict(mod, newx = dm, s = "lambda.1se")
+    # Fit glmnet model and make predictions for training data
+    if(model_type == "growth"){
+      mod <- glmnet::cv.glmnet(x = dm, y = sing_sp[, outcome_var],
+                               family = "gaussian")
+      preds <- predict(mod, newx = dm, s = "lambda.1se")
+    } else if(model_type == "mortality"){
+      mod <- glmnet::cv.glmnet(x = dm, y = sing_sp[, outcome_var],
+                               family = "binomial")
+      preds <- predict(mod, newx = dm, type = "class", s = "lambda.1se")
+    }
     
     # Combine with observations
     obs_pred <- cbind(tree_ids, sing_sp %>% select(all_of(outcome_var)), preds)
@@ -154,7 +162,7 @@ growth_model <- function(training, outcome_var, iterations = 1,
     obs_pred <- obs_pred %>%
       group_by(tree_id) %>%
       summarize(observations = observations[1],
-                predictions = mean(predictions))
+                predictions = mean(as.numeric(predictions)))
     
     # Calculate coefficient of determination
     R_squared <- coef_det(obs_pred)
@@ -260,7 +268,12 @@ growth_model <- function(training, outcome_var, iterations = 1,
     dm_test[, which(is.nan(dm_test[1, ]))] <- 0
     
     # Calculate model predictions for test data
-    test_preds <- predict(best_mod, newx = dm_test, s = "lambda.1se")
+    if(model_type == "growth"){
+      test_preds <- predict(best_mod, newx = dm_test, s = "lambda.1se")
+    } else if(model_type == "mortality"){
+      test_preds <- predict(best_mod, newx = dm_test, type = "class",
+                            s = "lambda.1se")
+    }
     
     # Combine with observations
     test_obs_pred <- cbind(test_ids, ss_test %>% select(all_of(outcome_var)),
@@ -271,7 +284,7 @@ growth_model <- function(training, outcome_var, iterations = 1,
     test_obs_pred <- test_obs_pred %>%
       group_by(tree_id) %>%
       summarize(observations = observations[1],
-                predictions = mean(predictions))
+                predictions = mean(as.numeric(predictions)))
     
     # Calculate coefficient of determination
     test_R_squared <- coef_det(test_obs_pred)

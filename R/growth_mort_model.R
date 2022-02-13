@@ -1,4 +1,4 @@
-#' Model tree growth
+#' Model tree growth and mortality
 #' 
 #' Fits regularized linear regression models of tree growth or logistic
 #' regression models of tree mortality for a single species, returning the model

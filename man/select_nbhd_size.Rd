@@ -11,6 +11,7 @@ select_nbhd_size(
   abiotic_data = NULL,
   focal_sps,
   dens_type,
+  edge_handling = F,
   max_x,
   max_y,
   rare_sps = 100
@@ -35,6 +36,11 @@ a neighborhood size should be selected.}
 \item{dens_type}{Method for calculating tree densities in each neighborhood.
 Must take one of the values: \code{"raw"}, \code{"proportional"}, or
 \code{"angular"}. See \code{?neighborhood_summary} for details.}
+
+\item{edge_handling}{Boolean indicating whether trees whose neighborhood
+overlaps the stand boundary should have their neighborhood metrics adjusted
+to account for the unsampled portion of their neighborhood. If FALSE, these
+trees will be excluded from the analysis as focals.}
 
 \item{max_x}{Maximum expected x coordinate (i.e. should be 100 if the stands
 are 100 x 100 m).}
@@ -71,13 +77,15 @@ calculate a series of metrics to describe the neighborhoods around each tree.
 It does this by applying the \code{neighborhoods} and then the
 \code{neighborhood_summary} function. It is therefore necessary to provide,
 under the argument \code{dens_type}, instruction for the method that
-\code{neighborhood_summary} should use to calculate densities. This process
-is repeated for each of the neighborhood sizes specified by the argument
-\code{radii}. To prevent edge effects, trees whose neighborhood overlaps the
-stand boundary are excluded from modeling (hence the need to provide stand
-sizes with the arguments \code{max_x} and \code{max_y}). Boundary overlap is
-determined using the largest neighborhood size in \code{radii} to ensure
-the number of focal trees is constant across neighborhood sizes.
+\code{neighborhood_summary} should use to calculate densities. It is also
+possible to conduct edge handling by setting \code{edge_handling = T}. This
+process is repeated for each of the neighborhood sizes specified by the
+argument \code{radii}. To prevent edge effects, trees whose neighborhood
+overlaps the stand boundary are excluded from modeling (hence the need to
+provide stand sizes with the arguments \code{max_x} and \code{max_y}).
+Boundary overlap is determined using the largest neighborhood size in
+\code{radii} to ensure the number of focal trees is constant across
+neighborhood sizes.
 
 The neighborhood metrics are then combined with the growth rates of their
 focal tree, specifically the \code{size_corr_growth} output by 

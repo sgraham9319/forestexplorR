@@ -12,13 +12,15 @@
 #' It does this by applying the \code{neighborhoods} and then the
 #' \code{neighborhood_summary} function. It is therefore necessary to provide,
 #' under the argument \code{dens_type}, instruction for the method that
-#' \code{neighborhood_summary} should use to calculate densities. This process
-#' is repeated for each of the neighborhood sizes specified by the argument
-#' \code{radii}. To prevent edge effects, trees whose neighborhood overlaps the
-#' stand boundary are excluded from modeling (hence the need to provide stand
-#' sizes with the arguments \code{max_x} and \code{max_y}). Boundary overlap is
-#' determined using the largest neighborhood size in \code{radii} to ensure
-#' the number of focal trees is constant across neighborhood sizes.
+#' \code{neighborhood_summary} should use to calculate densities. It is also
+#' possible to conduct edge handling by setting \code{edge_handling = T}. This
+#' process is repeated for each of the neighborhood sizes specified by the
+#' argument \code{radii}. To prevent edge effects, trees whose neighborhood
+#' overlaps the stand boundary are excluded from modeling (hence the need to
+#' provide stand sizes with the arguments \code{max_x} and \code{max_y}).
+#' Boundary overlap is determined using the largest neighborhood size in
+#' \code{radii} to ensure the number of focal trees is constant across
+#' neighborhood sizes.
 #' 
 #' The neighborhood metrics are then combined with the growth rates of their
 #' focal tree, specifically the \code{size_corr_growth} output by 
@@ -45,6 +47,10 @@
 #' @param dens_type Method for calculating tree densities in each neighborhood.
 #' Must take one of the values: \code{"raw"}, \code{"proportional"}, or
 #' \code{"angular"}. See \code{?neighborhood_summary} for details.
+#' @param edge_handling Boolean indicating whether trees whose neighborhood
+#' overlaps the stand boundary should have their neighborhood metrics adjusted
+#' to account for the unsampled portion of their neighborhood. If FALSE, these
+#' trees will be excluded from the analysis as focals.
 #' @param max_x Maximum expected x coordinate (i.e. should be 100 if the stands
 #' are 100 x 100 m).
 #' @param max_y Maximum expected y coordinate.
@@ -69,7 +75,7 @@
 
 select_nbhd_size <- function(radii, map_data, growth_data,
                              abiotic_data = NULL, focal_sps, dens_type,
-                             max_x, max_y, rare_sps = 100){
+                             edge_handling = F, max_x, max_y, rare_sps = 100){
   
   # Create data frame to store results
   nb_rad_comp <- as.data.frame(matrix(NA, nrow = length(radii),
@@ -88,16 +94,20 @@ select_nbhd_size <- function(radii, map_data, growth_data,
     
     # Describe neighborhoods
     nbhd_summ <- neighborhood_summary(nbhds, id_column = "tree_id",
-                                      radius = nb_rad, densities = dens_type)
+                                      radius = nb_rad, densities = dens_type,
+                                      edge_correction = edge_handling,
+                                      x_limit = max_x, y_limit = max_y)
     
     # Combine neighborhoods with their summaries
     nbhds <- nbhds %>%
       left_join(nbhd_summ, by = "tree_id")
     
     # Remove trees whose max neighborhood overlaps a plot boundary
-    nbhds <- nbhds %>%
-      filter(x_coord >= max(radii) & x_coord <= max_x - max(radii) &
-               y_coord >= max(radii) & y_coord <= max_y - max(radii))
+    if(edge_handling == F){
+      nbhds <- nbhds %>%
+        filter(x_coord >= max(radii) & x_coord <= max_x - max(radii) &
+                 y_coord >= max(radii) & y_coord <= max_y - max(radii))
+    }
     
     # Calculate annual growth for all trees
     growth <- growth_summary(growth_data)

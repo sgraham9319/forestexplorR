@@ -1,8 +1,8 @@
 ---
-title: "Modeling tree growth"
+title: "Modeling tree growth and mortality"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Modeling tree growth}
+  %\VignetteIndexEntry{Modeling tree growth and mortality}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -19,7 +19,7 @@ library(dplyr)
 
 This vignette demonstrates how the neighborhood description and growth
 calculation functions of ForestPlotR can be used to setup a neighborhood model
-of tree growth.
+of tree growth or a neighborhood model of tree mortality.
 
 ## Formating data for a growth model
 
@@ -100,7 +100,7 @@ nbhds <- nbhds %>%
 Now we have a dataset containing all the variables we will use for this
 modeling demonstration.
 
-## `growth_model()`: Create a neighborhood tree growth model
+## `growth_mort_model()`: Create a neighborhood tree growth model
 
 When modeling tree growth, it is common practice to create a separate model
 for each focal tree species because the drivers of growth are likely to differ
@@ -113,7 +113,7 @@ one_species <- nbhds %>%
   select(-species)
 ```
 
-The `growth_model()` function also offers test set validation, so next we will
+The `growth_mort_model()` function also offers test set validation, so next we will
 divide our dataset into a training and test set.
 
 ```{r}
@@ -129,14 +129,15 @@ training <- one_species %>%
 test <- setdiff(one_species, training)
 ```
 
-Now we can call the `growth_model()` function, which fits a linear regularized
-regression model of tree growth. In the most basic use case, this function
-requires only a training set and the name of the dependent variable, which 
-should be a column in the training set. We set the seed because the model fitting process is stochastic.
+Now we can call the `growth_mort_model()` function, which fits a linear
+regularized regression model of tree growth. In the most basic use case, this
+function requires only a training set and the name of the dependent variable,
+which should be a column in the training set. We set the seed because the model
+fitting process is stochastic.
 
 ```{r}
 set.seed(1000)
-basic_growth_mod <- growth_model(training, outcome_var = "size_corr_growth")
+basic_growth_mod <- growth_mort_model(training, outcome_var = "size_corr_growth")
 ```
 
 The output of the above code is a list containing 4 elements. The first element
@@ -161,14 +162,14 @@ coefficients for all fitted models.
 
 ```{r}
 set.seed(1000)
-iter_growth_mod <- growth_model(training, outcome_var = "size_corr_growth",
-                                iterations = 10)
+iter_growth_mod <- growth_mort_model(training, outcome_var = "size_corr_growth",
+                                     iterations = 10)
 iter_growth_mod$R_squared
 ```
 
-The `growth_model()` function can also handle rare competitor tree species. The
-optional argument `rare_comps` specifies the minimum number of interactions a
-competitor species must be a part of to be considered a common competitor. Any
+The `growth_mort_model()` function can also handle rare competitor tree species.
+The optional argument `rare_comps` specifies the minimum number of interactions
+a competitor species must be a part of to be considered a common competitor. Any
 species with fewer interactions will be grouped together under the new species
 identity of `"RARE"`. If species-specific densities are included as covariates
 in the training data, a `"RARE_density"` variable can also be created by
@@ -177,24 +178,69 @@ indicating the suffix attached to density variables under the argument
 
 ```{r}
 set.seed(1000)
-rare_growth_mod <- growth_model(training, outcome_var = "size_corr_growth",
-                                rare_comps = 100, density_suffix = "_angle_sum")
+rare_growth_mod <- growth_mort_model(training, outcome_var = "size_corr_growth",
+                                     rare_comps = 100,
+                                     density_suffix = "_angle_sum")
 
 # Check for RARE in coefficients
 names(rare_growth_mod$mod_coef)
 ```
 
-Finally, the `growth_model()` function can evaluate the ability of the fitted
-model to predict the growth of trees in a test set i.e. trees not used in the
-model fitting process. To do this, a test set must be provided under the 
+Finally, the `growth_mort_model()` function can evaluate the ability of the
+fitted model to predict the growth of trees in a test set i.e. trees not used in
+the model fitting process. To do this, a test set must be provided under the 
 optional argument `test`. Predictive ability is quantified with an R^2 value
 that constitutes a new element in the output list.
 
 ```{r}
 set.seed(1000)
-test_growth_mod <- growth_model(training, outcome_var = "size_corr_growth",
-                                test = test)
+test_growth_mod <- growth_mort_model(training, outcome_var = "size_corr_growth",
+                                     test = test)
 
 # Ability to predict test data
 test_growth_mod$test_R_squared
+```
+
+## `growth_mort_model()`: Create a neighborhood tree mortality model
+
+The data formatting for a neighborhood mortality model is very similar to that
+for a neighborhood growth model. Therefore, we can skip a few steps in this
+vignette and join the built-in mortality data to our one_species data frame. We
+also need to remove the dependent growth variable, `size_corr_growth`:
+
+```{r}
+one_species_mort <- one_species %>%
+  left_join(mort_dummy, by = "tree_id") %>%
+  select(-size_corr_growth)
+```
+
+Then we again create the training set for the model:
+
+```{r}
+# Create vector of tree ids
+all_tree_ids <- unique(one_species_mort$tree_id)
+
+# Assign 80% of trees to training
+training_trees <- sample(all_tree_ids, length(all_tree_ids) * 0.8)
+
+# Define training
+training <- one_species_mort %>%
+  filter(tree_id %in% training_trees)
+```
+
+Now we can fit a basic mortality model.
+
+```{r}
+set.seed(1000)
+basic_mort_mod <- growth_mort_model(training, outcome_var = "mort")
+```
+
+Here is the model output:
+
+```{r}
+# R^2 value
+basic_growth_mod$R_squared
+
+# Fitted coefficients
+t(result$mod_coef)
 ```

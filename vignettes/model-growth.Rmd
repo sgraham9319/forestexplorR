@@ -239,8 +239,8 @@ Here is the model output:
 
 ```{r}
 # R^2 value
-basic_growth_mod$R_squared
+basic_mort_mod$R_squared
 
 # Fitted coefficients
-t(result$mod_coef)
+t(basic_mort_mod$mod_coef)
 ```

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Check tree measurement data — tree_check • ForestPlotR</title>
+<title>Model tree growth and mortality — growth_mort_model • ForestPlotR</title>
 
 
 <!-- jquery -->
@@ -39,11 +39,12 @@
 
 
 
-<meta property="og:title" content="Check tree measurement data — tree_check" />
-<meta property="og:description" content="Checks a tree measurements dataset for missing data and formatting that could 
-lead to errors when applying other functions in this package. Outputs a
-table of the trees with data issues and a table summarizing the number of
-trees in the mapping dataset that have data issues." />
+<meta property="og:title" content="Model tree growth and mortality — growth_mort_model" />
+<meta property="og:description" content="Fits regularized linear regression models of tree growth or logistic
+regression models of tree mortality for a single species, returning the model
+object, its growth predictions, its coefficient of determination when applied
+to the training set (and optionally a provided test set), and the fitted
+model coefficients." />
 
 
 
@@ -138,68 +139,123 @@ trees in the mapping dataset that have data issues." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Check tree measurement data</h1>
-    <small class="dont-index">Source: <a href='https://github.com/sgraham9319/ForestPlotR/blob/master/R/tree_check.R'><code>R/tree_check.R</code></a></small>
-    <div class="hidden name"><code>tree_check.Rd</code></div>
+    <h1>Model tree growth and mortality</h1>
+    <small class="dont-index">Source: <a href='https://github.com/sgraham9319/ForestPlotR/blob/master/R/growth_mort_model.R'><code>R/growth_mort_model.R</code></a></small>
+    <div class="hidden name"><code>growth_mort_model.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Checks a tree measurements dataset for missing data and formatting that could 
-lead to errors when applying other functions in this package. Outputs a
-table of the trees with data issues and a table summarizing the number of
-trees in the mapping dataset that have data issues.</p>
+    <p>Fits regularized linear regression models of tree growth or logistic
+regression models of tree mortality for a single species, returning the model
+object, its growth predictions, its coefficient of determination when applied
+to the training set (and optionally a provided test set), and the fitted
+model coefficients.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>tree_check</span><span class='op'>(</span><span class='va'>tree_data</span>, <span class='va'>map_data</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>growth_mort_model</span><span class='op'>(</span>
+  <span class='va'>training</span>,
+  <span class='va'>outcome_var</span>,
+  model_type <span class='op'>=</span> <span class='st'>"growth"</span>,
+  iterations <span class='op'>=</span> <span class='fl'>1</span>,
+  rare_comps <span class='op'>=</span> <span class='st'>"none"</span>,
+  density_suffix <span class='op'>=</span> <span class='st'>"none"</span>,
+  test <span class='op'>=</span> <span class='cn'>NULL</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>tree_data</th>
-      <td><p>Data frame containing tree measurement data where each row
-represents a single measurement of a single tree. Should contain the columns
-<code>tree_id</code>, <code>stand_id</code>, <code>species</code>, <code>year</code> and <code>dbh</code>.
-Any additional columns will be ignored by this function.</p></td>
+      <th>training</th>
+      <td><p>A dataframe containing a separate row for each focal x
+neighbor tree pair and a column for each variable to include in the
+model, including the outcome variable. Outcome variable must be numeric
+(for mortality data, use 1s and 0s), other variables can be of any type,
+including character. Character variables will be converted to factors before
+fitting the model.</p></td>
     </tr>
     <tr>
-      <th>map_data</th>
-      <td><p>Data frame containing tree mapping data. Should contain the
-columns <code>tree_id</code>, <code>stand_id</code>, <code>species</code>, <code>x_coord</code>,
-and <code>y_coord</code>. Any additional columns will be ignored by this function.
-Note that this function does not check the mapping data, which should first 
-be checked with the function <code>mapping_check</code>.</p></td>
+      <th>outcome_var</th>
+      <td><p>Name of column in <code>training</code> containing the outcome
+variable, provided as a string.</p></td>
+    </tr>
+    <tr>
+      <th>model_type</th>
+      <td><p>Character string specifying whether a growth model (linear)
+or a mortality model (logistic) is being fitted.</p></td>
+    </tr>
+    <tr>
+      <th>iterations</th>
+      <td><p>Number of times the model should be fitted.</p></td>
+    </tr>
+    <tr>
+      <th>rare_comps</th>
+      <td><p>Minimum number of interactions a competitor species must
+appear in to remain separate from the "OTHR" category (see details). If not
+specified, no "OTHR" category will be created and all competitor species will
+remain separate.</p></td>
+    </tr>
+    <tr>
+      <th>density_suffix</th>
+      <td><p>Suffix of columns containing species-specific densities
+e.g. if density columns are of the form <code>speciesA_dens</code>, this argument
+should have the value <code>"_dens"</code>. This optional argument is only used
+if the argument <code>rare_comps</code> is specified.</p></td>
+    </tr>
+    <tr>
+      <th>test</th>
+      <td><p>An optional dataframe of test data that must be in exactly the
+same format as the training data i.e. all the same columns with the same
+names.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A list containing two elements:</p><ul>
-<li><p><code>problem_trees</code> is a data frame containing the tree ids found
-  to have data issues and a description of the issue</p></li>
-<li><p><code>issue_summary</code> is a data frame that shows the number and 
-  percentage of trees with at least one issue and with each of the specific
-  issues</p></li>
+    <p>A list containing four or five elements:</p><ul>
+<li><p><code>mod</code> is a fitted glmnet model
+object - if <code>iterations &gt; 1</code> this will be the model with the lowest
+cross-validated mean square error</p></li>
+<li><p><code>obs_pred</code> is a dataframe containing
+observed and predicted growth - if <code>iterations &gt; 1</code> this will 
+correspond to the best model</p></li>
+<li><p><code>R_squared</code> is the coefficient of
+determination - if <code>iterations &gt; 1</code> this will correspond to the best
+model</p></li>
+<li><p><code>test_R_squared</code> is the coefficient of determination of the best
+model on the test data (this element will not appear if no test data are
+provided)</p></li>
+<li><p><code>mod_coef</code> is a data frame containing the fitted coefficients, 
+cross-validated mean square error (<code>mse</code>), and coefficient of 
+determination for each fitted model with rows in ascending order of 
+<code>mse</code>.</p></li>
 </ul>
 
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>The data issues checked for are: presence of required columns, single tree
-ids referring to multiple trees, trees having no associated mapping data,
-missing dbh, stand id, species, or measurement year. This function does
-not check for misspelled stand ids or species, which should be checked 
-independently. The common issue of negative growth rates resulting from
-measurement error are not checked here, but are checked by
-<code>growth_summary</code>.</p>
-<p>Tree ids indicated to have data issues according to this function are not 
-necessarily unusable. For instance, missing year data could be inferred from
-knowledge on when certain stands were measured. The tree ids with data issues
-should therefore be investigated further rather than being excluded from 
-further analyses right away.</p>
+    <p>All variables in the user-provided training data other than tree_id and the
+indicated outcome variable are included as explanatory variables in the
+model. Regularized regression model is fitted using the glmnet package.
+Predictions, R-squared, and model coefficients returned are all based on the
+<code>"lambda.1se"</code> model but all models with different lambda values are
+included in the returned mod object - see glmnet documentation for details.</p>
+<p>As the glmnet model fitting process is stochastic, the fitted model can
+differ with each run. The <code>iterations</code> argument allows the user to
+specify how many times the model should be fitted. If the model is fitted
+more than once, the fitted coefficients for all models will be returned
+but only the model object for the best model (lowest cross-validated mean
+square error) will be returned.</p>
+<p>Rare competitor species can be grouped together as "OTHR" for modeling if
+desired. The optional argument <code>rare_comps</code> is a number indicating the
+minimum number of interactions a species must appear in to remain separate
+from the "OTHR" category. If handling of rare competitor species is requested
+and species-specific densities are included in <code>training</code>, the densities
+of rare species can be summed together under "OTHR_density" using the
+optional argument <code>density_suffix</code>.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='va'>tree_check_test</span> <span class='op'>&lt;-</span> <span class='fu'>tree_check</span><span class='op'>(</span><span class='va'>messy_tree</span>, <span class='va'>mapping</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; [1] "Potential formatting problems detected: please review output and correct errors or remove problem trees if necessary before continuing analysis"</div></pre>
+    <pre class="examples"><div class='input'><span class='co'># See vignette "Modeling tree growth and mortality"</span>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

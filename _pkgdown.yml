@@ -20,7 +20,7 @@ reference:
   - stand_map
 - title: "Modeling"
 - contents:
-  - growth_model
+  - growth_mort_model
   - select_nbhd_size
 - title: "Built-in datasets"
 - contents:
@@ -29,6 +29,7 @@ reference:
   - stand_locations
   - messy_mapping
   - messy_tree
+  - mort_dummy
   - stand_abiotic
 authors:
   Stuart Graham:

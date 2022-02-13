@@ -109,7 +109,7 @@ neighborhood size varies between study systems and ecological processes." />
       <a href="../articles/growth-calc.html">Calculating growth rates</a>
     </li>
     <li>
-      <a href="../articles/model-growth.html">Modeling tree growth</a>
+      <a href="../articles/model-growth.html">Modeling tree growth and mortality</a>
     </li>
     <li>
       <a href="../articles/nbhd_size.html">Selecting neighborhood size</a>
@@ -213,7 +213,7 @@ are 100 x 100 m).</p></td>
       <th>rare_sps</th>
       <td><p>Minimum number of interactions a competitor species must
 appear in to remain separate from the "RARE" category in the growth models
-(see <code><a href='growth_model.html'>?growth_model</a></code> for details). If not specified, this argument will
+(see <code>?growth_model</code> for details). If not specified, this argument will
 default to a value of 100 interactions.</p></td>
     </tr>
     </table>
@@ -249,9 +249,9 @@ focal tree, specifically the <code>size_corr_growth</code> output by
 are excluded as focal trees). If the user also provides abiotic data for the
 stands using the argument <code>abiotic_data</code>, these are also joined to the
 neighborhood metric and growth data. The result is a design matrix that is
-given to the <code>growth_model</code> function. This entire process is repeated
-for each neighborhood size (<code>radii</code>) and <code>focal_sps</code>, with the 
-mean square error of each resulting model being recorded. The function
+given to the <code>growth_mort_model</code> function. This entire process is
+repeated for each neighborhood size (<code>radii</code>) and <code>focal_sps</code>, with
+the mean square error of each resulting model being recorded. The function
 outputs a list containing a data frame of all mean square error values and
 a plot of mean square error vs. neighborhood size for each <code>focal_sps</code>.</p>
 

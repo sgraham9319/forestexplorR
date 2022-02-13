@@ -85,9 +85,9 @@ focal tree, specifically the \code{size_corr_growth} output by
 are excluded as focal trees). If the user also provides abiotic data for the
 stands using the argument \code{abiotic_data}, these are also joined to the
 neighborhood metric and growth data. The result is a design matrix that is
-given to the \code{growth_model} function. This entire process is repeated
-for each neighborhood size (\code{radii}) and \code{focal_sps}, with the 
-mean square error of each resulting model being recorded. The function
+given to the \code{growth_mort_model} function. This entire process is
+repeated for each neighborhood size (\code{radii}) and \code{focal_sps}, with
+the mean square error of each resulting model being recorded. The function
 outputs a list containing a data frame of all mean square error values and
 a plot of mean square error vs. neighborhood size for each \code{focal_sps}.
 }

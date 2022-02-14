@@ -24,6 +24,8 @@
 #'   in area at breast height, in cm^2/year}
 #'   \item{size_corr_growth}{square root of \code{annual_growth} divided by
 #'   \code{begin_size} to give somewhat normally distributed growth rates}
+#'   \item{size_corr_growth_basal}{square root of \code{annual_bai} divided by
+#'   \code{begin_size} to give somewhat normally distributed growth rates}
 #'   \item{...}{any other columns that appeared in \code{data}}
 #' }
 #' @examples
@@ -65,9 +67,13 @@ detailed_growth <- function(data){
   
   # Calculate size corrected growth for trees where defined
   output$size_corr_growth <- NA
+  output$size_corr_growth_basal <- NA
   valid_rows <- which(output$annual_growth >= 0)
   output$size_corr_growth[valid_rows] <- 
     sqrt(output$annual_growth[valid_rows] /
+           output$begin_size[valid_rows])
+  output$size_corr_growth_basal[valid_rows] <-
+    sqrt(output$annual_bai[valid_rows] /
            output$begin_size[valid_rows])
   
   # Give warning if some trees showed negative growth

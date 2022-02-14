@@ -36,6 +36,8 @@ A dataframe containing growth rate measurements for each tree:
   in area at breast height, in cm^2/year}
   \item{size_corr_growth}{square root of \code{annual_growth} divided by
   \code{begin_size} to give somewhat normally distributed growth rates}
+  \item{size_corr_growth_basal}{square root of \code{annual_bai} divided by
+  \code{begin_size} to give somewhat normally distributed growth rates}
 }
 }
 \description{

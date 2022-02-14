@@ -29,6 +29,8 @@ A data frame containing between-census annual growth of each tree:
   in area at breast height, in cm^2/year}
   \item{size_corr_growth}{square root of \code{annual_growth} divided by
   \code{begin_size} to give somewhat normally distributed growth rates}
+  \item{size_corr_growth_basal}{square root of \code{annual_bai} divided by
+  \code{begin_size} to give somewhat normally distributed growth rates}
   \item{...}{any other columns that appeared in \code{data}}
 }
 }

@@ -47,9 +47,10 @@ Data frame containing a summary for each neighborhood in
 \code{neighbors}.
 }
 \description{
-Calculates species-specific densities and species richness for each 
-neighborhood in the provided data frame. Densities can be provided as
-area covered in the neighborhood, area covered per hectare, or the sum of
+Calculates species-specific densities and species diversity metrics (species
+richness, Shannon-Wiener diversity, Simpson's diversity, Pielou's J evenness)
+for each neighborhood in the provided data frame. Densities can be provided
+as area covered in the neighborhood, area covered per hectare, or the sum of
 horizontal angles.
 }
 \details{

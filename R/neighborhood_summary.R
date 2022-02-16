@@ -1,8 +1,9 @@
 #' Summarize neighborhoods
 #'
-#' Calculates species-specific densities and species richness for each 
-#' neighborhood in the provided data frame. Densities can be provided as
-#' area covered in the neighborhood, area covered per hectare, or the sum of
+#' Calculates species-specific densities and species diversity metrics (species
+#' richness, Shannon-Wiener diversity, Simpson's diversity, Pielou's J evenness)
+#' for each neighborhood in the provided data frame. Densities can be provided
+#' as area covered in the neighborhood, area covered per hectare, or the sum of
 #' horizontal angles.
 #' 
 #' This function contains an optional argument for handling edge effects. When
@@ -82,7 +83,49 @@ neighborhood_summary <- function(neighbors, id_column, radius,
   dens <- neighbors %>%
     select(id, id_column, prox, dbh_comp, sps_comp, abh_comp)
   
-  # Convert to wide format
+  # Format data for calculating diversity metrics
+  div <- dens %>%
+    tidyr::pivot_wider(id_cols = id,
+                       names_from = sps_comp, names_sort = T,
+                       values_from = abh_comp, values_fill = 0) %>%
+    left_join(neighbors %>% select(id, id_column), by = "id") %>%
+    select(-id) %>%
+    group_by(get(id_column)) %>%
+    select(-id_column) %>%
+    summarize(across(.fn = sum))
+  div <- div %>%
+    ungroup() %>%
+    mutate(all = rowSums(div[, 2:ncol(div)]))
+  div <- div %>%
+    rowwise() %>%
+    mutate(across(2:(ncol(div) - 1), ~ ./all)) %>%
+    select(-all)
+  
+  # Calculate Shannon-Wiener diversity
+  shannon <- div %>%
+    rowwise() %>%
+    mutate(across(2:ncol(div), ~ .x * log(.x)))
+  shannon <- shannon %>%
+    ungroup() %>%
+    mutate(shannon = -rowSums(shannon[, 2:ncol(shannon)], na.rm = T)) %>%
+    select(1, shannon)
+  
+  # Calculate Simpson's diversity
+  simpson <- div %>%
+    rowwise() %>%
+    mutate(across(2:ncol(div), ~ .x ^ 2))
+  simpson <- simpson %>%
+    ungroup() %>%
+    mutate(simpson = 1-rowSums(simpson[, 2:ncol(simpson)])) %>%
+    select(1, simpson)
+  
+  # Add to species richness and calculate evenness (Pielou's J)
+  sps_rich <- sps_rich %>%
+    left_join(shannon, by = "get(id_column)") %>%
+    left_join(simpson, by = "get(id_column)") %>%
+    mutate(evenness = shannon / log(sps_richness))
+  
+  # Convert density data frame to wide format
   if(densities == "angular"){
     dens <- dens %>%
       mutate(sum_angle = atan(dbh_comp / (prox * 100))) %>%
@@ -138,7 +181,7 @@ neighborhood_summary <- function(neighbors, id_column, radius,
   if(edge_correction == T & densities != "proportional"){
     output <- output %>%
       rowwise() %>%
-      mutate(across(c(2, 4:ncol(output)), ~ .*(1 / prop_area_inc))) %>%
+      mutate(across(c(2, 7:ncol(output)), ~ .*(1 / prop_area_inc))) %>%
       mutate(sps_richness = round(sps_richness)) %>%
       select(-(prop_area_inc))
   }

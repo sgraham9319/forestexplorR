@@ -98,6 +98,10 @@ select_nbhd_size <- function(radii, map_data, growth_data,
                                       edge_correction = edge_handling,
                                       x_limit = max_x, y_limit = max_y)
     
+    # Exclude evenness from neighborhood summaries to avoid NaNs
+    nbhd_summ <- nbhd_summ %>%
+      select(-evenness)
+    
     # Combine neighborhoods with their summaries
     nbhds <- nbhds %>%
       left_join(nbhd_summ, by = "tree_id")

@@ -186,13 +186,15 @@ an example.</p></td>
   in area at breast height, in cm^2/year</p></dd>
   <dt>size_corr_growth</dt><dd><p>square root of <code>annual_growth</code> divided by
   <code>begin_size</code> to give somewhat normally distributed growth rates</p></dd>
+  <dt>size_corr_growth_basal</dt><dd><p>square root of <code>annual_bai</code> divided by
+  <code>begin_size</code> to give somewhat normally distributed growth rates</p></dd>
 
 </dl>
 
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='fu'>growth_summary</span><span class='op'>(</span><span class='va'>tree</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; [1] "Warning: 139 trees exhibited negative annual growth"</div><div class='output co'>#&gt; <span style='color: #949494;'># A tibble: 9,155 x 12</span>
+</div><div class='output co'>#&gt; [1] "Warning: 139 trees exhibited negative annual growth"</div><div class='output co'>#&gt; <span style='color: #949494;'># A tibble: 9,155 x 13</span>
 #&gt;    tree_id       stand_id species first_record last_record begin_size final_size
 #&gt;    <span style='color: #949494; font-style: italic;'>&lt;chr&gt;</span>         <span style='color: #949494; font-style: italic;'>&lt;chr&gt;</span>    <span style='color: #949494; font-style: italic;'>&lt;chr&gt;</span>          <span style='color: #949494; font-style: italic;'>&lt;int&gt;</span>       <span style='color: #949494; font-style: italic;'>&lt;int&gt;</span>      <span style='color: #949494; font-style: italic;'>&lt;dbl&gt;</span>      <span style='color: #949494; font-style: italic;'>&lt;dbl&gt;</span>
 #&gt; <span style='color: #BCBCBC;'> 1</span> AB08000100001 AB08     TSHE            <span style='text-decoration: underline;'>1</span>978        <span style='text-decoration: underline;'>2</span>017       48.2       50.6
@@ -205,9 +207,9 @@ an example.</p></td>
 #&gt; <span style='color: #BCBCBC;'> 8</span> AB08000100008 AB08     TSHE            <span style='text-decoration: underline;'>1</span>978        <span style='text-decoration: underline;'>2</span>017       20.3       26.9
 #&gt; <span style='color: #BCBCBC;'> 9</span> AB08000100009 AB08     THPL            <span style='text-decoration: underline;'>1</span>978        <span style='text-decoration: underline;'>2</span>017       48         56.5
 #&gt; <span style='color: #BCBCBC;'>10</span> AB08000100010 AB08     PSME            <span style='text-decoration: underline;'>1</span>978        <span style='text-decoration: underline;'>2</span>017       79.6       83  
-#&gt; <span style='color: #949494;'># ... with 9,145 more rows, and 5 more variables: mean_size &lt;dbl&gt;,</span>
+#&gt; <span style='color: #949494;'># ... with 9,145 more rows, and 6 more variables: mean_size &lt;dbl&gt;,</span>
 #&gt; <span style='color: #949494;'>#   midpoint_size &lt;dbl&gt;, annual_growth &lt;dbl&gt;, annual_bai &lt;dbl&gt;,</span>
-#&gt; <span style='color: #949494;'>#   size_corr_growth &lt;dbl&gt;</span></div></pre>
+#&gt; <span style='color: #949494;'>#   size_corr_growth &lt;dbl&gt;, size_corr_growth_basal &lt;dbl&gt;</span></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

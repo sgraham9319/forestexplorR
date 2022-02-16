@@ -122,7 +122,8 @@
 
 <span class="co"># Combine neighborhoods with their summaries</span>
 <span class="va">nbhds</span> <span class="op">&lt;-</span> <span class="va">nbhds</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html">left_join</a></span><span class="op">(</span><span class="va">nbhd_summ</span>, by <span class="op">=</span> <span class="st">"tree_id"</span><span class="op">)</span></code></pre></div>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html">left_join</a></span><span class="op">(</span><span class="va">nbhd_summ</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">shannon</span>, <span class="va">simpson</span>, <span class="va">evenness</span><span class="op">)</span><span class="op">)</span>,
+            by <span class="op">=</span> <span class="st">"tree_id"</span><span class="op">)</span></code></pre></div>
 <p>We have now summarized the neighborhoods of all trees, but our summaries are inaccurate for trees whose neighborhood overlaps a stand boundary i.e. we did not sample their entire neighborhood. Rather than estimating the missing portions of these trees’ neighborhoods, we will exclude them from the model.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Define neighborhood radius</span>
@@ -185,17 +186,17 @@
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># R^2 value</span>
 <span class="va">basic_growth_mod</span><span class="op">$</span><span class="va">R_squared</span>
-<span class="co">#&gt; [1] 0.2036919</span>
+<span class="co">#&gt; [1] 0.2106109</span>
 
 <span class="co"># Observations and model predictions</span>
 <span class="va">basic_growth_mod</span><span class="op">$</span><span class="va">obs_pred</span>
 <span class="co">#&gt; # A tibble: 1,804 x 3</span>
 <span class="co">#&gt;   tree_id       observations predictions</span>
 <span class="co">#&gt;   &lt;chr&gt;                &lt;dbl&gt;       &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 AB08000300012        0.165       0.138</span>
-<span class="co">#&gt; 2 AB08000300013        0.170       0.130</span>
-<span class="co">#&gt; 3 AB08000300021        0.160       0.139</span>
-<span class="co">#&gt; 4 AB08000300024        0.119       0.147</span>
+<span class="co">#&gt; 1 AB08000300012        0.165       0.140</span>
+<span class="co">#&gt; 2 AB08000300013        0.170       0.131</span>
+<span class="co">#&gt; 3 AB08000300014        0.129       0.128</span>
+<span class="co">#&gt; 4 AB08000300021        0.160       0.142</span>
 <span class="co">#&gt; # ... with 1,800 more rows</span></code></pre></div>
 <p>The evaluate the robustness of the stochastic model fitting process there is an optional argument (<code>iterations</code>) that specifies how many times the model should be fit. When this argument is specified, the model object, r-squared value and table of observations and predictions refer to the model that had the lowest mean square error. However, the <code>mod_coef</code> element will contain the fitted coefficients for all fitted models.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
@@ -203,7 +204,7 @@
 <span class="va">iter_growth_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/growth_mort_model.html">growth_mort_model</a></span><span class="op">(</span><span class="va">training</span>, outcome_var <span class="op">=</span> <span class="st">"size_corr_growth"</span>,
                                      iterations <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>
 <span class="va">iter_growth_mod</span><span class="op">$</span><span class="va">R_squared</span>
-<span class="co">#&gt; [1] 0.2047857</span></code></pre></div>
+<span class="co">#&gt; [1] 0.2115688</span></code></pre></div>
 <p>The <code><a href="../reference/growth_mort_model.html">growth_mort_model()</a></code> function can also handle rare competitor tree species. The optional argument <code>rare_comps</code> specifies the minimum number of interactions a competitor species must be a part of to be considered a common competitor. Any species with fewer interactions will be grouped together under the new species identity of <code>"RARE"</code>. If species-specific densities are included as covariates in the training data, a <code>"RARE_density"</code> variable can also be created by indicating the suffix attached to density variables under the argument <code>density_suffix</code>.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">1000</span><span class="op">)</span>
@@ -229,7 +230,7 @@
 
 <span class="co"># Ability to predict test data</span>
 <span class="va">test_growth_mod</span><span class="op">$</span><span class="va">test_R_squared</span>
-<span class="co">#&gt; [1] 0.1795031</span></code></pre></div>
+<span class="co">#&gt; [1] 0.1635075</span></code></pre></div>
 </div>
 <div id="growth_mort_model-create-a-neighborhood-tree-mortality-model" class="section level2">
 <h2 class="hasAnchor">
@@ -258,58 +259,58 @@
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># R^2 value</span>
 <span class="va">basic_mort_mod</span><span class="op">$</span><span class="va">R_squared</span>
-<span class="co">#&gt; [1] 0.2479958</span>
+<span class="co">#&gt; [1] 0.2541342</span>
 
 <span class="co"># Fitted coefficients</span>
 <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">basic_mort_mod</span><span class="op">$</span><span class="va">mod_coef</span><span class="op">)</span>
-<span class="co">#&gt;                            1</span>
-<span class="co">#&gt; (Intercept)      0.270513890</span>
-<span class="co">#&gt; prox             0.000000000</span>
-<span class="co">#&gt; sps_compABAM    -0.002282450</span>
-<span class="co">#&gt; sps_compABGR     0.000000000</span>
-<span class="co">#&gt; sps_compABLA     0.000000000</span>
-<span class="co">#&gt; sps_compABPR     0.000000000</span>
-<span class="co">#&gt; sps_compALSI     0.000000000</span>
-<span class="co">#&gt; sps_compALVI     0.000000000</span>
-<span class="co">#&gt; sps_compCANO     0.000000000</span>
-<span class="co">#&gt; sps_compPICO     0.000000000</span>
-<span class="co">#&gt; sps_compPIEN     0.000000000</span>
-<span class="co">#&gt; sps_compPIMO     0.000000000</span>
-<span class="co">#&gt; sps_compPOBA     0.000000000</span>
-<span class="co">#&gt; sps_compPSME     0.000000000</span>
-<span class="co">#&gt; sps_compTABR     0.000000000</span>
-<span class="co">#&gt; sps_compTHPL     0.000000000</span>
-<span class="co">#&gt; sps_compTSHE     0.000000000</span>
-<span class="co">#&gt; sps_compTSME     0.000000000</span>
-<span class="co">#&gt; dbh_comp         0.000000000</span>
-<span class="co">#&gt; sps_richness     0.000000000</span>
-<span class="co">#&gt; ABAM_angle_sum   0.000000000</span>
-<span class="co">#&gt; ABGR_angle_sum   0.000000000</span>
-<span class="co">#&gt; ABLA_angle_sum   0.000000000</span>
-<span class="co">#&gt; ABPR_angle_sum   0.000000000</span>
-<span class="co">#&gt; ALRU_angle_sum   0.000000000</span>
-<span class="co">#&gt; ALSI_angle_sum   0.000000000</span>
-<span class="co">#&gt; ALVI_angle_sum   0.000000000</span>
-<span class="co">#&gt; CANO_angle_sum   0.000000000</span>
-<span class="co">#&gt; PICO_angle_sum   0.000000000</span>
-<span class="co">#&gt; PIEN_angle_sum   0.000000000</span>
-<span class="co">#&gt; PIMO_angle_sum   0.000000000</span>
-<span class="co">#&gt; PISI_angle_sum   0.000000000</span>
-<span class="co">#&gt; POBA_angle_sum   0.000000000</span>
-<span class="co">#&gt; PSME_angle_sum  -0.002585550</span>
-<span class="co">#&gt; TABR_angle_sum   0.003066099</span>
-<span class="co">#&gt; THPL_angle_sum   0.000000000</span>
-<span class="co">#&gt; TSHE_angle_sum   0.000000000</span>
-<span class="co">#&gt; TSME_angle_sum   0.000000000</span>
-<span class="co">#&gt; all_angle_sum.x  0.256101742</span>
-<span class="co">#&gt; precip_mm        0.000000000</span>
-<span class="co">#&gt; temp_C          -0.002253518</span>
-<span class="co">#&gt; elev_m           0.000000000</span>
-<span class="co">#&gt; aet_mm           0.000000000</span>
-<span class="co">#&gt; pet_mm          -0.007720212</span>
-<span class="co">#&gt; all_angle_sum.y  0.001129792</span>
-<span class="co">#&gt; mse              0.127669968</span>
-<span class="co">#&gt; R_squared        0.247995766</span></code></pre></div>
+<span class="co">#&gt;                             1</span>
+<span class="co">#&gt; (Intercept)      2.712542e-01</span>
+<span class="co">#&gt; prox             0.000000e+00</span>
+<span class="co">#&gt; sps_compABAM    -7.175678e-03</span>
+<span class="co">#&gt; sps_compABGR     0.000000e+00</span>
+<span class="co">#&gt; sps_compABLA     0.000000e+00</span>
+<span class="co">#&gt; sps_compABPR     0.000000e+00</span>
+<span class="co">#&gt; sps_compALSI     0.000000e+00</span>
+<span class="co">#&gt; sps_compALVI     0.000000e+00</span>
+<span class="co">#&gt; sps_compCANO     0.000000e+00</span>
+<span class="co">#&gt; sps_compPICO     0.000000e+00</span>
+<span class="co">#&gt; sps_compPIEN     0.000000e+00</span>
+<span class="co">#&gt; sps_compPIMO     0.000000e+00</span>
+<span class="co">#&gt; sps_compPOBA     0.000000e+00</span>
+<span class="co">#&gt; sps_compPSME     0.000000e+00</span>
+<span class="co">#&gt; sps_compTABR     0.000000e+00</span>
+<span class="co">#&gt; sps_compTHPL     0.000000e+00</span>
+<span class="co">#&gt; sps_compTSHE     0.000000e+00</span>
+<span class="co">#&gt; sps_compTSME     0.000000e+00</span>
+<span class="co">#&gt; dbh_comp         0.000000e+00</span>
+<span class="co">#&gt; sps_richness     0.000000e+00</span>
+<span class="co">#&gt; ABAM_angle_sum   0.000000e+00</span>
+<span class="co">#&gt; ABGR_angle_sum   0.000000e+00</span>
+<span class="co">#&gt; ABLA_angle_sum   0.000000e+00</span>
+<span class="co">#&gt; ABPR_angle_sum   1.260346e-02</span>
+<span class="co">#&gt; ALRU_angle_sum   0.000000e+00</span>
+<span class="co">#&gt; ALSI_angle_sum   0.000000e+00</span>
+<span class="co">#&gt; ALVI_angle_sum   0.000000e+00</span>
+<span class="co">#&gt; CANO_angle_sum   1.731368e-03</span>
+<span class="co">#&gt; PICO_angle_sum   0.000000e+00</span>
+<span class="co">#&gt; PIEN_angle_sum  -2.855141e-03</span>
+<span class="co">#&gt; PIMO_angle_sum  -1.398662e-03</span>
+<span class="co">#&gt; PISI_angle_sum   0.000000e+00</span>
+<span class="co">#&gt; POBA_angle_sum   0.000000e+00</span>
+<span class="co">#&gt; PSME_angle_sum  -1.420608e-03</span>
+<span class="co">#&gt; TABR_angle_sum   6.661441e-03</span>
+<span class="co">#&gt; THPL_angle_sum   0.000000e+00</span>
+<span class="co">#&gt; TSHE_angle_sum   3.337198e-03</span>
+<span class="co">#&gt; TSME_angle_sum   0.000000e+00</span>
+<span class="co">#&gt; all_angle_sum.x  2.628775e-01</span>
+<span class="co">#&gt; precip_mm        0.000000e+00</span>
+<span class="co">#&gt; temp_C           0.000000e+00</span>
+<span class="co">#&gt; elev_m           0.000000e+00</span>
+<span class="co">#&gt; aet_mm          -1.391790e-02</span>
+<span class="co">#&gt; pet_mm          -5.927667e-03</span>
+<span class="co">#&gt; all_angle_sum.y  8.312186e-06</span>
+<span class="co">#&gt; mse              1.267605e-01</span>
+<span class="co">#&gt; R_squared        2.541342e-01</span></code></pre></div>
 </div>
   </div>
 

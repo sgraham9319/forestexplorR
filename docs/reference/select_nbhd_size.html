@@ -161,6 +161,7 @@ neighborhood size varies between study systems and ecological processes.</p>
   abiotic_data <span class='op'>=</span> <span class='cn'>NULL</span>,
   <span class='va'>focal_sps</span>,
   <span class='va'>dens_type</span>,
+  edge_handling <span class='op'>=</span> <span class='cn'>F</span>,
   <span class='va'>max_x</span>,
   <span class='va'>max_y</span>,
   rare_sps <span class='op'>=</span> <span class='fl'>100</span>
@@ -201,6 +202,13 @@ Must take one of the values: <code>"raw"</code>, <code>"proportional"</code>, or
 <code>"angular"</code>. See <code><a href='neighborhood_summary.html'>?neighborhood_summary</a></code> for details.</p></td>
     </tr>
     <tr>
+      <th>edge_handling</th>
+      <td><p>Boolean indicating whether trees whose neighborhood
+overlaps the stand boundary should have their neighborhood metrics adjusted
+to account for the unsampled portion of their neighborhood. If FALSE, these
+trees will be excluded from the analysis as focals.</p></td>
+    </tr>
+    <tr>
       <th>max_x</th>
       <td><p>Maximum expected x coordinate (i.e. should be 100 if the stands
 are 100 x 100 m).</p></td>
@@ -236,13 +244,15 @@ calculate a series of metrics to describe the neighborhoods around each tree.
 It does this by applying the <code>neighborhoods</code> and then the
 <code>neighborhood_summary</code> function. It is therefore necessary to provide,
 under the argument <code>dens_type</code>, instruction for the method that
-<code>neighborhood_summary</code> should use to calculate densities. This process
-is repeated for each of the neighborhood sizes specified by the argument
-<code>radii</code>. To prevent edge effects, trees whose neighborhood overlaps the
-stand boundary are excluded from modeling (hence the need to provide stand
-sizes with the arguments <code>max_x</code> and <code>max_y</code>). Boundary overlap is
-determined using the largest neighborhood size in <code>radii</code> to ensure
-the number of focal trees is constant across neighborhood sizes.</p>
+<code>neighborhood_summary</code> should use to calculate densities. It is also
+possible to conduct edge handling by setting <code>edge_handling = T</code>. This
+process is repeated for each of the neighborhood sizes specified by the
+argument <code>radii</code>. To prevent edge effects, trees whose neighborhood
+overlaps the stand boundary are excluded from modeling (hence the need to
+provide stand sizes with the arguments <code>max_x</code> and <code>max_y</code>).
+Boundary overlap is determined using the largest neighborhood size in
+<code>radii</code> to ensure the number of focal trees is constant across
+neighborhood sizes.</p>
 <p>The neighborhood metrics are then combined with the growth rates of their
 focal tree, specifically the <code>size_corr_growth</code> output by 
 <code>growth_summary</code> (any trees with illogical negative annual growth rates

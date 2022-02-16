@@ -79,7 +79,8 @@ functions:
 ```{r}
 nbhds <- neighborhoods(mapping, stands = "AB08", radius = 10,
                        coords = locations)
-nbhd_summ <- neighborhood_summary(nbhds, "loc_id", 10, "angular")
+nbhd_summ <- neighborhood_summary(neighbors = nbhds, id_column = "loc_id",
+                                  radius = 10, densities = "angular")
 ```
 
 Next we join the coordinate locations with the calculated densities:
@@ -106,9 +107,9 @@ neighborhoods, we can use the `edge_correction` argument of
 proportion of the neighborhood area that lies beyond the stand boundary:
 
 ```{r}
-nbhd_summ <- neighborhood_summary(nbhds, "loc_id", 10, "angular",
-                                  edge_correction = T, x_limit = 100, 
-                                  y_limit = 100)
+nbhd_summ <- neighborhood_summary(nbhds, id_column = "loc_id", radius = 10,
+                                  densities = "angular", edge_correction = T,
+                                  x_limit = 100, y_limit = 100)
 grid_data <- locations %>%
   left_join(nbhd_summ %>%
               select(loc_id, all_angle_sum),

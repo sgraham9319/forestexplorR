@@ -76,10 +76,12 @@ head(coord_nbhds)
 ## `neighborhood_summary()`: Summarize neighborhoods
 
 The `neighborhood_summary()` function takes output of the `neighborhoods()`
-function and calculates species richness, overall tree density, and densities of
-each tree species for each neighborhood. The `densities` argument is used to
-specify how densities should be calculated.
+function and calculates species diversity metrics, overall tree density, and
+densities of each tree species for each neighborhood. Diversity metrics include
+species richness, Shannon-Wiener diversity, Simpson's diversity, and evenness
+(Pielou's J).
 
+The `densities` argument is used to specify how densities should be calculated.
 The optimal method for density calculation is likely to vary between study 
 systems and processes of interest. If the differential effects of neighbor tree 
 species are likely to be influenced by how close the neighbors of each species 
@@ -107,7 +109,7 @@ $$\pi(\frac{dbh}{2})^{2}$$
 nbhd_summ <- neighborhood_summary(nbhds, id_column = "tree_id", radius = 10,
                                   densities = "raw")
 nbhd_summ %>%
-  select(tree_id, sps_richness, ABAM_density, TSHE_density, all_density)
+  select(tree_id, sps_richness, shannon, ABAM_density, TSHE_density, all_density)
 ```
 
 ### `neighborhood_summary(densities = "proportional")`
@@ -119,7 +121,7 @@ accounts for.
 nbhd_summ <- neighborhood_summary(nbhds, id_column = "tree_id", radius = 10,
                                   densities = "proportional")
 nbhd_summ %>%
-  select(tree_id, sps_richness, ABAM_density, TSHE_density, all_density)
+  select(tree_id, sps_richness, shannon, ABAM_density, TSHE_density, all_density)
 ```
 
 ### `neighborhood_summary(densities = "angular")`
@@ -134,7 +136,8 @@ the neighbor tree.
 nbhd_summ <- neighborhood_summary(nbhds, id_column = "tree_id", radius = 10,
                                   densities = "angular")
 nbhd_summ %>%
-  select(tree_id, sps_richness, ABAM_angle_sum, TSHE_angle_sum, all_angle_sum)
+  select(tree_id, sps_richness, shannon, ABAM_angle_sum, TSHE_angle_sum,
+         all_angle_sum)
 ```
 
 ### `neighborhood_summary(neighbors_incl = "larger_only")`
@@ -149,7 +152,8 @@ nbhd_summ <- neighborhood_summary(nbhds, id_column = "tree_id", radius = 10,
                                   densities = "angular",
                                   neighbors_incl = "larger_only")
 nbhd_summ %>%
-  select(tree_id, sps_richness, ABAM_angle_sum, TSHE_angle_sum, all_angle_sum)
+  select(tree_id, sps_richness, shannon, ABAM_angle_sum, TSHE_angle_sum,
+         all_angle_sum)
 ```
 
 

@@ -37,7 +37,8 @@ nbhd_summ <- neighborhood_summary(nbhds, id_column = "tree_id", radius = 10,
 
 # Combine neighborhoods with their summaries
 nbhds <- nbhds %>%
-  left_join(nbhd_summ, by = "tree_id")
+  left_join(nbhd_summ %>% select(-c(shannon, simpson, evenness)),
+            by = "tree_id")
 ```
 
 We have now summarized the neighborhoods of all trees, but our summaries are 

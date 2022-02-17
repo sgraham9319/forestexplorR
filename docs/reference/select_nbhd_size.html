@@ -40,12 +40,13 @@
 
 
 <meta property="og:title" content="Select neighborhood size — select_nbhd_size" />
-<meta property="og:description" content="Fits tree growth models using neighborhood metrics based on differing
-neighborhood sizes, calculating mean square error of each model, thereby
-providing useful data on the appropriate neighborhood size for analysis. It
-is strongly recommended that this sensitivity analysis or a similar one is
-used to select a neighborhood size for modeling because the appropriate 
-neighborhood size varies between study systems and ecological processes." />
+<meta property="og:description" content="Fits tree growth or mortality models using neighborhood metrics based on
+differing neighborhood sizes, calculating mean square error of each model,
+thereby providing useful data on the appropriate neighborhood size for
+analysis. It is strongly recommended that this sensitivity analysis or a
+similar one is used to select a neighborhood size for modeling because the
+appropriate neighborhood size varies between study systems and ecological
+processes." />
 
 
 
@@ -146,18 +147,20 @@ neighborhood size varies between study systems and ecological processes." />
     </div>
 
     <div class="ref-description">
-    <p>Fits tree growth models using neighborhood metrics based on differing
-neighborhood sizes, calculating mean square error of each model, thereby
-providing useful data on the appropriate neighborhood size for analysis. It
-is strongly recommended that this sensitivity analysis or a similar one is
-used to select a neighborhood size for modeling because the appropriate 
-neighborhood size varies between study systems and ecological processes.</p>
+    <p>Fits tree growth or mortality models using neighborhood metrics based on
+differing neighborhood sizes, calculating mean square error of each model,
+thereby providing useful data on the appropriate neighborhood size for
+analysis. It is strongly recommended that this sensitivity analysis or a
+similar one is used to select a neighborhood size for modeling because the
+appropriate neighborhood size varies between study systems and ecological
+processes.</p>
     </div>
 
     <pre class="usage"><span class='fu'>select_nbhd_size</span><span class='op'>(</span>
   <span class='va'>radii</span>,
   <span class='va'>map_data</span>,
-  <span class='va'>growth_data</span>,
+  <span class='va'>model_process</span>,
+  <span class='va'>tree_data</span>,
   abiotic_data <span class='op'>=</span> <span class='cn'>NULL</span>,
   <span class='va'>focal_sps</span>,
   <span class='va'>dens_type</span>,
@@ -179,9 +182,20 @@ neighborhood size varies between study systems and ecological processes.</p>
       <td><p>Data frame containing tree coordinates.</p></td>
     </tr>
     <tr>
-      <th>growth_data</th>
-      <td><p>Data frame containing repeated measurements of DBH for
-trees in <code>map_data</code></p></td>
+      <th>model_process</th>
+      <td><p>Character determining type of process to be modeled
+(i.e. <code>"growth"</code> or <code>"mortality"</code>).</p></td>
+    </tr>
+    <tr>
+      <th>tree_data</th>
+      <td><p>Data frame containing mortality or size data for trees in
+<code>map_data</code>. If <code>model_process = "mortality"</code>, <code>tree_data</code>
+should be a data frame containing the columns <code>tree_id</code> and 
+<code>mort</code>, where <code>mort</code> contains 1 and 0 values indicating dead and
+alive respectively, and each tree id appears on a single row (see dataset
+<code>mort_dummy</code> for an example). If <code>model_process = "growth"</code>, 
+<code>tree_data</code> should contain repeated DBH measurements for each tree id
+(see dataset <code>tree</code> for an example).</p></td>
     </tr>
     <tr>
       <th>abiotic_data</th>
@@ -220,9 +234,9 @@ are 100 x 100 m).</p></td>
     <tr>
       <th>rare_sps</th>
       <td><p>Minimum number of interactions a competitor species must
-appear in to remain separate from the "RARE" category in the growth models
-(see <code>?growth_model</code> for details). If not specified, this argument will
-default to a value of 100 interactions.</p></td>
+appear in to remain separate from the "RARE" category in the models
+(see <code><a href='growth_mort_model.html'>?growth_mort_model</a></code> for details). If not specified, this argument
+will default to a value of 100 interactions.</p></td>
     </tr>
     </table>
 
@@ -247,23 +261,23 @@ under the argument <code>dens_type</code>, instruction for the method that
 <code>neighborhood_summary</code> should use to calculate densities. It is also
 possible to conduct edge handling by setting <code>edge_handling = T</code>. This
 process is repeated for each of the neighborhood sizes specified by the
-argument <code>radii</code>. To prevent edge effects, trees whose neighborhood
-overlaps the stand boundary are excluded from modeling (hence the need to
-provide stand sizes with the arguments <code>max_x</code> and <code>max_y</code>).
-Boundary overlap is determined using the largest neighborhood size in
-<code>radii</code> to ensure the number of focal trees is constant across
-neighborhood sizes.</p>
-<p>The neighborhood metrics are then combined with the growth rates of their
-focal tree, specifically the <code>size_corr_growth</code> output by 
-<code>growth_summary</code> (any trees with illogical negative annual growth rates
+argument <code>radii</code>. If <code>edge_handling = F</code>, trees whose neighborhood
+overlaps the stand boundary will be excluded from modeling. Boundary overlap
+is determined using the largest neighborhood size in <code>radii</code> to ensure
+the number of focal trees is constant across neighborhood sizes.</p>
+<p>The neighborhood metrics are then combined with the growth rates or mortality
+status of their focal tree. If <code>model_process = "growth"</code> the
+<code>size_corr_growth</code> output by <code>growth_summary</code> will be used as
+the dependent variable (any trees with illogical negative annual growth rates
 are excluded as focal trees). If the user also provides abiotic data for the
 stands using the argument <code>abiotic_data</code>, these are also joined to the
-neighborhood metric and growth data. The result is a design matrix that is
-given to the <code>growth_mort_model</code> function. This entire process is
-repeated for each neighborhood size (<code>radii</code>) and <code>focal_sps</code>, with
-the mean square error of each resulting model being recorded. The function
-outputs a list containing a data frame of all mean square error values and
-a plot of mean square error vs. neighborhood size for each <code>focal_sps</code>.</p>
+neighborhood metric and growth/mortality data. The result is a design matrix
+that is given to the <code>growth_mort_model</code> function. This entire process
+is repeated for each neighborhood size (<code>radii</code>) and <code>focal_sps</code>,
+with the mean square error of each resulting model being recorded. The
+function outputs a list containing a data frame of all mean square error
+values and a plot of mean square error vs. neighborhood size for each
+<code>focal_sps</code>.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'># See vignette "Selecting neighborhood size"</span>

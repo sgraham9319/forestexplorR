@@ -1,14 +1,13 @@
-#' Model tree growth and mortality
+#' Model tree growth
 #' 
-#' Fits regularized linear regression models of tree growth or logistic
-#' regression models of tree mortality for a single species, returning the model
-#' object, its growth predictions, its coefficient of determination when applied
-#' to the training set (and optionally a provided test set), and the fitted
-#' model coefficients.
+#' Fits regularized linear regression models of tree growth for a single
+#' species, returning the model object, its growth predictions, its coefficient
+#' of determination when applied to the training set (and optionally, a
+#' user-provided test set), and the fitted model coefficients.
 #' 
 #' All variables in the user-provided training data other than tree_id and the
 #' indicated outcome variable are included as explanatory variables in the
-#' model. Regularized regression model is fitted using the glmnet package.
+#' model. The regularized regression model is fitted using the glmnet package.
 #' Predictions, R-squared, and model coefficients returned are all based on the
 #' \code{"lambda.1se"} model but all models with different lambda values are
 #' included in the returned mod object - see glmnet documentation for details.
@@ -20,28 +19,25 @@
 #' but only the model object for the best model (lowest cross-validated mean
 #' square error) will be returned.
 #' 
-#' Rare competitor species can be grouped together as "OTHR" for modeling if
+#' Rare competitor species can be grouped together as "RARE" for modeling if
 #' desired. The optional argument \code{rare_comps} is a number indicating the
 #' minimum number of interactions a species must appear in to remain separate
-#' from the "OTHR" category. If handling of rare competitor species is requested
+#' from the "RARE" category. If handling of rare competitor species is requested
 #' and species-specific densities are included in \code{training}, the densities
-#' of rare species can be summed together under "OTHR_density" using the
+#' of rare species can be summed together under "RARE_density" using the
 #' optional argument \code{density_suffix}.
 #' 
 #' @param training A dataframe containing a separate row for each focal x
 #' neighbor tree pair and a column for each variable to include in the
-#' model, including the outcome variable. Outcome variable must be numeric
-#' (for mortality data, use 1s and 0s), other variables can be of any type,
-#' including character. Character variables will be converted to factors before
-#' fitting the model.
+#' model, including the outcome variable. Outcome variable must be numeric.
+#' Other variables can be of any type, including character. Any character
+#' variables will be converted to factors before fitting the model.
 #' @param outcome_var Name of column in \code{training} containing the outcome
 #' variable, provided as a string.
-#' @param model_type Character string specifying whether a growth model (linear)
-#' or a mortality model (logistic) is being fitted.
 #' @param iterations Number of times the model should be fitted.
 #' @param rare_comps Minimum number of interactions a competitor species must
-#' appear in to remain separate from the "OTHR" category (see details). If not
-#' specified, no "OTHR" category will be created and all competitor species will
+#' appear in to remain separate from the "RARE" category (see details). If not
+#' specified, no "RARE" category will be created and all competitor species will
 #' remain separate.
 #' @param density_suffix Suffix of columns containing species-specific densities
 #' e.g. if density columns are of the form \code{speciesA_dens}, this argument
@@ -75,9 +71,9 @@
 #' @importFrom magrittr %>%
 #' @import dplyr
 
-growth_mort_model <- function(training, outcome_var, model_type = "growth",
-                         iterations = 1, rare_comps = "none",
-                         density_suffix = "none", test = NULL){
+growth_model <- function(training, outcome_var, iterations = 1,
+                         rare_comps = "none", density_suffix = "none",
+                         test = NULL){
   
   # Order training by tree id
   sing_sp <- training %>%
@@ -144,15 +140,9 @@ growth_mort_model <- function(training, outcome_var, model_type = "growth",
   for(i in 1:iterations){
     
     # Fit glmnet model and make predictions for training data
-    if(model_type == "growth"){
-      mod <- glmnet::cv.glmnet(x = dm, y = sing_sp[, outcome_var],
-                               family = "gaussian")
-      preds <- predict(mod, newx = dm, s = "lambda.1se")
-    } else if(model_type == "mortality"){
-      mod <- glmnet::cv.glmnet(x = dm, y = sing_sp[, outcome_var],
-                               family = "binomial")
-      preds <- predict(mod, newx = dm, type = "class", s = "lambda.1se")
-    }
+    mod <- glmnet::cv.glmnet(x = dm, y = sing_sp[, outcome_var],
+                             family = "gaussian")
+    preds <- predict(mod, newx = dm, s = "lambda.1se")
     
     # Combine with observations
     obs_pred <- cbind(tree_ids, sing_sp %>% select(all_of(outcome_var)), preds)
@@ -268,12 +258,7 @@ growth_mort_model <- function(training, outcome_var, model_type = "growth",
     dm_test[, which(is.nan(dm_test[1, ]))] <- 0
     
     # Calculate model predictions for test data
-    if(model_type == "growth"){
-      test_preds <- predict(best_mod, newx = dm_test, s = "lambda.1se")
-    } else if(model_type == "mortality"){
-      test_preds <- predict(best_mod, newx = dm_test, type = "class",
-                            s = "lambda.1se")
-    }
+    test_preds <- predict(best_mod, newx = dm_test, s = "lambda.1se")
     
     # Combine with observations
     test_obs_pred <- cbind(test_ids, ss_test %>% select(all_of(outcome_var)),

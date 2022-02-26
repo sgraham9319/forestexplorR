@@ -20,7 +20,8 @@ reference:
   - stand_map
 - title: "Modeling"
 - contents:
-  - growth_mort_model
+  - growth_model
+  - mortality_model
   - select_nbhd_size
 - title: "Built-in datasets"
 - contents:

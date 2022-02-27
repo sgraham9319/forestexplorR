@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Model tree growth — growth_model • ForestPlotR</title>
+<title>Model tree mortality — mortality_model • ForestPlotR</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Model tree growth — growth_model" />
-<meta property="og:description" content="Fits regularized linear regression models of tree growth for a single
+<meta property="og:title" content="Model tree mortality — mortality_model" />
+<meta property="og:description" content="Fits regularized logistic regression models of tree mortality for a single
 species, returning the model object, its growth predictions, its coefficient
 of determination when applied to the training set (and optionally, a
 user-provided test set), and the fitted model coefficients." />
@@ -138,19 +138,19 @@ user-provided test set), and the fitted model coefficients." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Model tree growth</h1>
-    <small class="dont-index">Source: <a href='https://github.com/sgraham9319/ForestPlotR/blob/master/R/growth_model.R'><code>R/growth_model.R</code></a></small>
-    <div class="hidden name"><code>growth_model.Rd</code></div>
+    <h1>Model tree mortality</h1>
+    <small class="dont-index">Source: <a href='https://github.com/sgraham9319/ForestPlotR/blob/master/R/mortality_model.R'><code>R/mortality_model.R</code></a></small>
+    <div class="hidden name"><code>mortality_model.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Fits regularized linear regression models of tree growth for a single
+    <p>Fits regularized logistic regression models of tree mortality for a single
 species, returning the model object, its growth predictions, its coefficient
 of determination when applied to the training set (and optionally, a
 user-provided test set), and the fitted model coefficients.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>growth_model</span><span class='op'>(</span>
+    <pre class="usage"><span class='fu'>mortality_model</span><span class='op'>(</span>
   <span class='va'>training</span>,
   <span class='va'>outcome_var</span>,
   iterations <span class='op'>=</span> <span class='fl'>1</span>,
@@ -166,9 +166,10 @@ user-provided test set), and the fitted model coefficients.</p>
       <th>training</th>
       <td><p>A dataframe containing a separate row for each focal x
 neighbor tree pair and a column for each variable to include in the
-model, including the outcome variable. Outcome variable must be numeric.
-Other variables can be of any type, including character. Any character
-variables will be converted to factors before fitting the model.</p></td>
+model, including the outcome variable. Outcome variable must be numeric, with
+value 1 indicating 'dead' and value 0 indicating 'alive'. Other variables can
+be of any type, including character. Any character variables will be
+converted to factors before fitting the model.</p></td>
     </tr>
     <tr>
       <th>outcome_var</th>
@@ -219,7 +220,7 @@ provided)</p></li>
 <li><p><code>mod_coef</code> is a data frame containing the fitted coefficients, 
 cross-validated mean square error (<code>mse</code>), and coefficient of 
 determination for each fitted model with rows in ascending order of 
-<code>mse</code>.</p></li>
+<code>mse</code></p></li>
 </ul>
 
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
@@ -228,7 +229,7 @@ determination for each fitted model with rows in ascending order of
 indicated outcome variable are included as explanatory variables in the
 model. The regularized regression model is fitted using the glmnet package.
 Predictions, R-squared, and model coefficients returned are all based on the
-<code>"lambda.1se"</code> model but all models with different lambda values are
+<code>"lambda.1se"</code> model, but all models with different lambda values are
 included in the returned mod object - see glmnet documentation for details.</p>
 <p>As the glmnet model fitting process is stochastic, the fitted model can
 differ with each run. The <code>iterations</code> argument allows the user to

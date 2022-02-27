@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Repeated size measurements for 9155 trees. — tree • ForestPlotR</title>
+<title>Repeated size measurements and mortality records for 9155 trees. — tree • ForestPlotR</title>
 
 
 <!-- jquery -->
@@ -39,12 +39,18 @@
 
 
 
-<meta property="og:title" content="Repeated size measurements for 9155 trees. — tree" />
-<meta property="og:description" content="A dataset containing repeated size measurements for 9155 trees in 15 mapped
-forest stands located in Mount Rainier National Park, WA, USA. Each row
-represents a single measurement of a single tree. These stands are part of
-the Pacific Northwest Permanent Sample Plot Network 
-(http://pnwpsp.forestry.oregonstate.edu/)" />
+<meta property="og:title" content="Repeated size measurements and mortality records for 9155 trees. — tree" />
+<meta property="og:description" content="A dataset containing repeated size measurements and mortality records for
+9155 trees in 15 mapped forest stands located in Mount Rainier National Park,
+WA, USA. These stands are part of the Pacific Northwest Permanent Sample Plot
+Network (http://pnwpsp.forestry.oregonstate.edu/). Each row represents
+a single measurement of a single tree and a determination of whether it was
+alive or dead. PLEASE NOTE: the mortality data in the mort column were
+randomly generated for the purposes of demonstrating functions in this
+package and should not be used for real analysis. Although mortality data
+are collected in these stands, mortality rates are extremely low and
+therefore the real mortality data could not be used for demonstrating the
+mortality model function in this package" />
 
 
 
@@ -139,17 +145,23 @@ the Pacific Northwest Permanent Sample Plot Network
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Repeated size measurements for 9155 trees.</h1>
+    <h1>Repeated size measurements and mortality records for 9155 trees.</h1>
     <small class="dont-index">Source: <a href='https://github.com/sgraham9319/ForestPlotR/blob/master/R/tree.R'><code>R/tree.R</code></a></small>
     <div class="hidden name"><code>tree.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>A dataset containing repeated size measurements for 9155 trees in 15 mapped
-forest stands located in Mount Rainier National Park, WA, USA. Each row
-represents a single measurement of a single tree. These stands are part of
-the Pacific Northwest Permanent Sample Plot Network 
-(<a href='http://pnwpsp.forestry.oregonstate.edu/'>http://pnwpsp.forestry.oregonstate.edu/</a>)</p>
+    <p>A dataset containing repeated size measurements and mortality records for
+9155 trees in 15 mapped forest stands located in Mount Rainier National Park,
+WA, USA. These stands are part of the Pacific Northwest Permanent Sample Plot
+Network (<a href='http://pnwpsp.forestry.oregonstate.edu/'>http://pnwpsp.forestry.oregonstate.edu/</a>). Each row represents
+a single measurement of a single tree and a determination of whether it was
+alive or dead. PLEASE NOTE: the mortality data in the <code>mort</code> column were
+randomly generated for the purposes of demonstrating functions in this
+package and should not be used for real analysis. Although mortality data
+are collected in these stands, mortality rates are extremely low and
+therefore the real mortality data could not be used for demonstrating the
+mortality model function in this package</p>
     </div>
 
     <pre class="usage"><span class='va'>tree</span></pre>
@@ -157,7 +169,7 @@ the Pacific Northwest Permanent Sample Plot Network
 
     <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
 
-    <p>A data frame with 60114 rows and 6 variables:</p><dl>
+    <p>A data frame with 60114 rows and 7 variables:</p><dl>
   <dt>tree_id</dt><dd><p>unique identification code of the tree</p></dd>
   <dt>stand_id</dt><dd><p>name of stand in which tree is located</p></dd>
   <dt>tag</dt><dd><p>unique tag number of the tree</p></dd>
@@ -165,6 +177,7 @@ the Pacific Northwest Permanent Sample Plot Network
   <dt>year</dt><dd><p>year when measurement was taken</p></dd>
   <dt>dbh</dt><dd><p>diameter at breast height of the tree at the time of
   measurement, in cm</p></dd>
+  <dt>mort</dt><dd><p>tree mortality status with 1 meaning dead and 0 meaning alive</p></dd>
 
 </dl>
 

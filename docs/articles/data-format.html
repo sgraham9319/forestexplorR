@@ -137,14 +137,14 @@
 <p>The tree census dataset should be a data frame where each row represents the measurement data for a single tree during a specific census of the stand. This means each tree will appear on <em>x</em> rows where <em>x</em> is the number of censuses in which that tree was measured. The required columns are: <code>tree_id</code>, <code>stand_id</code>, <code>species</code>, <code>year</code> and <code>dbh</code>. For details on what each required column represents, use <code><a href="../reference/tree.html">?tree</a></code>. The built-in dataset <code>tree</code> is a cleaned and correctly formatted example:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">tree</span><span class="op">)</span>
-<span class="co">#&gt;         tree_id stand_id  tag species year  dbh</span>
-<span class="co">#&gt; 1 AB08000100022     AB08   19    TSHE 2002 15.0</span>
-<span class="co">#&gt; 2 AB08000100022     AB08   19    TSHE 2008 15.2</span>
-<span class="co">#&gt; 3 AB08000100022     AB08   19    TSHE 2012 15.1</span>
-<span class="co">#&gt; 4 AB08000100022     AB08   19    TSHE 2017 15.3</span>
-<span class="co">#&gt; 5 AB08000100001     AB08 4001    TSHE 1978 48.2</span>
-<span class="co">#&gt; 6 AB08000100001     AB08 4001    TSHE 1984 48.2</span></code></pre></div>
-<p>Additional unrequired columns can also be included in the tree census dataset without disrupting function performance (e.g. <code>tag</code> in <code>tree</code>) and column order is not important.</p>
+<span class="co">#&gt;         tree_id stand_id  tag species year  dbh mort</span>
+<span class="co">#&gt; 1 AB08000100022     AB08   19    TSHE 2002 15.0    0</span>
+<span class="co">#&gt; 2 AB08000100022     AB08   19    TSHE 2008 15.2    0</span>
+<span class="co">#&gt; 3 AB08000100022     AB08   19    TSHE 2012 15.1    0</span>
+<span class="co">#&gt; 4 AB08000100022     AB08   19    TSHE 2017 15.3    0</span>
+<span class="co">#&gt; 5 AB08000100001     AB08 4001    TSHE 1978 48.2    0</span>
+<span class="co">#&gt; 6 AB08000100001     AB08 4001    TSHE 1984 48.2    0</span></code></pre></div>
+<p>Additional columns can also be included in the tree census dataset without disrupting function performance (e.g. <code>tag</code> in <code>tree</code>) and a <code>mort</code> column containing mortality status of each tree during each status is required to use <code><a href="../reference/mortality_model.html">mortality_model()</a></code>. Column order is not important.</p>
 </div>
 </div>
 <div id="data-checking" class="section level2">
@@ -206,17 +206,17 @@
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">messy_tree</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">dbh</span><span class="op">)</span><span class="op">)</span>
-<span class="co">#&gt;          tree_id stand_id  tag species year dbh</span>
-<span class="co">#&gt; 1  AB08000200006     AB08 4023    TSHE 1990  NA</span>
-<span class="co">#&gt; 2  AB08000200008     AB08 4025    TSHE 2012  NA</span>
-<span class="co">#&gt; 3  AB08000300029     AB08 8671    ABAM 2012  NA</span>
-<span class="co">#&gt; 4  AB08000600020     AB08 4107    THPL 1984  NA</span>
-<span class="co">#&gt; 5  AB08000700016     AB08 4130    THPL 2002  NA</span>
-<span class="co">#&gt; 6  AB08001500015     AB08 4176    TSHE 2012  NA</span>
-<span class="co">#&gt; 7  AB08001600003     AB08 4191    TSHE 1990  NA</span>
-<span class="co">#&gt; 8  AB08001600008     AB08 4196    TSHE 1995  NA</span>
-<span class="co">#&gt; 9  PP17000600019     PP17 9620    PSME 2013  NA</span>
-<span class="co">#&gt; 10 PP17001100021     PP17    4    PIMO 2017  NA</span></code></pre></div>
+<span class="co">#&gt;          tree_id stand_id  tag species year dbh mort</span>
+<span class="co">#&gt; 1  AB08000200006     AB08 4023    TSHE 1990  NA    0</span>
+<span class="co">#&gt; 2  AB08000200008     AB08 4025    TSHE 2012  NA    1</span>
+<span class="co">#&gt; 3  AB08000300029     AB08 8671    ABAM 2012  NA    0</span>
+<span class="co">#&gt; 4  AB08000600020     AB08 4107    THPL 1984  NA    0</span>
+<span class="co">#&gt; 5  AB08000700016     AB08 4130    THPL 2002  NA    0</span>
+<span class="co">#&gt; 6  AB08001500015     AB08 4176    TSHE 2012  NA    0</span>
+<span class="co">#&gt; 7  AB08001600003     AB08 4191    TSHE 1990  NA    0</span>
+<span class="co">#&gt; 8  AB08001600008     AB08 4196    TSHE 1995  NA    0</span>
+<span class="co">#&gt; 9  PP17000600019     PP17 9620    PSME 2013  NA    0</span>
+<span class="co">#&gt; 10 PP17001100021     PP17    4    PIMO 2017  NA    0</span></code></pre></div>
 <p>The <code><a href="../reference/tree_check.html">tree_check()</a></code> function checks a tree census dataset for a variety of common errors. A mapping dataset needs to be supplied to the function so that trees in the tree census data that have no associated mapping can be identified. <code><a href="../reference/tree_check.html">tree_check()</a></code> returns a list containing two elements. The first element (<code>$problem_trees</code>) is a data frame containing the tree ids that were flagged as having a data issue and summarizes the issue.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">tree_issues</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tree_check.html">tree_check</a></span><span class="op">(</span>tree_data <span class="op">=</span> <span class="va">messy_tree</span>, map_data <span class="op">=</span> <span class="va">mapping</span><span class="op">)</span>
@@ -237,9 +237,9 @@
 <span class="co">#&gt; 1       at least one issue    59 5.7392996</span>
 <span class="co">#&gt; 2              missing dbh    10 0.9727626</span>
 <span class="co">#&gt; 3 missing measurement year    10 0.9727626</span>
-<span class="co">#&gt; 4       missing species id    10 0.9727626</span>
-<span class="co">#&gt; 5         missing stand id    10 0.9727626</span>
-<span class="co">#&gt; 6          no mapping data    10 0.9727626</span></code></pre></div>
+<span class="co">#&gt; 4 missing mortality record    20 1.9455253</span>
+<span class="co">#&gt; 5       missing species id    10 0.9727626</span>
+<span class="co">#&gt; 6         missing stand id    10 0.9727626</span></code></pre></div>
 </div>
 </div>
   </div>

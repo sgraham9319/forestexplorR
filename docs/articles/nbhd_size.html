@@ -113,7 +113,7 @@
 <a href="#using-select_nbhd_size" class="anchor"></a>Using <code>select_nbhd_size()</code>
 </h2>
 <p>The <code><a href="../reference/select_nbhd_size.html">select_nbhd_size()</a></code> function fits tree growth or mortality models using a variety of neighborhood sizes to calculate the explanatory neighborhood metrics and quantifies the fit of each model to the training data. Comparing the fit of models based on different neighborhood sizes then permits an informed decision on the neighborhood size to be used in the final analysis.</p>
-<p>This process involves the implementation of many ForestPlotR functions and therefore <code><a href="../reference/select_nbhd_size.html">select_nbhd_size()</a></code> has many required arguments. First we must provide the neighborhood sizes to try (<code>radii</code>) and the tree species for which we want to try them (<code>focal_sps</code>; independent assessments of neighborhood size are made for each species). In addition, we must provide the tree location data required for identifying neighborhoods (<code>map_data</code>), indicate whether we are fitting a growth or mortality model (<code>model_process</code>), and provide either the tree remeasurement data needed to calculate growth rates or mortality data (<code>tree_data</code>). We can also optionally provide any stand-level abiotic variables we want to include as covariates in the models (<code>abiotic_data</code>).</p>
+<p>This process involves the implementation of many ForestPlotR functions and therefore <code><a href="../reference/select_nbhd_size.html">select_nbhd_size()</a></code> has many required arguments. First we must provide the neighborhood sizes to try (<code>radii</code>) and the tree species for which we want to try them (<code>focal_sps</code>; independent assessments of neighborhood size are made for each species). In addition, we must provide the tree location data required for identifying neighborhoods (<code>map_data</code>), indicate whether we are fitting a growth or mortality model (<code>model_process</code>), and provide the tree measurement dataset needed to calculate growth rates or provide mortality data (<code>tree_data</code>). We can also optionally provide any stand-level abiotic variables we want to include as covariates in the models (<code>abiotic_data</code>).</p>
 <p>We also need to indicate what method <code><a href="../reference/neighborhood_summary.html">neighborhood_summary()</a></code> should use to calculate species-specific tree densities, the maximum x and y coordinates so that trees with neighborhoods overlapping the stand boundary can be identified (<code>max_x</code> and <code>max_y</code>), whether we want these edge trees to be excluded from analysis or have their neighborhood metrics corrected (<code>edge_handling</code>), and (optionally) the number of interactions a neighbor species must be involved in to be treated independently instead of included in the “RARE” group (<code>rare_sps</code>; defaults to 100 interactions if not provided).</p>
 <p>The following code shows an example of applying <code><a href="../reference/select_nbhd_size.html">select_nbhd_size()</a></code> to growth models for the species “PSME” and “TSHE” in the built-in mapping data, trying neighborhood sizes of 3, 6, 9, 12, and 15 m in radius. Here, we do not apply edge handling, and therefore trees with neighborhoods overlapping the stand boundary are excluded from analysis.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
@@ -133,11 +133,11 @@
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">size_compare</span><span class="op">$</span><span class="va">mse_vals</span>
 <span class="co">#&gt;   radius     PSME_mse    TSHE_mse</span>
-<span class="co">#&gt; 1      3 0.0005640729 0.002575402</span>
-<span class="co">#&gt; 2      6 0.0003510550 0.002140497</span>
-<span class="co">#&gt; 3      9 0.0003242876 0.002038977</span>
-<span class="co">#&gt; 4     12 0.0003325458 0.001946973</span>
-<span class="co">#&gt; 5     15 0.0003108068 0.001909381</span></code></pre></div>
+<span class="co">#&gt; 1      3 0.0005724606 0.002647753</span>
+<span class="co">#&gt; 2      6 0.0003455639 0.002134349</span>
+<span class="co">#&gt; 3      9 0.0003215634 0.002035031</span>
+<span class="co">#&gt; 4     12 0.0003312434 0.001952552</span>
+<span class="co">#&gt; 5     15 0.0003122562 0.001906557</span></code></pre></div>
 <p>The remaining elements are plots of mean square error vs. neighborhood size for each of the focal species:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">size_compare</span><span class="op">$</span><span class="va">PSME_plot</span></code></pre></div>

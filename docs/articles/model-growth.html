@@ -158,15 +158,15 @@
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">stand_id</span>, <span class="va">dbh</span>, <span class="va">abh</span>, <span class="va">x_coord</span>, <span class="va">y_coord</span>, <span class="va">id_comp</span>, <span class="va">abh_comp</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p>Now we have a dataset containing all the variables we will use for this modeling demonstration.</p>
 </div>
-<div id="growth_mort_model-create-a-neighborhood-tree-growth-model" class="section level2">
+<div id="growth_model-create-a-neighborhood-tree-growth-model" class="section level2">
 <h2 class="hasAnchor">
-<a href="#growth_mort_model-create-a-neighborhood-tree-growth-model" class="anchor"></a><code>growth_mort_model()</code>: Create a neighborhood tree growth model</h2>
+<a href="#growth_model-create-a-neighborhood-tree-growth-model" class="anchor"></a><code>growth_model()</code>: Create a neighborhood tree growth model</h2>
 <p>When modeling tree growth, it is common practice to create a separate model for each focal tree species because the drivers of growth are likely to differ among species. The code below isolates a single tree species and then removes the species variable because it is no longer useful.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">one_species</span> <span class="op">&lt;-</span> <span class="va">nbhds</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">species</span> <span class="op">==</span> <span class="st">"ABAM"</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">species</span><span class="op">)</span></code></pre></div>
-<p>The <code><a href="../reference/growth_mort_model.html">growth_mort_model()</a></code> function also offers test set validation, so next we will divide our dataset into a training and test set.</p>
+<p>The <code><a href="../reference/growth_model.html">growth_model()</a></code> function also offers test set validation, so next we will divide our dataset into a training and test set.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Create vector of tree ids</span>
 <span class="va">all_tree_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="va">one_species</span><span class="op">$</span><span class="va">tree_id</span><span class="op">)</span>
@@ -178,39 +178,39 @@
 <span class="va">training</span> <span class="op">&lt;-</span> <span class="va">one_species</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">tree_id</span> <span class="op">%in%</span> <span class="va">training_trees</span><span class="op">)</span>
 <span class="va">test</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/setops.html">setdiff</a></span><span class="op">(</span><span class="va">one_species</span>, <span class="va">training</span><span class="op">)</span></code></pre></div>
-<p>Now we can call the <code><a href="../reference/growth_mort_model.html">growth_mort_model()</a></code> function, which fits a linear regularized regression model of tree growth. In the most basic use case, this function requires only a training set and the name of the dependent variable, which should be a column in the training set. We set the seed because the model fitting process is stochastic.</p>
+<p>Now we can call the <code><a href="../reference/growth_model.html">growth_model()</a></code> function, which fits a linear regularized regression model of tree growth. In the most basic use case, this function requires only a training set and the name of the dependent variable, which should be a column in the training set. We set the seed because the model fitting process is stochastic.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">1000</span><span class="op">)</span>
-<span class="va">basic_growth_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/growth_mort_model.html">growth_mort_model</a></span><span class="op">(</span><span class="va">training</span>, outcome_var <span class="op">=</span> <span class="st">"size_corr_growth"</span><span class="op">)</span></code></pre></div>
+<span class="va">basic_growth_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/growth_model.html">growth_model</a></span><span class="op">(</span><span class="va">training</span>, outcome_var <span class="op">=</span> <span class="st">"size_corr_growth"</span><span class="op">)</span></code></pre></div>
 <p>The output of the above code is a list containing 4 elements. The first element <code>mod</code> is the model object. The second element <code>obs_pred</code> is a data frame of observed and model predicted growth for each tree. The third element is the R^2 value of the model. The fourth element is the estimated coefficients.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># R^2 value</span>
 <span class="va">basic_growth_mod</span><span class="op">$</span><span class="va">R_squared</span>
-<span class="co">#&gt; [1] 0.1961013</span>
+<span class="co">#&gt; [1] 0.2041247</span>
 
 <span class="co"># Observations and model predictions</span>
 <span class="va">basic_growth_mod</span><span class="op">$</span><span class="va">obs_pred</span>
 <span class="co">#&gt; # A tibble: 1,804 x 3</span>
 <span class="co">#&gt;   tree_id       observations predictions</span>
 <span class="co">#&gt;   &lt;chr&gt;                &lt;dbl&gt;       &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 AB08000300012        0.165       0.142</span>
+<span class="co">#&gt; 1 AB08000300013        0.170       0.133</span>
 <span class="co">#&gt; 2 AB08000300014        0.129       0.131</span>
-<span class="co">#&gt; 3 AB08000300021        0.160       0.142</span>
+<span class="co">#&gt; 3 AB08000300021        0.160       0.141</span>
 <span class="co">#&gt; 4 AB08000300024        0.119       0.151</span>
 <span class="co">#&gt; # ... with 1,800 more rows</span></code></pre></div>
 <p>The evaluate the robustness of the stochastic model fitting process there is an optional argument (<code>iterations</code>) that specifies how many times the model should be fit. When this argument is specified, the model object, r-squared value and table of observations and predictions refer to the model that had the lowest mean square error. However, the <code>mod_coef</code> element will contain the fitted coefficients for all fitted models.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">1000</span><span class="op">)</span>
-<span class="va">iter_growth_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/growth_mort_model.html">growth_mort_model</a></span><span class="op">(</span><span class="va">training</span>, outcome_var <span class="op">=</span> <span class="st">"size_corr_growth"</span>,
-                                     iterations <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>
+<span class="va">iter_growth_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/growth_model.html">growth_model</a></span><span class="op">(</span><span class="va">training</span>, outcome_var <span class="op">=</span> <span class="st">"size_corr_growth"</span>,
+                                iterations <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>
 <span class="va">iter_growth_mod</span><span class="op">$</span><span class="va">R_squared</span>
-<span class="co">#&gt; [1] 0.1961013</span></code></pre></div>
-<p>The <code><a href="../reference/growth_mort_model.html">growth_mort_model()</a></code> function can also handle rare competitor tree species. The optional argument <code>rare_comps</code> specifies the minimum number of interactions a competitor species must be a part of to be considered a common competitor. Any species with fewer interactions will be grouped together under the new species identity of <code>"RARE"</code>. If species-specific densities are included as covariates in the training data, a <code>"RARE_density"</code> variable can also be created by indicating the suffix attached to density variables under the argument <code>density_suffix</code>.</p>
+<span class="co">#&gt; [1] 0.2060253</span></code></pre></div>
+<p>The <code><a href="../reference/growth_model.html">growth_model()</a></code> function can also handle rare competitor tree species. The optional argument <code>rare_comps</code> specifies the minimum number of interactions a competitor species must be a part of to be considered a common competitor. Any species with fewer interactions will be grouped together under the new species identity of <code>"RARE"</code>. If species-specific densities are included as covariates in the training data, a <code>"RARE_density"</code> variable can also be created by indicating the suffix attached to density variables under the argument <code>density_suffix</code>.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">1000</span><span class="op">)</span>
-<span class="va">rare_growth_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/growth_mort_model.html">growth_mort_model</a></span><span class="op">(</span><span class="va">training</span>, outcome_var <span class="op">=</span> <span class="st">"size_corr_growth"</span>,
-                                     rare_comps <span class="op">=</span> <span class="fl">100</span>,
-                                     density_suffix <span class="op">=</span> <span class="st">"_angle_sum"</span><span class="op">)</span>
+<span class="va">rare_growth_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/growth_model.html">growth_model</a></span><span class="op">(</span><span class="va">training</span>, outcome_var <span class="op">=</span> <span class="st">"size_corr_growth"</span>,
+                                rare_comps <span class="op">=</span> <span class="fl">100</span>,
+                                density_suffix <span class="op">=</span> <span class="st">"_angle_sum"</span><span class="op">)</span>
 
 <span class="co"># Check for RARE in coefficients</span>
 <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">rare_growth_mod</span><span class="op">$</span><span class="va">mod_coef</span><span class="op">)</span>
@@ -222,94 +222,119 @@
 <span class="co">#&gt; [21] "TSME_angle_sum" "all_angle_sum"  "precip_mm"      "temp_C"        </span>
 <span class="co">#&gt; [25] "elev_m"         "aet_mm"         "pet_mm"         "RARE_density"  </span>
 <span class="co">#&gt; [29] "mse"            "R_squared"</span></code></pre></div>
-<p>Finally, the <code><a href="../reference/growth_mort_model.html">growth_mort_model()</a></code> function can evaluate the ability of the fitted model to predict the growth of trees in a test set i.e. trees not used in the model fitting process. To do this, a test set must be provided under the optional argument <code>test</code>. Predictive ability is quantified with an R^2 value that constitutes a new element in the output list.</p>
+<p>Finally, the <code><a href="../reference/growth_model.html">growth_model()</a></code> function can evaluate the ability of the fitted model to predict the growth of trees in a test set i.e. trees not used in the model fitting process. To do this, a test set must be provided under the optional argument <code>test</code>. Predictive ability is quantified with an R^2 value that constitutes a new element in the output list.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">1000</span><span class="op">)</span>
-<span class="va">test_growth_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/growth_mort_model.html">growth_mort_model</a></span><span class="op">(</span><span class="va">training</span>, outcome_var <span class="op">=</span> <span class="st">"size_corr_growth"</span>,
-                                     test <span class="op">=</span> <span class="va">test</span><span class="op">)</span>
+<span class="va">test_growth_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/growth_model.html">growth_model</a></span><span class="op">(</span><span class="va">training</span>, outcome_var <span class="op">=</span> <span class="st">"size_corr_growth"</span>,
+                                test <span class="op">=</span> <span class="va">test</span><span class="op">)</span>
 
 <span class="co"># Ability to predict test data</span>
 <span class="va">test_growth_mod</span><span class="op">$</span><span class="va">test_R_squared</span>
-<span class="co">#&gt; [1] 0.2062266</span></code></pre></div>
+<span class="co">#&gt; [1] 0.1738573</span></code></pre></div>
 </div>
-<div id="growth_mort_model-create-a-neighborhood-tree-mortality-model" class="section level2">
+<div id="mortality_model-create-a-neighborhood-tree-mortality-model" class="section level2">
 <h2 class="hasAnchor">
-<a href="#growth_mort_model-create-a-neighborhood-tree-mortality-model" class="anchor"></a><code>growth_mort_model()</code>: Create a neighborhood tree mortality model</h2>
-<p>The data formatting for a neighborhood mortality model is very similar to that for a neighborhood growth model. Therefore, we can skip a few steps in this vignette and join the built-in mortality data to our one_species data frame. We also need to remove the dependent growth variable, <code>size_corr_growth</code>:</p>
+<a href="#mortality_model-create-a-neighborhood-tree-mortality-model" class="anchor"></a><code>mortality_model()</code>: Create a neighborhood tree mortality model</h2>
+<p>The data formatting for a neighborhood mortality model is very similar to that for a neighborhood growth model. First we can calculate our neighborhood summaries and remove trees whose neighborhood overlaps the stand boundary:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">one_species_mort</span> <span class="op">&lt;-</span> <span class="va">one_species</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html">left_join</a></span><span class="op">(</span><span class="va">mort_dummy</span>, by <span class="op">=</span> <span class="st">"tree_id"</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">size_corr_growth</span><span class="op">)</span></code></pre></div>
-<p>Then we again create the training set for the model:</p>
+<code class="sourceCode R"><span class="co"># Construct neighborhoods for all trees in all stands</span>
+<span class="va">nbhds</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/neighborhoods.html">neighborhoods</a></span><span class="op">(</span><span class="va">mapping</span>, radius <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>
+
+<span class="co"># Describe neighborhoods using angular species-specific densities</span>
+<span class="va">nbhd_summ</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/neighborhood_summary.html">neighborhood_summary</a></span><span class="op">(</span><span class="va">nbhds</span>, id_column <span class="op">=</span> <span class="st">"tree_id"</span>, radius <span class="op">=</span> <span class="fl">10</span>,
+                                  densities <span class="op">=</span> <span class="st">"angular"</span><span class="op">)</span>
+
+<span class="co"># Combine neighborhoods with their summaries</span>
+<span class="va">nbhds</span> <span class="op">&lt;-</span> <span class="va">nbhds</span> <span class="op">%&gt;%</span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html">left_join</a></span><span class="op">(</span><span class="va">nbhd_summ</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">shannon</span>, <span class="va">simpson</span>, <span class="va">evenness</span><span class="op">)</span><span class="op">)</span>,
+            by <span class="op">=</span> <span class="st">"tree_id"</span><span class="op">)</span>
+
+<span class="co"># Define neighborhood radius</span>
+<span class="va">nb_rad</span> <span class="op">&lt;-</span> <span class="fl">10</span>
+
+<span class="co"># Remove trees whose neighborhood overlaps a stand boundary</span>
+<span class="va">nbhds</span> <span class="op">&lt;-</span> <span class="va">nbhds</span> <span class="op">%&gt;%</span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">x_coord</span> <span class="op">&gt;=</span> <span class="va">nb_rad</span> <span class="op">&amp;</span> <span class="va">x_coord</span> <span class="op">&lt;=</span> <span class="fl">100</span> <span class="op">-</span> <span class="va">nb_rad</span> <span class="op">&amp;</span>
+           <span class="va">y_coord</span> <span class="op">&gt;=</span> <span class="va">nb_rad</span> <span class="op">&amp;</span> <span class="va">y_coord</span> <span class="op">&lt;=</span> <span class="fl">100</span> <span class="op">-</span> <span class="va">nb_rad</span><span class="op">)</span></code></pre></div>
+<p>Next we extract the mortality data for each tree from our tree measurement data frame and join it to our neighborhoods data:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># Create vector of tree ids</span>
-<span class="va">all_tree_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="va">one_species_mort</span><span class="op">$</span><span class="va">tree_id</span><span class="op">)</span>
+<code class="sourceCode R"><span class="va">mortality</span> <span class="op">&lt;-</span> <span class="va">tree</span> <span class="op">%&gt;%</span>
+        <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">tree_id</span><span class="op">)</span> <span class="op">%&gt;%</span>
+        <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarize</a></span><span class="op">(</span>mort <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span><span class="op">(</span><span class="va">mort</span><span class="op">)</span><span class="op">)</span>
 
-<span class="co"># Assign 80% of trees to training</span>
-<span class="va">training_trees</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="va">all_tree_ids</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">all_tree_ids</span><span class="op">)</span> <span class="op">*</span> <span class="fl">0.8</span><span class="op">)</span>
-
-<span class="co"># Define training</span>
-<span class="va">training</span> <span class="op">&lt;-</span> <span class="va">one_species_mort</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">tree_id</span> <span class="op">%in%</span> <span class="va">training_trees</span><span class="op">)</span></code></pre></div>
-<p>Now we can fit a basic mortality model.</p>
+<span class="va">nbhds</span> <span class="op">&lt;-</span> <span class="va">nbhds</span> <span class="op">%&gt;%</span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html">inner_join</a></span><span class="op">(</span><span class="va">mortality</span>, by <span class="op">=</span> <span class="st">"tree_id"</span><span class="op">)</span></code></pre></div>
+<p>Then we add the stand abiotic data and remove the columns we don’t want to include as model covariates:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">1000</span><span class="op">)</span>
-<span class="va">basic_mort_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/growth_mort_model.html">growth_mort_model</a></span><span class="op">(</span><span class="va">training</span>, outcome_var <span class="op">=</span> <span class="st">"mort"</span><span class="op">)</span></code></pre></div>
-<p>Here is the model output:</p>
+<code class="sourceCode R"><span class="va">nbhds</span> <span class="op">&lt;-</span> <span class="va">nbhds</span> <span class="op">%&gt;%</span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html">left_join</a></span><span class="op">(</span><span class="va">stand_abiotic</span>, by <span class="op">=</span> <span class="st">"stand_id"</span><span class="op">)</span>
+
+<span class="va">nbhds</span> <span class="op">&lt;-</span> <span class="va">nbhds</span> <span class="op">%&gt;%</span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">stand_id</span>, <span class="va">dbh</span>, <span class="va">abh</span>, <span class="va">x_coord</span>, <span class="va">y_coord</span>, <span class="va">id_comp</span>, <span class="va">abh_comp</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<p>Now we can subset to a single focal species:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">one_species</span> <span class="op">&lt;-</span> <span class="va">nbhds</span> <span class="op">%&gt;%</span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">species</span> <span class="op">==</span> <span class="st">"ABAM"</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">species</span><span class="op">)</span></code></pre></div>
+<p>For this example we will not use test set validation, so we can now fit the mortality model:</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">1000</span><span class="op">)</span>
+<span class="va">basic_mort_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mortality_model.html">mortality_model</a></span><span class="op">(</span><span class="va">one_species</span>, outcome_var <span class="op">=</span> <span class="st">"mort"</span><span class="op">)</span></code></pre></div>
+<p>Here is the model output:</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># R^2 value</span>
 <span class="va">basic_mort_mod</span><span class="op">$</span><span class="va">R_squared</span>
-<span class="co">#&gt; [1] 0.2635165</span>
+<span class="co">#&gt; [1] -0.1733919</span>
 
 <span class="co"># Fitted coefficients</span>
 <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">basic_mort_mod</span><span class="op">$</span><span class="va">mod_coef</span><span class="op">)</span>
-<span class="co">#&gt;                            1</span>
-<span class="co">#&gt; (Intercept)     2.654713e-01</span>
-<span class="co">#&gt; prox            0.000000e+00</span>
-<span class="co">#&gt; sps_compABAM   -7.468588e-03</span>
-<span class="co">#&gt; sps_compABGR    0.000000e+00</span>
-<span class="co">#&gt; sps_compABLA    0.000000e+00</span>
-<span class="co">#&gt; sps_compABPR    0.000000e+00</span>
-<span class="co">#&gt; sps_compALSI    0.000000e+00</span>
-<span class="co">#&gt; sps_compALVI    0.000000e+00</span>
-<span class="co">#&gt; sps_compCANO    0.000000e+00</span>
-<span class="co">#&gt; sps_compPICO    0.000000e+00</span>
-<span class="co">#&gt; sps_compPIEN    0.000000e+00</span>
-<span class="co">#&gt; sps_compPIMO    0.000000e+00</span>
-<span class="co">#&gt; sps_compPOBA    0.000000e+00</span>
-<span class="co">#&gt; sps_compPSME    0.000000e+00</span>
-<span class="co">#&gt; sps_compTABR    0.000000e+00</span>
-<span class="co">#&gt; sps_compTHPL    0.000000e+00</span>
-<span class="co">#&gt; sps_compTSHE    0.000000e+00</span>
-<span class="co">#&gt; sps_compTSME    0.000000e+00</span>
-<span class="co">#&gt; dbh_comp        0.000000e+00</span>
-<span class="co">#&gt; sps_richness    0.000000e+00</span>
-<span class="co">#&gt; ABAM_angle_sum  0.000000e+00</span>
-<span class="co">#&gt; ABGR_angle_sum  0.000000e+00</span>
-<span class="co">#&gt; ABLA_angle_sum  0.000000e+00</span>
-<span class="co">#&gt; ABPR_angle_sum  5.828015e-03</span>
-<span class="co">#&gt; ALRU_angle_sum  0.000000e+00</span>
-<span class="co">#&gt; ALSI_angle_sum  0.000000e+00</span>
-<span class="co">#&gt; ALVI_angle_sum  0.000000e+00</span>
-<span class="co">#&gt; CANO_angle_sum  0.000000e+00</span>
-<span class="co">#&gt; PICO_angle_sum -2.235789e-03</span>
-<span class="co">#&gt; PIEN_angle_sum -9.950755e-16</span>
-<span class="co">#&gt; PIMO_angle_sum  0.000000e+00</span>
-<span class="co">#&gt; PISI_angle_sum  0.000000e+00</span>
-<span class="co">#&gt; POBA_angle_sum -1.225651e-17</span>
-<span class="co">#&gt; PSME_angle_sum -7.349121e-03</span>
-<span class="co">#&gt; TABR_angle_sum  1.336544e-02</span>
-<span class="co">#&gt; THPL_angle_sum -3.799668e-03</span>
-<span class="co">#&gt; TSHE_angle_sum  0.000000e+00</span>
-<span class="co">#&gt; TSME_angle_sum  7.391900e-03</span>
-<span class="co">#&gt; all_angle_sum   2.676897e-01</span>
-<span class="co">#&gt; precip_mm       0.000000e+00</span>
-<span class="co">#&gt; temp_C         -3.990922e-05</span>
-<span class="co">#&gt; elev_m          0.000000e+00</span>
-<span class="co">#&gt; aet_mm         -6.098126e-03</span>
-<span class="co">#&gt; pet_mm         -1.116847e-02</span>
-<span class="co">#&gt; mse             1.217567e-01</span>
-<span class="co">#&gt; R_squared       2.635165e-01</span></code></pre></div>
+<span class="co">#&gt;                          1</span>
+<span class="co">#&gt; (Intercept)    -1.23106822</span>
+<span class="co">#&gt; prox            0.00000000</span>
+<span class="co">#&gt; sps_compABAM    0.00000000</span>
+<span class="co">#&gt; sps_compABGR    0.00000000</span>
+<span class="co">#&gt; sps_compABLA    0.00000000</span>
+<span class="co">#&gt; sps_compABPR    0.00000000</span>
+<span class="co">#&gt; sps_compALSI    0.00000000</span>
+<span class="co">#&gt; sps_compALVI    0.00000000</span>
+<span class="co">#&gt; sps_compCANO    0.01702032</span>
+<span class="co">#&gt; sps_compPICO    0.00000000</span>
+<span class="co">#&gt; sps_compPIEN    0.00000000</span>
+<span class="co">#&gt; sps_compPIMO    0.00000000</span>
+<span class="co">#&gt; sps_compPOBA    0.00000000</span>
+<span class="co">#&gt; sps_compPSME    0.00000000</span>
+<span class="co">#&gt; sps_compTABR    0.00000000</span>
+<span class="co">#&gt; sps_compTHPL    0.00000000</span>
+<span class="co">#&gt; sps_compTSHE    0.00000000</span>
+<span class="co">#&gt; sps_compTSME    0.00000000</span>
+<span class="co">#&gt; dbh_comp        0.00000000</span>
+<span class="co">#&gt; sps_richness    0.00000000</span>
+<span class="co">#&gt; ABAM_angle_sum  0.29046254</span>
+<span class="co">#&gt; ABGR_angle_sum -0.02033387</span>
+<span class="co">#&gt; ABLA_angle_sum  0.01281999</span>
+<span class="co">#&gt; ABPR_angle_sum  0.00000000</span>
+<span class="co">#&gt; ALRU_angle_sum  0.00000000</span>
+<span class="co">#&gt; ALSI_angle_sum  0.00000000</span>
+<span class="co">#&gt; ALVI_angle_sum  0.00000000</span>
+<span class="co">#&gt; CANO_angle_sum  0.09187474</span>
+<span class="co">#&gt; PICO_angle_sum  0.00000000</span>
+<span class="co">#&gt; PIEN_angle_sum  0.00000000</span>
+<span class="co">#&gt; PIMO_angle_sum -0.01332930</span>
+<span class="co">#&gt; PISI_angle_sum  0.00000000</span>
+<span class="co">#&gt; POBA_angle_sum  0.00000000</span>
+<span class="co">#&gt; PSME_angle_sum  0.00000000</span>
+<span class="co">#&gt; TABR_angle_sum  0.00000000</span>
+<span class="co">#&gt; THPL_angle_sum  0.00000000</span>
+<span class="co">#&gt; TSHE_angle_sum  0.00000000</span>
+<span class="co">#&gt; TSME_angle_sum -0.07790914</span>
+<span class="co">#&gt; all_angle_sum   0.46876611</span>
+<span class="co">#&gt; precip_mm       0.00000000</span>
+<span class="co">#&gt; temp_C         -0.00208531</span>
+<span class="co">#&gt; elev_m         -0.07239877</span>
+<span class="co">#&gt; aet_mm         -0.05362160</span>
+<span class="co">#&gt; pet_mm          0.00000000</span>
+<span class="co">#&gt; mse             1.01458525</span>
+<span class="co">#&gt; R_squared      -0.17339192</span></code></pre></div>
 </div>
   </div>
 

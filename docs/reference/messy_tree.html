@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Uncleaned repeated size measurement data. — messy_tree • ForestPlotR</title>
+<title>Uncleaned repeated size measurement and mortality data. — messy_tree • ForestPlotR</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,7 @@
 
 
 
-<meta property="og:title" content="Uncleaned repeated size measurement data. — messy_tree" />
+<meta property="og:title" content="Uncleaned repeated size measurement and mortality data. — messy_tree" />
 <meta property="og:description" content="A dataset containing repeated size measurements for trees in 2 mapped
 forest stands located in Mount Rainier National Park, WA, USA. Each row
 represents a single measurement of a single tree. This is a subset of the
@@ -139,7 +139,7 @@ test and demonstrate the tree_check function." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Uncleaned repeated size measurement data.</h1>
+    <h1>Uncleaned repeated size measurement and mortality data.</h1>
     <small class="dont-index">Source: <a href='https://github.com/sgraham9319/ForestPlotR/blob/master/R/messy_tree.R'><code>R/messy_tree.R</code></a></small>
     <div class="hidden name"><code>messy_tree.Rd</code></div>
     </div>
@@ -157,7 +157,7 @@ test and demonstrate the <code>tree_check</code> function.</p>
 
     <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
 
-    <p>A data frame with 6501 rows and 6 variables:</p><dl>
+    <p>A data frame with 6501 rows and 7 variables:</p><dl>
   <dt>tree_id</dt><dd><p>unique identification code of the tree</p></dd>
   <dt>stand_id</dt><dd><p>name of stand in which tree is located</p></dd>
   <dt>tag</dt><dd><p>unique tag number of the tree</p></dd>
@@ -165,6 +165,7 @@ test and demonstrate the <code>tree_check</code> function.</p>
   <dt>year</dt><dd><p>year when measurement was taken</p></dd>
   <dt>dbh</dt><dd><p>diameter at breast height of the tree at the time of
   measurement, in cm</p></dd>
+  <dt>mort</dt><dd><p>tree mortality status with 1 meaning dead and 0 meaning alive</p></dd>
 
 </dl>
 

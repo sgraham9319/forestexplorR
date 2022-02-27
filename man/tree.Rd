@@ -3,9 +3,9 @@
 \docType{data}
 \name{tree}
 \alias{tree}
-\title{Repeated size measurements for 9155 trees.}
+\title{Repeated size measurements and mortality records for 9155 trees.}
 \format{
-A data frame with 60114 rows and 6 variables:
+A data frame with 60114 rows and 7 variables:
 \describe{
   \item{tree_id}{unique identification code of the tree}
   \item{stand_id}{name of stand in which tree is located}
@@ -14,6 +14,7 @@ A data frame with 60114 rows and 6 variables:
   \item{year}{year when measurement was taken}
   \item{dbh}{diameter at breast height of the tree at the time of
   measurement, in cm}
+  \item{mort}{tree mortality status with 1 meaning dead and 0 meaning alive}
 }
 }
 \source{
@@ -24,10 +25,16 @@ Network on request \url{http://pnwpsp.forestry.oregonstate.edu/data}
 tree
 }
 \description{
-A dataset containing repeated size measurements for 9155 trees in 15 mapped
-forest stands located in Mount Rainier National Park, WA, USA. Each row
-represents a single measurement of a single tree. These stands are part of
-the Pacific Northwest Permanent Sample Plot Network 
-(\url{http://pnwpsp.forestry.oregonstate.edu/})
+A dataset containing repeated size measurements and mortality records for
+9155 trees in 15 mapped forest stands located in Mount Rainier National Park,
+WA, USA. These stands are part of the Pacific Northwest Permanent Sample Plot
+Network (\url{http://pnwpsp.forestry.oregonstate.edu/}). Each row represents
+a single measurement of a single tree and a determination of whether it was
+alive or dead. PLEASE NOTE: the mortality data in the \code{mort} column were
+randomly generated for the purposes of demonstrating functions in this
+package and should not be used for real analysis. Although mortality data
+are collected in these stands, mortality rates are extremely low and
+therefore the real mortality data could not be used for demonstrating the
+mortality model function in this package
 }
 \keyword{datasets}

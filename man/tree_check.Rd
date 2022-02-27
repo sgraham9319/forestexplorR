@@ -10,7 +10,10 @@ tree_check(tree_data, map_data)
 \item{tree_data}{Data frame containing tree measurement data where each row
 represents a single measurement of a single tree. Should contain the columns
 \code{tree_id}, \code{stand_id}, \code{species}, \code{year} and \code{dbh}.
-Any additional columns will be ignored by this function.}
+If a \code{mort} column (i.e. mortality data used for the 
+\code{mortality_model} function) it will be checked for missing values but no
+warning will be produced if this column is absent. Any additional columns
+will be ignored by this function.}
 
 \item{map_data}{Data frame containing tree mapping data. Should contain the
 columns \code{tree_id}, \code{stand_id}, \code{species}, \code{x_coord},
@@ -37,11 +40,13 @@ trees in the mapping dataset that have data issues.
 \details{
 The data issues checked for are: presence of required columns, single tree
 ids referring to multiple trees, trees having no associated mapping data,
-missing dbh, stand id, species, or measurement year. This function does
-not check for misspelled stand ids or species, which should be checked 
-independently. The common issue of negative growth rates resulting from
-measurement error are not checked here, but are checked by
-\code{growth_summary}.
+missing dbh, stand id, species, or measurement year. The provided
+\code{tree_data} is also checked for the presence of a \code{mort} column
+containing mortality data; if this column is found, a check for missing
+mortality data is also performed. This function does not check for misspelled
+stand ids or species, which should be checked independently. The common issue
+of negative growth rates resulting from measurement error are not checked
+here, but are checked by \code{growth_summary}.
 
 Tree ids indicated to have data issues according to this function are not 
 necessarily unusable. For instance, missing year data could be inferred from

@@ -37,8 +37,8 @@ provide the neighborhood sizes to try (`radii`) and the tree species for which
 we want to try them (`focal_sps`; independent assessments of neighborhood size
 are made for each species). In addition, we must provide the tree location data
 required for identifying neighborhoods (`map_data`), indicate whether we are
-fitting a growth or mortality model (`model_process`), and provide either the
-tree remeasurement data needed to calculate growth rates or mortality data
+fitting a growth or mortality model (`model_process`), and provide the tree
+measurement dataset needed to calculate growth rates or provide mortality data
 (`tree_data`). We can also optionally provide any stand-level abiotic variables
 we want to include as covariates in the models (`abiotic_data`).
 

@@ -65,9 +65,10 @@ correctly formatted example:
 head(tree)
 ```
 
-Additional unrequired columns can also be included in the tree census dataset
-without disrupting function performance (e.g. `tag` in `tree`) and column order
-is not important.
+Additional columns can also be included in the tree census dataset without
+disrupting function performance (e.g. `tag` in `tree`) and a `mort` column 
+containing mortality status of each tree during each status is required to use
+`mortality_model()`. Column order is not important.
 
 ## Data checking
 

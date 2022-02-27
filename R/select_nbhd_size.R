@@ -2,7 +2,7 @@
 #' 
 #' Fits tree growth or mortality models using neighborhood metrics based on
 #' differing neighborhood sizes, calculating mean square error of each model,
-#' thereby providing useful data on the appropriate neighborhood size for
+#' and thereby providing useful data on the appropriate neighborhood size for
 #' analysis. It is strongly recommended that this sensitivity analysis or a
 #' similar one is used to select a neighborhood size for modeling because the
 #' appropriate neighborhood size varies between study systems and ecological
@@ -11,7 +11,7 @@
 #' This function uses a data frame of tree coordinates (\code{map_data}) to
 #' calculate a series of metrics to describe the neighborhoods around each tree.
 #' It does this by applying the \code{neighborhoods} and then the
-#' \code{neighborhood_summary} function. It is therefore necessary to provide,
+#' \code{neighborhood_summary} functions. It is therefore necessary to provide,
 #' under the argument \code{dens_type}, instruction for the method that
 #' \code{neighborhood_summary} should use to calculate densities. It is also
 #' possible to conduct edge handling by setting \code{edge_handling = T}. This
@@ -28,8 +28,9 @@
 #' are excluded as focal trees). If the user also provides abiotic data for the
 #' stands using the argument \code{abiotic_data}, these are also joined to the
 #' neighborhood metric and growth/mortality data. The result is a design matrix
-#' that is given to the \code{growth_mort_model} function. This entire process
-#' is repeated for each neighborhood size (\code{radii}) and \code{focal_sps},
+#' that is given to the \code{growth_model} or \code{mortality_model} function,
+#' depending on the value of \code{model_process}. This entire process is
+#' repeated for each neighborhood size (\code{radii}) and \code{focal_sps},
 #' with the mean square error of each resulting model being recorded. The
 #' function outputs a list containing a data frame of all mean square error
 #' values and a plot of mean square error vs. neighborhood size for each
@@ -39,14 +40,13 @@
 #' @param map_data Data frame containing tree coordinates.
 #' @param model_process Character determining type of process to be modeled
 #' (i.e. \code{"growth"} or \code{"mortality"}).
-#' @param tree_data Data frame containing mortality or size data for trees in
-#' \code{map_data}. If \code{model_process = "mortality"}, \code{tree_data}
-#' should be a data frame containing the columns \code{tree_id} and 
-#' \code{mort}, where \code{mort} contains 1 and 0 values indicating dead and
-#' alive respectively, and each tree id appears on a single row (see dataset
-#' \code{mort_dummy} for an example). If \code{model_process = "growth"}, 
-#' \code{tree_data} should contain repeated DBH measurements for each tree id
-#' (see dataset \code{tree} for an example).
+#' @param tree_data Tree measurement data frame containing size or mortality
+#' data for trees in \code{map_data} (see built-in dataset \code{tree} for an
+#' example). If \code{model_process = "mortality"}, \code{tree_data} must
+#' contain a \code{mort} column where 1 and 0 values indicate dead and alive
+#' respectively. If \code{model_process = "growth"}, \code{tree_data} must
+#' contain repeated DBH measurements in a \code{dbh} column. Additional
+#' columns are permitted.
 #' @param abiotic_data Data frame containing abiotic data for each of the stands
 #' in \code{map_data}. Must contain a stand_id column. All other columns will be
 #' included as explanatory variables in the fitted models. This argument is
@@ -65,8 +65,8 @@
 #' @param max_y Maximum expected y coordinate.
 #' @param rare_sps Minimum number of interactions a competitor species must
 #' appear in to remain separate from the "RARE" category in the models
-#' (see \code{?growth_mort_model} for details). If not specified, this argument
-#' will default to a value of 100 interactions.
+#' (see \code{?growth_model} or \code{?mortality_model} for details). If not
+#' specified, this argument will default to a value of 100 interactions.
 #' @return A list containing a number of named elements (exact number will be
 #' the number of \code{focal_sps} plus one:
 #' \itemize{
@@ -138,10 +138,14 @@ select_nbhd_size <- function(radii, map_data, model_process, tree_data,
                    by = "tree_id")
     } else if(model_process == "mortality"){
       
+      # Extract mortality data for each tree
+      mortality <- tree_data %>%
+        group_by(tree_id) %>%
+        summarize(mort = max(mort))
+      
       # Add mortality data to neighborhoods
       nbhds <- nbhds %>%
-        inner_join(tree_data %>% select(tree_id, mort),
-                   by = "tree_id")
+        inner_join(mortality, by = "tree_id")
     }
     
     # Add plot abiotic data, if provided
@@ -165,25 +169,23 @@ select_nbhd_size <- function(radii, map_data, model_process, tree_data,
       # Run model
       if(model_process == "growth"){
         if(dens_type == "angular"){
-          mod <- growth_mort_model(one_sps, outcome_var = "size_corr_growth",
-                                   rare_comps = rare_sps,
-                                   density_suffix = "_angle_sum")
+          mod <- growth_model(one_sps, outcome_var = "size_corr_growth",
+                              rare_comps = rare_sps,
+                              density_suffix = "_angle_sum")
         } else{
-          mod <- growth_mort_model(one_sps, outcome_var = "size_corr_growth",
-                                   rare_comps = rare_sps,
-                                   density_suffix = "_density")
+          mod <- growth_model(one_sps, outcome_var = "size_corr_growth",
+                              rare_comps = rare_sps,
+                              density_suffix = "_density")
         }
       } else if(model_process == "mortality"){
         if(dens_type == "angular"){
-          mod <- growth_mort_model(one_sps, outcome_var = "mort",
-                                   model_type = model_process,
-                                   rare_comps = rare_sps,
-                                   density_suffix = "_angle_sum")
+          mod <- mortality_model(one_sps, outcome_var = "mort",
+                                 rare_comps = rare_sps,
+                                 density_suffix = "_angle_sum")
         } else{
-          mod <- growth_mort_model(one_sps, outcome_var = "mort",
-                                   model_type = model_process,
-                                   rare_comps = rare_sps,
-                                   density_suffix = "_density")
+          mod <- mortality_model(one_sps, outcome_var = "mort",
+                                 rare_comps = rare_sps,
+                                 density_suffix = "_density")
         }
       }
       

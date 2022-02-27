@@ -1,4 +1,4 @@
-#' Uncleaned repeated size measurement data.
+#' Uncleaned repeated size measurement and mortality data.
 #' 
 #' A dataset containing repeated size measurements for trees in 2 mapped
 #' forest stands located in Mount Rainier National Park, WA, USA. Each row
@@ -6,7 +6,7 @@
 #' \code{tree} dataset with a variety of errors intentionally added in order to
 #' test and demonstrate the \code{tree_check} function.
 #' 
-#' @format A data frame with 6501 rows and 6 variables:
+#' @format A data frame with 6501 rows and 7 variables:
 #' \describe{
 #'   \item{tree_id}{unique identification code of the tree}
 #'   \item{stand_id}{name of stand in which tree is located}
@@ -15,6 +15,7 @@
 #'   \item{year}{year when measurement was taken}
 #'   \item{dbh}{diameter at breast height of the tree at the time of
 #'   measurement, in cm}
+#'   \item{mort}{tree mortality status with 1 meaning dead and 0 meaning alive}
 #' }
 #' @source Raw data (without the induced errors) are available from the Pacific
 #' Northwest Permanent Sample Plot Network on request

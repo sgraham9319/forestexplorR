@@ -3,9 +3,9 @@
 \docType{data}
 \name{messy_tree}
 \alias{messy_tree}
-\title{Uncleaned repeated size measurement data.}
+\title{Uncleaned repeated size measurement and mortality data.}
 \format{
-A data frame with 6501 rows and 6 variables:
+A data frame with 6501 rows and 7 variables:
 \describe{
   \item{tree_id}{unique identification code of the tree}
   \item{stand_id}{name of stand in which tree is located}
@@ -14,6 +14,7 @@ A data frame with 6501 rows and 6 variables:
   \item{year}{year when measurement was taken}
   \item{dbh}{diameter at breast height of the tree at the time of
   measurement, in cm}
+  \item{mort}{tree mortality status with 1 meaning dead and 0 meaning alive}
 }
 }
 \source{

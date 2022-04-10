@@ -76,7 +76,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/sgraham9319/ForestPlotR/">
+  <a href="https://github.com/sgraham9319/forestexplorR/">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -97,7 +97,7 @@
       <h1 data-toc-skip>Selecting neighborhood size</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/sgraham9319/ForestPlotR/blob/master/vignettes/nbhd_size.Rmd"><code>vignettes/nbhd_size.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/sgraham9319/forestexplorR/blob/master/vignettes/nbhd_size.Rmd"><code>vignettes/nbhd_size.Rmd</code></a></small>
       <div class="hidden name"><code>nbhd_size.Rmd</code></div>
 
     </div>
@@ -105,7 +105,7 @@
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://sgraham9319.github.io/ForestPlot/">forestexplorR</a></span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://sgraham9319.github.io/forestexplorR/">forestexplorR</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></code></pre></div>
 <p>This vignette demonstrates how to select an appropriate neighborhood size for modeling tree growth or mortality. The appropriate neighborhood size differs between forest ecosystems, forest successional stages, and tree species, so it is strongly recommended that a sensitivity analysis be conducted for neighborhood size before drawing conclusions.</p>
 <div id="using-select_nbhd_size" class="section level2">
@@ -133,11 +133,11 @@
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">size_compare</span><span class="op">$</span><span class="va">mse_vals</span>
 <span class="co">#&gt;   radius     PSME_mse    TSHE_mse</span>
-<span class="co">#&gt; 1      3 0.0005796989 0.002625962</span>
-<span class="co">#&gt; 2      6 0.0003523701 0.002138367</span>
-<span class="co">#&gt; 3      9 0.0003255446 0.002038517</span>
-<span class="co">#&gt; 4     12 0.0003359357 0.001950139</span>
-<span class="co">#&gt; 5     15 0.0003116326 0.001906466</span></code></pre></div>
+<span class="co">#&gt; 1      3 0.0005965735 0.002588781</span>
+<span class="co">#&gt; 2      6 0.0003472912 0.002130589</span>
+<span class="co">#&gt; 3      9 0.0003230661 0.002028809</span>
+<span class="co">#&gt; 4     12 0.0003323303 0.001944152</span>
+<span class="co">#&gt; 5     15 0.0003093260 0.001909060</span></code></pre></div>
 <p>The remaining elements are plots of mean square error vs. neighborhood size for each of the focal species:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">size_compare</span><span class="op">$</span><span class="va">PSME_plot</span></code></pre></div>

@@ -76,7 +76,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/sgraham9319/ForestPlotR/">
+  <a href="https://github.com/sgraham9319/forestexplorR/">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -97,7 +97,7 @@
       <h1 data-toc-skip>Describing neighborhoods</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/sgraham9319/ForestPlotR/blob/master/vignettes/describe-nbhds.Rmd"><code>vignettes/describe-nbhds.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/sgraham9319/forestexplorR/blob/master/vignettes/describe-nbhds.Rmd"><code>vignettes/describe-nbhds.Rmd</code></a></small>
       <div class="hidden name"><code>describe-nbhds.Rmd</code></div>
 
     </div>
@@ -105,7 +105,7 @@
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://sgraham9319.github.io/ForestPlot/">forestexplorR</a></span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://sgraham9319.github.io/forestexplorR/">forestexplorR</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></code></pre></div>
 <p>This vignette describes a series of functions in the forestexplorR package that provide quantitative descriptions of local neighborhoods in mapped forest stands. The neighborhood of a specific location in a mapped stand is the collection of trees growing within a specified distance of that location.</p>
 <p>Of these functions, <code><a href="../reference/neighborhoods.html">neighborhoods()</a></code> constructs the list of all trees in each neighborhood. <code><a href="../reference/neighborhood_summary.html">neighborhood_summary()</a></code> takes the output of <code><a href="../reference/neighborhoods.html">neighborhoods()</a></code> as input and calculates tree species richness and species-specific densities for each neighborhood. <code><a href="../reference/site_by_species.html">site_by_species()</a></code> also takes the output of <code><a href="../reference/neighborhoods.html">neighborhoods()</a></code> as input but creates a site-by-species matrix, where each site is a different neighborhood, that can be used to calculate diversity metrics. <code><a href="../reference/tree_utm.html">tree_utm()</a></code> takes a mapping object as input and calculates UTM coordinates for each tree, thereby allowing trees to be linked to fine-scale spatial data such as topography.</p>

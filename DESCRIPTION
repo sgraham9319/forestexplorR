@@ -14,7 +14,7 @@ Description: This package analyzes tree growth measurements, and their dependenc
 Imports:
     stringr, tidyverse, glmnet, sf, plotly
 License: MIT + file LICENSE
-URL: https://sgraham9319.github.io/ForestPlot/ https://github.com/sgraham9319/ForestPlotR
+URL: https://sgraham9319.github.io/forestexplorR/ https://github.com/sgraham9319/forestexplorR
 Encoding: UTF-8
 LazyData: true
 Suggests:

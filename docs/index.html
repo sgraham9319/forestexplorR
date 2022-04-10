@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tree growth as a function of its neighbors • ForestPlotR</title>
+<title>Tree growth as a function of its neighbors • forestexplorR</title>
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="bootstrap-toc.css">
 <script src="bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
@@ -31,7 +31,7 @@
         <span class="icon-bar"></span>
       </button>
       <span class="navbar-brand">
-        <a class="navbar-link" href="index.html">ForestPlotR</a>
+        <a class="navbar-link" href="index.html">forestexplorR</a>
         <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
       </span>
     </div>
@@ -94,28 +94,28 @@
 
       </header><div class="row">
   <div class="contents col-md-9">
-<div id="forestplotr" class="section level1">
+<div id="forestexplorr" class="section level1">
 <div class="page-header"><h1 class="hasAnchor">
-<a href="#forestplotr" class="anchor"></a>ForestPlotR</h1></div>
-<p>The ForestPlotR package is designed to facilitate the cleaning, analysis and visualization of rectangular mapped forest stand data.</p>
+<a href="#forestexplorr" class="anchor"></a>forestexplorR</h1></div>
+<p>The forestexplorR package is designed to facilitate the cleaning, analysis and visualization of rectangular mapped forest stand data.</p>
 <p>Mapped forest stands are areas of the forest where the size, species identity and location of each tree meeting a specified minimum size threshold is recorded. Stands are typically re-censused periodically to document mortality, re-measure tagged trees, and record trees that have reached the minimum size threshold since the previous census. Together, these data allow us to quantitatively describe the local neighborhood of any tree or specified location in the stand. These neighborhood descriptions can then be used as informative covariates of forest processes, such as tree growth, tree mortality, and spatial variation in soil microbial communities.</p>
-<p>Massaging these invaluable datasets into a format conducive to exploration and analysis is no small feat. First, we need to extract data on all the trees growing in each of several thousand focal trees’ neighborhoods. Then we may want to calculate the annual growth rate of each tree using its repeated size measurements. We may also want to generate gps locations for individual trees in order to connect them with spatially explicit data sources such as lidar topographical data. Typically, each research group working with mapped forest stand data must complete these arduous coding tasks independently. ForestPlotR attempts to negate this time-consuming process by providing flexible functions that can perform each of these tasks on any mapped forest stand dataset.</p>
+<p>Massaging these invaluable datasets into a format conducive to exploration and analysis is no small feat. First, we need to extract data on all the trees growing in each of several thousand focal trees’ neighborhoods. Then we may want to calculate the annual growth rate of each tree using its repeated size measurements. We may also want to generate gps locations for individual trees in order to connect them with spatially explicit data sources such as lidar topographical data. Typically, each research group working with mapped forest stand data must complete these arduous coding tasks independently. forestexplorR attempts to negate this time-consuming process by providing flexible functions that can perform each of these tasks on any mapped forest stand dataset.</p>
 <div id="installation" class="section level2">
 <h2 class="hasAnchor">
 <a href="#installation" class="anchor"></a>Installation</h2>
 <p>If installing on a Mac, you will need to have libgit2 installed on your machine. This can be installed using homebrew with:</p>
 <pre><code>brew install libgit2</code></pre>
-<p>ForestPlotR can then be installed with the following:</p>
+<p>forestexplorR can then be installed with the following:</p>
 <pre><code><a href="https://rdrr.io/r/utils/install.packages.html"># Install devtools package if not already installed
 install.packages("devtools")
 
-# Use devtools to install ForestPlotR
-devtools::install_github("sgraham9319/ForestPlotR")</a></code></pre>
+# Use devtools to install forestexplorR
+devtools::install_github("sgraham9319/forestexplorR")</a></code></pre>
 </div>
 <div id="updates" class="section level2">
 <h2 class="hasAnchor">
 <a href="#updates" class="anchor"></a>Updates</h2>
-<p>The functions of ForestPlotR handle only the most common analytical tasks associated with mapped forest stand data. If you encounter a task that is not covered by ForestPlotR, please feel free to build that functionality and submit a pull request, or contact us if you’re not sure where to start.</p>
+<p>The functions of forestexplorR handle only the most common analytical tasks associated with mapped forest stand data. If you encounter a task that is not covered by forestexplorR, please feel free to build that functionality and submit a pull request, or contact us if you’re not sure where to start.</p>
 </div>
 </div>
   </div>

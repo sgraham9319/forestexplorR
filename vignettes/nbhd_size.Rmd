@@ -13,7 +13,7 @@ options(tibble.print_min = 4, tibble.print_max = 4)
 ```
 
 ```{r setup, warning=FALSE, message=FALSE}
-library(ForestPlotR)
+library(forestexplorR)
 library(dplyr)
 ```
 
@@ -31,7 +31,7 @@ and quantifies the fit of each model to the training data. Comparing the fit of
 models based on different neighborhood sizes then permits an informed decision
 on the neighborhood size to be used in the final analysis.
 
-This process involves the implementation of many ForestPlotR functions and 
+This process involves the implementation of many forestexplorR functions and 
 therefore `select_nbhd_size()` has many required arguments. First we must 
 provide the neighborhood sizes to try (`radii`) and the tree species for which
 we want to try them (`focal_sps`; independent assessments of neighborhood size

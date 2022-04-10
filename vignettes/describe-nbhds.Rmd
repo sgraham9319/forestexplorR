@@ -13,11 +13,11 @@ options(tibble.print_min = 4, tibble.print_max = 4)
 ```
 
 ```{r setup, warning=FALSE, message=FALSE}
-library(ForestPlotR)
+library(forestexplorR)
 library(dplyr)
 ```
 
-This vignette describes a series of functions in the ForestPlotR package that 
+This vignette describes a series of functions in the forestexplorR package that 
 provide quantitative descriptions of local neighborhoods in mapped forest
 stands. The neighborhood of a specific location in a mapped stand is the 
 collection of trees growing within a specified distance of that location. 

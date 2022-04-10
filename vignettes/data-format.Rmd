@@ -13,17 +13,17 @@ options(tibble.print_min = 4, tibble.print_max = 4)
 ```
 
 ```{r setup, warning=FALSE, message=FALSE}
-library(ForestPlotR)
+library(forestexplorR)
 library(dplyr)
 ```
 
 This vignette describes how mapped forest stand datasets should be formatted to
-ensure full compatibility with ForestPlotR and introduces some data checking
+ensure full compatibility with forestexplorR and introduces some data checking
 functions to assist with the formatting process.
 
 ## Data file types
 
-The ForestPlotR package expects raw mapped forest stand data to consist of at 
+The forestexplorR package expects raw mapped forest stand data to consist of at 
 least two distinct files:
 
 1. Mapping data - coordinate locations of individual trees within stands
@@ -41,13 +41,13 @@ dataset `mapping` is a cleaned and correctly formatted example:
 head(mapping)
 ```
 
-To ensure full compatibility with ForestPlotR functions, the mapping dataset
+To ensure full compatibility with forestexplorR functions, the mapping dataset
 should contain the columns: `tree_id`, `stand_id`, `tag`, `species`, `x_coord`,
 and `y_coord`. Additional columns can also be included without disrupting
 function performance and column order is not important. For details on what each
 required column represents, use `?mapping`. If only a few functions from
-ForestPlotR will be  applied, some columns in `mapping` may not be required (e.g.
-the column `tag` is only required for `stand_map()`) so please read
+forestexplorR will be  applied, some columns in `mapping` may not be required
+(e.g. the column `tag` is only required for `stand_map()`) so please read
 individual function documentation before spending time generating any missing
 columns.
 
@@ -74,7 +74,7 @@ containing mortality status of each tree during each status is required to use
 
 To obtain accurate and useful neighborhood descriptions it is important that
 the mapping and tree census datasets are cleaned of any unusual or missing data.
-The ForestPlotR package contains functions to assist with the cleaning process
+The forestexplorR package contains functions to assist with the cleaning process
 but these functions only highlight cases of missing data rather than 
 automatically removing the associated observations. This is because not all
 cases of missing data prevent all types of analysis and some missing data can

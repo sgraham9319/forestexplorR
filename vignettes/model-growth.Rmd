@@ -81,7 +81,10 @@ nbhds <- nbhds %>%
              by = "tree_id")
 ```
 
-We can also include additional covariates in our model such as abiotic data.
+We can also include additional covariates in our model such as abiotic data. In 
+fact we recommend that for models including data from multiple mapped stands,
+additional explanatory variables that account for the major axes of variation
+among the plots are included to account for potential spatial autocorrelation.
 The code below adds abiotic data to `nbhds` from the built-in dataset 
 `stand_abiotic`.
 

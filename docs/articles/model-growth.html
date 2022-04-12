@@ -148,7 +148,7 @@
 <code class="sourceCode R"><span class="va">nbhds</span> <span class="op">&lt;-</span> <span class="va">nbhds</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html">inner_join</a></span><span class="op">(</span><span class="va">growth</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">tree_id</span>, <span class="va">size_corr_growth</span><span class="op">)</span>,
              by <span class="op">=</span> <span class="st">"tree_id"</span><span class="op">)</span></code></pre></div>
-<p>We can also include additional covariates in our model such as abiotic data. The code below adds abiotic data to <code>nbhds</code> from the built-in dataset <code>stand_abiotic</code>.</p>
+<p>We can also include additional covariates in our model such as abiotic data. In fact we recommend that for models including data from multiple mapped stands, additional explanatory variables that account for the major axes of variation among the plots are included to account for potential spatial autocorrelation. The code below adds abiotic data to <code>nbhds</code> from the built-in dataset <code>stand_abiotic</code>.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">nbhds</span> <span class="op">&lt;-</span> <span class="va">nbhds</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html">left_join</a></span><span class="op">(</span><span class="va">stand_abiotic</span>, by <span class="op">=</span> <span class="st">"stand_id"</span><span class="op">)</span></code></pre></div>
@@ -186,17 +186,17 @@
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># R^2 value</span>
 <span class="va">basic_growth_mod</span><span class="op">$</span><span class="va">R_squared</span>
-<span class="co">#&gt; [1] 0.1978608</span>
+<span class="co">#&gt; [1] 0.2102422</span>
 
 <span class="co"># Observations and model predictions</span>
 <span class="va">basic_growth_mod</span><span class="op">$</span><span class="va">obs_pred</span>
 <span class="co">#&gt; # A tibble: 1,804 x 3</span>
 <span class="co">#&gt;   tree_id       observations predictions</span>
 <span class="co">#&gt;   &lt;chr&gt;                &lt;dbl&gt;       &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 AB08000300012        0.165       0.142</span>
-<span class="co">#&gt; 2 AB08000300013        0.170       0.132</span>
-<span class="co">#&gt; 3 AB08000300014        0.129       0.130</span>
-<span class="co">#&gt; 4 AB08000300021        0.160       0.141</span>
+<span class="co">#&gt; 1 AB08000300012        0.165       0.138</span>
+<span class="co">#&gt; 2 AB08000300013        0.170       0.128</span>
+<span class="co">#&gt; 3 AB08000300014        0.129       0.125</span>
+<span class="co">#&gt; 4 AB08000300021        0.160       0.138</span>
 <span class="co">#&gt; # ... with 1,800 more rows</span></code></pre></div>
 <p>The evaluate the robustness of the stochastic model fitting process there is an optional argument (<code>iterations</code>) that specifies how many times the model should be fit. When this argument is specified, the model object, r-squared value and table of observations and predictions refer to the model that had the lowest mean square error. However, the <code>mod_coef</code> element will contain the fitted coefficients for all fitted models.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
@@ -204,7 +204,7 @@
 <span class="va">iter_growth_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/growth_model.html">growth_model</a></span><span class="op">(</span><span class="va">training</span>, outcome_var <span class="op">=</span> <span class="st">"size_corr_growth"</span>,
                                 iterations <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>
 <span class="va">iter_growth_mod</span><span class="op">$</span><span class="va">R_squared</span>
-<span class="co">#&gt; [1] 0.2028751</span></code></pre></div>
+<span class="co">#&gt; [1] 0.2116699</span></code></pre></div>
 <p>The <code><a href="../reference/growth_model.html">growth_model()</a></code> function can also handle rare competitor tree species. The optional argument <code>rare_comps</code> specifies the minimum number of interactions a competitor species must be a part of to be considered a common competitor. Any species with fewer interactions will be grouped together under the new species identity of <code>"RARE"</code>. If species-specific densities are included as covariates in the training data, a <code>"RARE_density"</code> variable can also be created by indicating the suffix attached to density variables under the argument <code>density_suffix</code>.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">1000</span><span class="op">)</span>
@@ -230,7 +230,7 @@
 
 <span class="co"># Ability to predict test data</span>
 <span class="va">test_growth_mod</span><span class="op">$</span><span class="va">test_R_squared</span>
-<span class="co">#&gt; [1] 0.1709447</span></code></pre></div>
+<span class="co">#&gt; [1] 0.1507348</span></code></pre></div>
 </div>
 <div id="mortality_model-create-a-neighborhood-tree-mortality-model" class="section level2">
 <h2 class="hasAnchor">
